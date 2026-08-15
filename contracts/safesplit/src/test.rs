@@ -1,7 +1,7 @@
 #![cfg(test)]
 use super::*;
 use soroban_sdk::{testutils::Address as _, token, Address, BytesN, Env, String, Vec};
-use crate::types::{EscrowConfig, EscrowState, MilestoneInput, MilestoneStatus};
+use crate::types::MilestoneInput;
 
 #[test]
 fn test_escrow_happy_path() {
@@ -16,10 +16,10 @@ fn test_escrow_happy_path() {
     let token_admin = Address::generate(&e);
     let token_address = e.register_stellar_asset_contract(token_admin.clone());
     let token_client = token::Client::new(&e, &token_address);
-    let token_admin_client = token::StellarAssetContractClient::new(&e, &token_address);
+    let token_admin_client = token::StellarAssetClient::new(&e, &token_address);
 
     // Register SafeSplit contract
-    let contract_id = e.register_contract(None, SafeSplitContract);
+    let contract_id = e.register(SafeSplitContract, ());
     let client_escrow = SafeSplitContractClient::new(&e, &contract_id);
 
     // Create Milestone inputs
@@ -80,10 +80,10 @@ fn test_escrow_dispute_and_resolution() {
     let token_admin = Address::generate(&e);
     let token_address = e.register_stellar_asset_contract(token_admin.clone());
     let token_client = token::Client::new(&e, &token_address);
-    let token_admin_client = token::StellarAssetContractClient::new(&e, &token_address);
+    let token_admin_client = token::StellarAssetClient::new(&e, &token_address);
 
     // Register SafeSplit contract
-    let contract_id = e.register_contract(None, SafeSplitContract);
+    let contract_id = e.register(SafeSplitContract, ());
     let client_escrow = SafeSplitContractClient::new(&e, &contract_id);
 
     // Create Milestone inputs
@@ -131,10 +131,10 @@ fn test_escrow_cancel_and_refund() {
     let token_admin = Address::generate(&e);
     let token_address = e.register_stellar_asset_contract(token_admin.clone());
     let token_client = token::Client::new(&e, &token_address);
-    let token_admin_client = token::StellarAssetContractClient::new(&e, &token_address);
+    let token_admin_client = token::StellarAssetClient::new(&e, &token_address);
 
     // Register SafeSplit contract
-    let contract_id = e.register_contract(None, SafeSplitContract);
+    let contract_id = e.register(SafeSplitContract, ());
     let client_escrow = SafeSplitContractClient::new(&e, &contract_id);
 
     // Create Milestone inputs
