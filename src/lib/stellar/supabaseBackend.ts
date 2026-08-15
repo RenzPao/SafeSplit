@@ -250,3 +250,51 @@ export async function updateMilestoneStatus(
     throw new Error(logErr.message);
   }
 }
+
+export async function updateEscrowStatus(
+  escrowId: string,
+  params: {
+    status: 'Initialized' | 'Funded' | 'InProgress' | 'Disputed' | 'Completed' | 'Cancelled';
+    txHash: string;
+    eventName: string;
+    details: string;
+  }
+) {
+  // 1. Update Escrow Status
+  const { error: escrowErr } = await supabase
+    .from('Escrow')
+    .update({ status: params.status })
+    .eq('id', escrowId);
+
+  if (escrowErr) {
+    throw new Error(escrowErr.message);
+  }
+
+  // If Cancelled, mark remaining non-approved milestones as Refunded
+  if (params.status === 'Cancelled') {
+    const { error: milestoneErr } = await supabase
+      .from('Milestone')
+      .update({ status: 'Refunded' })
+      .eq('escrow_id', escrowId)
+      .not('status', 'eq', 'Approved');
+
+    if (milestoneErr) {
+      throw new Error(milestoneErr.message);
+    }
+  }
+
+  // 2. Create Activity Log
+  const { error: logErr } = await supabase
+    .from('ActivityLog')
+    .insert({
+      escrow_id: escrowId,
+      tx_hash: params.txHash,
+      event_name: params.eventName,
+      details: params.details,
+    });
+
+  if (logErr) {
+    throw new Error(logErr.message);
+  }
+}
+
