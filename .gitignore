@@ -46,3 +46,11 @@ next-env.d.ts
 # cargo build target
 **/target/
 
+
+/src/generated/prisma
+
+# IDE/Agent folders
+.agents/
+.claude/
+.windsurf/
+
