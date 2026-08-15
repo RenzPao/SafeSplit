@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   CheckCircle2, 
   AlertTriangle, 
@@ -10,7 +10,6 @@ import {
   Coins, 
   Scale, 
   ShieldAlert, 
-  ArrowRight, 
   FileText,
   Loader2,
   Check,
@@ -18,9 +17,6 @@ import {
 } from 'lucide-react';
 import { SafeSplitClient } from '@/lib/stellar/SafeSplitClient';
 import { uploadDeliverableFile, updateMilestoneStatus } from '@/lib/stellar/supabaseBackend';
-
-// Stellar Freighter Wallet API import
-import { signTransaction } from '@stellar/freighter-api';
 
 interface Milestone {
   id: string;
@@ -146,7 +142,7 @@ export default function MilestoneDetailView({
 
       // Request transaction signature via Freighter
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      const invokeOp = client.submitWorkTx(currentWalletAddress, {
+      client.submitWorkTx(currentWalletAddress, {
         freelancer: currentWalletAddress,
         milestoneId: milestone.milestone_index,
         submissionRef: cid,
@@ -168,9 +164,10 @@ export default function MilestoneDetailView({
 
       setStatusMessage({ type: 'success', text: 'Milestone submitted successfully on-chain!' });
       onActionSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Action failed.' });
+      const message = err instanceof Error ? err.message : 'Action failed.';
+      setStatusMessage({ type: 'error', text: message });
     } finally {
       setIsUploading(false);
       setIsSigning(false);
@@ -184,7 +181,7 @@ export default function MilestoneDetailView({
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      const invokeOp = client.approveMilestoneTx(currentWalletAddress, {
+      client.approveMilestoneTx(currentWalletAddress, {
         client: currentWalletAddress,
         milestoneId: milestone.milestone_index,
       });
@@ -200,9 +197,10 @@ export default function MilestoneDetailView({
 
       setStatusMessage({ type: 'success', text: 'Milestone approved and XLM released to freelancer!' });
       onActionSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Approval failed.' });
+      const message = err instanceof Error ? err.message : 'Approval failed.';
+      setStatusMessage({ type: 'error', text: message });
     } finally {
       setIsSigning(false);
     }
@@ -216,7 +214,7 @@ export default function MilestoneDetailView({
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
       const reasonHash = 'd3f4b50000000000000000000000000000000000000000000000000000000000'; // 32-byte hex mock
-      const invokeOp = client.raiseDisputeTx(currentWalletAddress, {
+      client.raiseDisputeTx(currentWalletAddress, {
         caller: currentWalletAddress,
         milestoneId: milestone.milestone_index,
         reasonHash,
@@ -232,9 +230,10 @@ export default function MilestoneDetailView({
 
       setStatusMessage({ type: 'success', text: 'Dispute raised successfully. Contract locked pending arbiter resolution.' });
       onActionSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Dispute action failed.' });
+      const message = err instanceof Error ? err.message : 'Dispute action failed.';
+      setStatusMessage({ type: 'error', text: message });
     } finally {
       setIsSigning(false);
     }
@@ -247,7 +246,7 @@ export default function MilestoneDetailView({
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      const invokeOp = client.resolveDisputeTx(currentWalletAddress, {
+      client.resolveDisputeTx(currentWalletAddress, {
         arbiter: currentWalletAddress,
         milestoneId: milestone.milestone_index,
         clientSplitBps: splitBps,
@@ -263,9 +262,10 @@ export default function MilestoneDetailView({
 
       setStatusMessage({ type: 'success', text: `Dispute resolved successfully! Client split: ${splitBps / 100}%, Freelancer split: ${(10000 - splitBps) / 100}%` });
       onActionSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setStatusMessage({ type: 'error', text: err.message || 'Resolution execution failed.' });
+      const message = err instanceof Error ? err.message : 'Resolution execution failed.';
+      setStatusMessage({ type: 'error', text: message });
     } finally {
       setIsSigning(false);
     }
