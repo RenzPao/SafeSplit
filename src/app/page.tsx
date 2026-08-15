@@ -17,6 +17,7 @@ import {
   Check
 } from 'lucide-react';
 import MilestoneDetailView from '@/components/MilestoneDetailView';
+import { createEscrowMetadata, fetchEscrowMetadata } from '@/lib/stellar/supabaseBackend';
 
 // Freighter Wallet API
 import { isConnected, getAddress } from '@stellar/freighter-api';
@@ -154,12 +155,7 @@ export default function Home() {
     setIsLoading(true);
     setErrorMsg('');
     try {
-      const res = await fetch(`/api/escrows/${targetAddress}`);
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to load escrow');
-      }
-
+      const data = await fetchEscrowMetadata(targetAddress);
       setLoadedEscrow(data.escrow);
       setSelectedMilestoneIndex(0);
       addRecentEscrow(targetAddress);
@@ -208,24 +204,14 @@ export default function Home() {
     const totalXlm = formMilestones.reduce((sum, m) => sum + m.amountXlm, 0);
 
     try {
-      const res = await fetch('/api/escrows', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contractAddress: formContractAddress.trim(),
-          clientAddress: formClientAddress.trim(),
-          freelancerAddress: formFreelancerAddress.trim(),
-          arbiterAddress: formArbiterAddress.trim(),
-          totalXlm,
-          milestones: formMilestones,
-          arbiterFeeBps: formArbiterFeeBps
-        })
+      const data = await createEscrowMetadata({
+        contractAddress: formContractAddress.trim(),
+        clientAddress: formClientAddress.trim(),
+        freelancerAddress: formFreelancerAddress.trim(),
+        arbiterAddress: formArbiterAddress.trim(),
+        totalXlm,
+        milestones: formMilestones
       });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to create escrow metadata');
-      }
 
       setCreationResult({
         escrow: data.escrow,
