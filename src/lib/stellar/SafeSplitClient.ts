@@ -3,10 +3,8 @@ import {
   Address, 
   xdr, 
   Operation, 
-  TransactionBuilder, 
   Networks,
-  nativeToScVal,
-  scValToNative
+  nativeToScVal
 } from '@stellar/stellar-sdk';
 
 export interface MilestoneInput {
