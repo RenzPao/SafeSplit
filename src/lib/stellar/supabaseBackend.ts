@@ -120,19 +120,18 @@ export async function fetchEscrowMetadata(contractAddress: string) {
     const contract = new Contract(contractAddress);
     const ledgerKey = xdr.LedgerKey.contractData(
       new xdr.LedgerKeyContractData({
-        contract: contract.address().toXdrObject(),
-        key: xdr.ScVal.scvVec([xdr.ScVal.scvSym('Config')]),
-        durability: xdr.ContractDataDurability.instance(),
+        contract: contract.address().toScAddress(),
+        key: xdr.ScVal.scvVec([xdr.ScVal.scvSymbol('Config')]),
+        durability: xdr.ContractDataDurability.persistent(),
       })
     );
 
-    const response = await server.getLedgerEntries([ledgerKey]);
+    const response = await server.getLedgerEntries(ledgerKey);
 
     if (response && response.entries && response.entries.length > 0) {
       const entry = response.entries[0];
-      const contractData = xdr.LedgerEntryData.fromXdr(Buffer.from(entry.xdr, 'base64'));
-      const val = contractData.contractData().val();
-      const nativeConfig: any = scValToNative(val);
+      const val = entry.val;
+      const nativeConfig: any = scValToNative(val.contractData().val());
 
       onChainState = {
         client: nativeConfig.client,
