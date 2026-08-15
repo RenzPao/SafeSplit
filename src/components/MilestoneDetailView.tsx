@@ -17,6 +17,7 @@ import {
   AlertOctagon
 } from 'lucide-react';
 import { SafeSplitClient } from '@/lib/stellar/SafeSplitClient';
+import { uploadDeliverableFile, updateMilestoneStatus } from '@/lib/stellar/supabaseBackend';
 
 // Stellar Freighter Wallet API import
 import { signTransaction } from '@stellar/freighter-api';
@@ -134,19 +135,7 @@ export default function MilestoneDetailView({
 
     try {
       if (file) {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadRes.ok) {
-          throw new Error('IPFS upload failed');
-        }
-
-        const uploadData = await uploadRes.json();
+        const uploadData = await uploadDeliverableFile(file);
         cid = uploadData.cid;
         url = uploadData.url;
       }
@@ -167,21 +156,15 @@ export default function MilestoneDetailView({
       // (Simplified logic representing final freighter signature request)
       setStatusMessage({ type: 'info', text: 'Signing on-chain submission transaction...' });
       
-      // Update off-chain database via API
-      const response = await fetch(`/api/escrows/${escrow.contract_address}/milestones`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          milestoneIndex: milestone.milestone_index,
-          submissionCid: cid,
-          deliverableUrl: url,
-          txHash: 'simulated-stellar-tx-hash',
-        }),
+      // Update off-chain database via Supabase
+      await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
+        status: 'Submitted',
+        deliverableUrl: url,
+        submissionCid: cid,
+        txHash: 'simulated-stellar-tx-hash',
+        eventName: 'WorkSubmitted',
+        details: `Freelancer submitted work for milestone ${milestone.milestone_index + 1}. CID: ${cid}`,
       });
-
-      if (!response.ok) {
-        throw new Error('Database status update failed');
-      }
 
       setStatusMessage({ type: 'success', text: 'Milestone submitted successfully on-chain!' });
       onActionSuccess();
@@ -207,19 +190,13 @@ export default function MilestoneDetailView({
       });
 
       // Simulate Freighter signature & submission
-      // Update database status
-      const response = await fetch(`/api/escrows/${escrow.contract_address}/milestones/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          milestoneIndex: milestone.milestone_index,
-          txHash: 'simulated- stellar-tx-hash-approve',
-        }),
+      // Update database status via Supabase
+      await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
+        status: 'Approved',
+        txHash: 'simulated-stellar-tx-hash-approve',
+        eventName: 'MilestoneApproved',
+        details: `Client approved milestone ${milestone.milestone_index + 1} and funds were released.`,
       });
-
-      if (!response.ok) {
-        throw new Error('Approval confirmation failed');
-      }
 
       setStatusMessage({ type: 'success', text: 'Milestone approved and XLM released to freelancer!' });
       onActionSuccess();
@@ -245,18 +222,13 @@ export default function MilestoneDetailView({
         reasonHash,
       });
 
-      const response = await fetch(`/api/escrows/${escrow.contract_address}/milestones/dispute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          milestoneIndex: milestone.milestone_index,
-          txHash: 'simulated- stellar-tx-hash-dispute',
-        }),
+      // Update status via Supabase
+      await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
+        status: 'Disputed',
+        txHash: 'simulated-stellar-tx-hash-dispute',
+        eventName: 'DisputeRaised',
+        details: `Dispute raised on milestone ${milestone.milestone_index + 1} by caller ${currentWalletAddress}`,
       });
-
-      if (!response.ok) {
-        throw new Error('Dispute logging failed');
-      }
 
       setStatusMessage({ type: 'success', text: 'Dispute raised successfully. Contract locked pending arbiter resolution.' });
       onActionSuccess();
@@ -281,19 +253,13 @@ export default function MilestoneDetailView({
         clientSplitBps: splitBps,
       });
 
-      const response = await fetch(`/api/escrows/${escrow.contract_address}/milestones/resolve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          milestoneIndex: milestone.milestone_index,
-          clientSplitBps: splitBps,
-          txHash: 'simulated-stellar-tx-hash-resolve',
-        }),
+      // Update status via Supabase
+      await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
+        status: splitBps === 10000 ? 'Refunded' : 'Approved',
+        txHash: 'simulated-stellar-tx-hash-resolve',
+        eventName: 'DisputeResolved',
+        details: `Arbiter resolved dispute on milestone ${milestone.milestone_index + 1} with client split of ${splitBps / 100}%`,
       });
-
-      if (!response.ok) {
-        throw new Error('Dispute resolution database logging failed');
-      }
 
       setStatusMessage({ type: 'success', text: `Dispute resolved successfully! Client split: ${splitBps / 100}%, Freelancer split: ${(10000 - splitBps) / 100}%` });
       onActionSuccess();
