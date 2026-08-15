@@ -69,19 +69,7 @@ export default function Home() {
   const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [recentEscrows, setRecentEscrows] = useState<string[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('safesplit_recent_escrows');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    }
-    return [];
-  });
+  const [recentEscrows, setRecentEscrows] = useState<string[]>([]);
 
   // Create Escrow form states
   const [formContractAddress, setFormContractAddress] = useState('');
@@ -102,6 +90,16 @@ export default function Home() {
 
   // Check Freighter connection on load
   useEffect(() => {
+    // Load recent escrows from localStorage on client-side mount
+    const saved = localStorage.getItem('safesplit_recent_escrows');
+    if (saved) {
+      try {
+        setRecentEscrows(JSON.parse(saved));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     const checkFreighter = async () => {
       try {
         const connectedRes = await isConnected();
