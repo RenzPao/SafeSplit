@@ -20,7 +20,8 @@ import MilestoneDetailView from '@/components/MilestoneDetailView';
 import { createEscrowMetadata, fetchEscrowMetadata } from '@/lib/stellar/supabaseBackend';
 
 // Freighter Wallet API
-import { isConnected, getAddress } from '@stellar/freighter-api';
+import { isConnected, getAddress, isAllowed, requestAccess } from '@stellar/freighter-api';
+
 
 interface Milestone {
   id: string;
@@ -105,10 +106,13 @@ export default function Home() {
       try {
         const connectedRes = await isConnected();
         if (connectedRes && connectedRes.isConnected) {
-          const addressRes = await getAddress();
-          if (addressRes && addressRes.address) {
-            setWalletAddress(addressRes.address);
-            setWalletConnected(true);
+          const allowedRes = await isAllowed();
+          if (allowedRes && allowedRes.isAllowed) {
+            const addressRes = await getAddress();
+            if (addressRes && addressRes.address) {
+              setWalletAddress(addressRes.address);
+              setWalletConnected(true);
+            }
           }
         }
       } catch (err) {
@@ -122,13 +126,15 @@ export default function Home() {
     try {
       const connectedRes = await isConnected();
       if (!connectedRes || !connectedRes.isConnected) {
-        alert('Freighter wallet extension not detected. Please install it or use the mock role selector.');
+        alert('Freighter wallet extension not detected. Please install it.');
         return;
       }
-      const addressRes = await getAddress();
-      if (addressRes && addressRes.address) {
-        setWalletAddress(addressRes.address);
+      const accessRes = await requestAccess();
+      if (accessRes && accessRes.address) {
+        setWalletAddress(accessRes.address);
         setWalletConnected(true);
+      } else if (accessRes && accessRes.error) {
+        alert(`Access denied: ${accessRes.error}`);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';
