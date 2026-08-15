@@ -110,8 +110,11 @@ export async function fetchEscrowMetadata(contractAddress: string) {
   }
 
   // Sort milestones & logs
-  escrow.milestones = (escrow.milestones || []).sort((a: any, b: any) => a.milestone_index - b.milestone_index);
-  escrow.activity_logs = (escrow.activity_logs || []).sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  interface MilestoneItem { milestone_index: number }
+  interface ActivityLogItem { timestamp: string | Date }
+
+  escrow.milestones = (escrow.milestones || []).sort((a: MilestoneItem, b: MilestoneItem) => a.milestone_index - b.milestone_index);
+  escrow.activity_logs = (escrow.activity_logs || []).sort((a: ActivityLogItem, b: ActivityLogItem) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   // 2. Sync with on-chain status
   let onChainState = null;
@@ -131,7 +134,17 @@ export async function fetchEscrowMetadata(contractAddress: string) {
     if (response && response.entries && response.entries.length > 0) {
       const entry = response.entries[0];
       const val = entry.val;
-      const nativeConfig: any = scValToNative(val.contractData().val());
+
+      interface NativeEscrowConfig {
+        client: string;
+        freelancer: string;
+        arbiter: string;
+        total_xlm_stroops: { toString: () => string };
+        current_milestone_index: number;
+        arbiter_fee_bps: number;
+        state: string;
+      }
+      const nativeConfig = scValToNative(val.contractData().val()) as NativeEscrowConfig;
 
       onChainState = {
         client: nativeConfig.client,
