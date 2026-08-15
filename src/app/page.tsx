@@ -21,6 +21,8 @@ import { createEscrowMetadata, fetchEscrowMetadata } from '@/lib/stellar/supabas
 
 // Freighter Wallet API
 import { isConnected, getAddress, isAllowed, requestAccess } from '@stellar/freighter-api';
+import { Keypair, StrKey } from '@stellar/stellar-sdk';
+
 
 
 interface Milestone {
@@ -237,15 +239,22 @@ export default function Home() {
 
   // Generate random mock contract and wallet addresses for testing
   const populateMockAddresses = () => {
-    const randHex = (len: number) => {
-      const chars = '0123456789abcdef';
-      return Array.from({ length: len }, () => chars[Math.floor(Math.random() * 16)]).join('');
-    };
+    const clientKey = Keypair.random().publicKey();
+    const freelancerKey = Keypair.random().publicKey();
+    const arbiterKey = Keypair.random().publicKey();
+    
+    const randomBytes = new Uint8Array(32);
+    if (typeof window !== 'undefined' && window.crypto) {
+      window.crypto.getRandomValues(randomBytes);
+    } else {
+      for (let i = 0; i < 32; i++) randomBytes[i] = Math.floor(Math.random() * 256);
+    }
+    const contractKey = StrKey.encodeContract(Buffer.from(randomBytes));
 
-    setFormContractAddress(`CC${randHex(54).toUpperCase()}`);
-    setFormClientAddress(`GD${randHex(54).toUpperCase()}`);
-    setFormFreelancerAddress(`GB${randHex(54).toUpperCase()}`);
-    setFormArbiterAddress(`GA${randHex(54).toUpperCase()}`);
+    setFormContractAddress(contractKey);
+    setFormClientAddress(clientKey);
+    setFormFreelancerAddress(freelancerKey);
+    setFormArbiterAddress(arbiterKey);
   };
 
   const copyToClipboard = (text: string, id: string) => {
