@@ -350,6 +350,75 @@ export default function Home() {
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
         
+        {/* Step-by-Step Chronological Progress */}
+        <div className="bg-zinc-900/20 border border-zinc-900 rounded-3xl p-6 shadow-md">
+          <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 text-center md:text-left">Project Progress Timeline</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+            {/* Step 1 */}
+            <div className={`p-4 rounded-2xl border text-center transition-all ${
+              !loadedEscrow 
+                ? 'border-purple-500 bg-purple-500/5 shadow-md shadow-purple-500/5' 
+                : 'border-zinc-800 opacity-60'
+            }`}>
+              <div className={`text-xs font-bold ${!loadedEscrow ? 'text-purple-400' : 'text-zinc-500'}`}>Step 1</div>
+              <div className="text-sm font-bold text-zinc-200 mt-1">Setup Agreement</div>
+              <div className="text-[10px] text-zinc-500 mt-1 leading-normal">Register participants & milestones</div>
+            </div>
+
+            {/* Step 2 */}
+            <div className={`p-4 rounded-2xl border text-center transition-all ${
+              loadedEscrow && loadedEscrow.status === 'Initialized'
+                ? 'border-purple-500 bg-purple-500/5 shadow-md shadow-purple-500/5' 
+                : 'border-zinc-800 ' + (loadedEscrow && ['Funded', 'InProgress', 'Disputed', 'Completed'].includes(loadedEscrow.status) ? 'opacity-100 border-emerald-500/30' : 'opacity-60')
+            }`}>
+              <div className={`text-xs font-bold ${loadedEscrow && loadedEscrow.status === 'Initialized' ? 'text-purple-400' : (loadedEscrow && ['Funded', 'InProgress', 'Disputed', 'Completed'].includes(loadedEscrow.status) ? 'text-emerald-400' : 'text-zinc-500')}`}>
+                {loadedEscrow && ['Funded', 'InProgress', 'Disputed', 'Completed'].includes(loadedEscrow.status) ? '✓ Step 2' : 'Step 2'}
+              </div>
+              <div className="text-sm font-bold text-zinc-200 mt-1">Deposit Funds</div>
+              <div className="text-[10px] text-zinc-500 mt-1 leading-normal">Client deposits XLM in escrow</div>
+            </div>
+
+            {/* Step 3 */}
+            <div className={`p-4 rounded-2xl border text-center transition-all ${
+              loadedEscrow && (loadedEscrow.status === 'Funded' || loadedEscrow.status === 'InProgress') && loadedEscrow.milestones.some(m => m.status === 'Pending')
+                ? 'border-purple-500 bg-purple-500/5 shadow-md shadow-purple-500/5' 
+                : 'border-zinc-800 ' + (loadedEscrow && loadedEscrow.milestones.every(m => m.status !== 'Pending') ? 'opacity-100 border-emerald-500/30' : 'opacity-60')
+            }`}>
+              <div className={`text-xs font-bold ${loadedEscrow && (loadedEscrow.status === 'Funded' || loadedEscrow.status === 'InProgress') && loadedEscrow.milestones.some(m => m.status === 'Pending') ? 'text-purple-400' : (loadedEscrow && loadedEscrow.milestones.every(m => m.status !== 'Pending') ? 'text-emerald-400' : 'text-zinc-500')}`}>
+                {loadedEscrow && loadedEscrow.milestones.every(m => m.status !== 'Pending') ? '✓ Step 3' : 'Step 3'}
+              </div>
+              <div className="text-sm font-bold text-zinc-200 mt-1">Work & Submit</div>
+              <div className="text-[10px] text-zinc-500 mt-1 leading-normal">Freelancer uploads deliverables</div>
+            </div>
+
+            {/* Step 4 */}
+            <div className={`p-4 rounded-2xl border text-center transition-all ${
+              loadedEscrow && loadedEscrow.milestones.some(m => m.status === 'Submitted' || m.status === 'Disputed')
+                ? 'border-purple-500 bg-purple-500/5 shadow-md shadow-purple-500/5' 
+                : 'border-zinc-800 ' + (loadedEscrow && loadedEscrow.milestones.every(m => m.status === 'Approved' || m.status === 'Refunded') && loadedEscrow.milestones.length > 0 ? 'opacity-100 border-emerald-500/30' : 'opacity-60')
+            }`}>
+              <div className={`text-xs font-bold ${loadedEscrow && loadedEscrow.milestones.some(m => m.status === 'Submitted' || m.status === 'Disputed') ? 'text-purple-400' : (loadedEscrow && loadedEscrow.milestones.every(m => m.status === 'Approved' || m.status === 'Refunded') && loadedEscrow.milestones.length > 0 ? 'text-emerald-400' : 'text-zinc-500')}`}>
+                {loadedEscrow && loadedEscrow.milestones.every(m => m.status === 'Approved' || m.status === 'Refunded') && loadedEscrow.milestones.length > 0 ? '✓ Step 4' : 'Step 4'}
+              </div>
+              <div className="text-sm font-bold text-zinc-200 mt-1">Review & Pay</div>
+              <div className="text-[10px] text-zinc-500 mt-1 leading-normal">Client approves and releases XLM</div>
+            </div>
+
+            {/* Step 5 */}
+            <div className={`p-4 rounded-2xl border text-center transition-all ${
+              loadedEscrow && (loadedEscrow.status === 'Completed' || loadedEscrow.status === 'Cancelled')
+                ? 'border-emerald-500/30 bg-emerald-500/5 shadow-md shadow-emerald-500/5' 
+                : 'border-zinc-800 opacity-60'
+            }`}>
+              <div className={`text-xs font-bold ${loadedEscrow && (loadedEscrow.status === 'Completed' || loadedEscrow.status === 'Cancelled') ? 'text-emerald-400' : 'text-zinc-500'}`}>Step 5</div>
+              <div className="text-sm font-bold text-zinc-200 mt-1">
+                {loadedEscrow && loadedEscrow.status === 'Cancelled' ? 'Cancelled' : 'Completed'}
+              </div>
+              <div className="text-[10px] text-zinc-500 mt-1 leading-normal">Project finalized and settled</div>
+            </div>
+          </div>
+        </div>
+
         {/* Navigation Tabs and Search / Loader row */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-zinc-900/40 border border-zinc-900 rounded-2xl p-4">
           <div className="flex gap-2">
