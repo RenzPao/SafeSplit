@@ -4,7 +4,8 @@ import {
   xdr, 
   Operation, 
   Networks,
-  nativeToScVal
+  nativeToScVal,
+  StrKey
 } from '@stellar/stellar-sdk';
 
 export interface MilestoneInput {
@@ -19,8 +20,20 @@ export class SafeSplitClient {
   public networkPassphrase: string;
 
   constructor(contractId: string, network: 'testnet' | 'mainnet' | string) {
-    this.contractId = contractId;
-    this.contract = new Contract(contractId);
+    let resolvedId = contractId ? contractId.trim() : '';
+    if (resolvedId && !StrKey.isValidContract(resolvedId)) {
+      const cleanHex = resolvedId.replace(/^0x/i, '');
+      if (/^[0-9a-fA-F]+$/.test(cleanHex)) {
+        const paddedHex = cleanHex.padEnd(64, '0');
+        try {
+          resolvedId = StrKey.encodeContract(Buffer.from(paddedHex, 'hex'));
+        } catch (e) {
+          console.error('Failed to encode hex contract ID:', e);
+        }
+      }
+    }
+    this.contractId = resolvedId;
+    this.contract = new Contract(resolvedId);
     if (network === 'testnet') {
       this.networkPassphrase = Networks.TESTNET;
     } else if (network === 'mainnet') {
