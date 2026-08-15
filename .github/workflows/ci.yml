@@ -35,9 +35,13 @@ jobs:
           cd contracts/safesplit
           cargo test
 
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
       - name: Verify Next.js Build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_ESCROW_CONTRACT_ID: ${{ secrets.NEXT_PUBLIC_ESCROW_CONTRACT_ID }}
         run: npm run build
+
