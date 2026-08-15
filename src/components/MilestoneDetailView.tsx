@@ -16,7 +16,8 @@ import {
   AlertOctagon
 } from 'lucide-react';
 import { SafeSplitClient } from '@/lib/stellar/SafeSplitClient';
-import { uploadDeliverableFile, updateMilestoneStatus } from '@/lib/stellar/supabaseBackend';
+import { uploadDeliverableFile, updateMilestoneStatus, updateEscrowStatus } from '@/lib/stellar/supabaseBackend';
+
 
 interface Milestone {
   id: string;
@@ -206,6 +207,63 @@ export default function MilestoneDetailView({
     }
   };
 
+  // Fund Escrow (Client)
+  const handleFundEscrow = async () => {
+    setIsSigning(true);
+    setStatusMessage({ type: 'info', text: 'Preparing funding transaction... Please sign in Freighter.' });
+
+    try {
+      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      client.depositXlmTx(currentWalletAddress, escrow.client_address);
+
+      // Update database status via Supabase
+      await updateEscrowStatus(escrow.id, {
+        status: 'Funded',
+        txHash: 'simulated-stellar-tx-hash-fund',
+        eventName: 'EscrowFunded',
+        details: `Client funded the escrow with ${escrow.total_xlm} XLM on-chain.`,
+      });
+
+      setStatusMessage({ type: 'success', text: 'Escrow contract funded successfully on-chain!' });
+      onActionSuccess();
+    } catch (err: unknown) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : 'Funding failed.';
+      setStatusMessage({ type: 'error', text: message });
+    } finally {
+      setIsSigning(false);
+    }
+  };
+
+  // Cancel Escrow & Refund (Client)
+  const handleCancelEscrow = async () => {
+    setIsSigning(true);
+    setStatusMessage({ type: 'info', text: 'Preparing cancellation transaction... Please sign in Freighter.' });
+
+    try {
+      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      client.cancelAndRefundTx(currentWalletAddress, escrow.client_address);
+
+      // Update database status via Supabase
+      await updateEscrowStatus(escrow.id, {
+        status: 'Cancelled',
+        txHash: 'simulated-stellar-tx-hash-cancel',
+        eventName: 'EscrowCancelled',
+        details: 'Client cancelled the escrow agreement and refunded all remaining funds.',
+      });
+
+      setStatusMessage({ type: 'success', text: 'Escrow cancelled and funds refunded to your wallet!' });
+      onActionSuccess();
+    } catch (err: unknown) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : 'Cancellation failed.';
+      setStatusMessage({ type: 'error', text: message });
+    } finally {
+      setIsSigning(false);
+    }
+  };
+
+
   // 3. Raise Dispute (Client / Freelancer)
   const handleRaiseDispute = async () => {
     setIsSigning(true);
@@ -378,9 +436,17 @@ export default function MilestoneDetailView({
               <div className="space-y-5">
                 <h3 className="text-base font-bold text-slate-200">Freelancer Workspace</h3>
                 
-                {milestone.status === 'Pending' && (
+                {escrow.status === 'Initialized' && (
+                  <div className="bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-2xl p-4 text-xs font-semibold leading-relaxed flex items-start gap-2.5">
+                    <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                    <span>The Client has not funded this agreement yet. Do not start work or submit deliverables until the contract is funded.</span>
+                  </div>
+                )}
+
+                {milestone.status === 'Pending' && escrow.status !== 'Initialized' && (
                   <>
                     <div 
+
                       onDragEnter={handleDrag}
                       onDragLeave={handleDrag}
                       onDragOver={handleDrag}
@@ -446,41 +512,77 @@ export default function MilestoneDetailView({
               <div className="space-y-5">
                 <h3 className="text-base font-bold text-slate-200">Client Panel</h3>
 
-                {milestone.status === 'Submitted' && (
+                {escrow.status === 'Initialized' ? (
                   <div className="space-y-3">
+                    <div className="bg-purple-950/20 border border-purple-900/30 text-purple-300 rounded-2xl p-4 text-xs font-semibold leading-relaxed flex items-start gap-2.5">
+                      <Coins className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
+                      <span>The contract is initialized but has no funds. Deposit {escrow.total_xlm} XLM on-chain to start the project.</span>
+                    </div>
+
                     <button
-                      onClick={handleApproveMilestone}
+                      onClick={handleFundEscrow}
                       disabled={isSigning}
-                      className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-100 text-xs font-bold transition-all shadow-lg hover:shadow-emerald-500/20 flex items-center justify-center gap-2"
+                      className="w-full py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-slate-100 text-xs font-bold transition-all shadow-lg hover:shadow-purple-500/20 flex items-center justify-center gap-2"
                     >
                       {isSigning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                      Approve & Release Funds
+                      Deposit & Fund Contract ({escrow.total_xlm} XLM)
                     </button>
 
                     <button
-                      onClick={handleRaiseDispute}
+                      onClick={handleCancelEscrow}
                       disabled={isSigning}
-                      className="w-full py-2.5 px-4 rounded-xl bg-slate-900 border border-rose-500/30 hover:border-rose-500/50 text-rose-400 text-xs font-bold transition-all flex items-center justify-center gap-2"
+                      className="w-full py-2 px-4 rounded-xl bg-slate-900 border border-rose-500/30 hover:border-rose-500/50 text-rose-400 text-xs font-bold transition-all flex items-center justify-center gap-2"
                     >
-                      Raise Contract Dispute
+                      Cancel Escrow & Refund
                     </button>
                   </div>
-                )}
+                ) : (
+                  <>
+                    {milestone.status === 'Submitted' && (
+                      <div className="space-y-3">
+                        <button
+                          onClick={handleApproveMilestone}
+                          disabled={isSigning}
+                          className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-100 text-xs font-bold transition-all shadow-lg hover:shadow-emerald-500/20 flex items-center justify-center gap-2"
+                        >
+                          {isSigning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                          Approve & Release Funds
+                        </button>
 
-                {milestone.status === 'Pending' && (
-                  <div className="text-center py-6 text-slate-400 text-xs font-medium">
-                    Awaiting freelancer deliverable submission.
-                  </div>
-                )}
+                        <button
+                          onClick={handleRaiseDispute}
+                          disabled={isSigning}
+                          className="w-full py-2.5 px-4 rounded-xl bg-slate-900 border border-rose-500/30 hover:border-rose-500/50 text-rose-400 text-xs font-bold transition-all flex items-center justify-center gap-2"
+                        >
+                          Raise Contract Dispute
+                        </button>
+                      </div>
+                    )}
 
-                {milestone.status === 'Approved' && (
-                  <div className="text-center py-6 text-emerald-400 text-xs font-bold flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-5 h-5" />
-                    Milestone fully approved.
-                  </div>
+                    {milestone.status === 'Pending' && (
+                      <div className="space-y-3 text-center py-4">
+                        <p className="text-slate-400 text-xs font-medium">Awaiting freelancer deliverable submission.</p>
+                        <button
+                          onClick={handleCancelEscrow}
+                          disabled={isSigning}
+                          className="w-full py-2 px-4 rounded-xl bg-slate-900 border border-rose-500/30 hover:border-rose-500/50 text-rose-400 text-xs font-bold transition-all flex items-center justify-center gap-2 mt-2"
+                        >
+                          Cancel Escrow & Refund
+                        </button>
+                      </div>
+                    )}
+
+                    {milestone.status === 'Approved' && (
+                      <div className="text-center py-6 text-emerald-400 text-xs font-bold flex items-center justify-center gap-2">
+                        <CheckCircle2 className="w-5 h-5" />
+                        Milestone fully approved.
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
+
 
             {/* 3. ARBITER ACTIONS */}
             {isArbiter && (

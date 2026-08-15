@@ -618,87 +618,88 @@ export default function Home() {
                 Before deploying or initializing the SafeSplit Soroban smart contract on-chain, register the escrow milestones, titles, descriptions, and budget breakdowns.
               </p>
               <div className="bg-purple-950/10 border border-purple-900/30 rounded-2xl p-4 mt-4 text-xs text-purple-300 leading-relaxed flex items-start gap-2.5">
-                <HelpCircle className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                <div>
-                  <strong>Why Register?</strong> In Soroban contracts, storing plain-text descriptions is extremely expensive in ledger fees. To optimize on-chain gas costs, SafeSplit hashes each milestone terms using SHA-256 off-chain, stores only the 32-byte hash on-chain, and uses the database to preserve the original metadata for UI viewing.
-                </div>
-              </div>
-            </div>
+                 <HelpCircle className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                 <div>
+                   <strong>How it works</strong>: Storing plain-text details on the blockchain is expensive. SafeSplit automatically converts your milestone terms into a secure 32-byte description hash to store it cheaply on-chain, while saving the full text details in your Supabase cloud database for easy viewing.
+                 </div>
+               </div>
+             </div>
+ 
+             {/* Creation Form */}
+             <div className="bg-zinc-900/40 border border-zinc-900 rounded-3xl p-6 md:p-8 shadow-xl">
+               <form onSubmit={handleCreateEscrow} className="space-y-6">
+                 
+                 <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+                   <h3 className="text-sm font-bold text-zinc-200">Agreement Settings & Participant Wallets</h3>
+                   <button
+                     type="button"
+                     onClick={populateMockAddresses}
+                     className="text-[10px] font-bold text-purple-400 hover:text-purple-300 bg-purple-950/30 border border-purple-900/40 px-2.5 py-1 rounded-lg transition-all"
+                   >
+                     Simulate Testing Addresses
+                   </button>
+                 </div>
+ 
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div className="space-y-1.5 md:col-span-2">
+                     <label className="text-xs text-zinc-400 font-semibold">Agreement ID (Contract Address)</label>
+                     <input
+                       type="text"
+                       placeholder="e.g. CDLZFC3SYJYDZT7K67VZ75HPJGWK3S..."
+                       value={formContractAddress}
+                       onChange={(e) => setFormContractAddress(e.target.value)}
+                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
+                       required
+                     />
+                   </div>
+                   <div className="space-y-1.5">
+                     <label className="text-xs text-zinc-400 font-semibold">Client Wallet (Funder)</label>
+                     <input
+                       type="text"
+                       placeholder="e.g. GD..."
+                       value={formClientAddress}
+                       onChange={(e) => setFormClientAddress(e.target.value)}
+                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
+                       required
+                     />
+                   </div>
+                   <div className="space-y-1.5">
+                     <label className="text-xs text-zinc-400 font-semibold">Freelancer Wallet (Worker)</label>
+                     <input
+                       type="text"
+                       placeholder="e.g. GB..."
+                       value={formFreelancerAddress}
+                       onChange={(e) => setFormFreelancerAddress(e.target.value)}
+                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
+                       required
+                     />
+                   </div>
+                   <div className="space-y-1.5">
+                     <label className="text-xs text-zinc-400 font-semibold">Mediator Wallet (Neutral Third-Party)</label>
+                     <input
+                       type="text"
+                       placeholder="e.g. GA..."
+                       value={formArbiterAddress}
+                       onChange={(e) => setFormArbiterAddress(e.target.value)}
+                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
+                       required
+                     />
+                   </div>
+                   <div className="space-y-1.5">
+                     <label className="text-xs text-zinc-400 font-semibold">Mediator Dispute Fee (Basis Points BPS)</label>
+                     <input
+                       type="number"
+                       placeholder="e.g. 500 = 5% fee"
+                       value={formArbiterFeeBps}
+                       onChange={(e) => setFormArbiterFeeBps(Number(e.target.value))}
+                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors"
+                       min="0"
+                       max="2000"
+                       required
+                     />
+                   </div>
+                 </div>
 
-            {/* Creation Form */}
-            <div className="bg-zinc-900/40 border border-zinc-900 rounded-3xl p-6 md:p-8 shadow-xl">
-              <form onSubmit={handleCreateEscrow} className="space-y-6">
-                
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-                  <h3 className="text-sm font-bold text-zinc-200">Contract & Participant Parameters</h3>
-                  <button
-                    type="button"
-                    onClick={populateMockAddresses}
-                    className="text-[10px] font-bold text-purple-400 hover:text-purple-300 bg-purple-950/30 border border-purple-900/40 px-2.5 py-1 rounded-lg transition-all"
-                  >
-                    Simulate Testing Addresses
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-xs text-zinc-400 font-semibold">Stellar Contract Address (or ID)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. CDLZFC3SYJYDZT7K67VZ75HPJGWK3S..."
-                      value={formContractAddress}
-                      onChange={(e) => setFormContractAddress(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-zinc-400 font-semibold">Client Address (Funder)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. GD..."
-                      value={formClientAddress}
-                      onChange={(e) => setFormClientAddress(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-zinc-400 font-semibold">Freelancer Address (Worker)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. GB..."
-                      value={formFreelancerAddress}
-                      onChange={(e) => setFormFreelancerAddress(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-zinc-400 font-semibold">Arbiter Address (Mediator)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. GA..."
-                      value={formArbiterAddress}
-                      onChange={(e) => setFormArbiterAddress(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-zinc-400 font-semibold">Arbiter Dispute Fee Basis Points (BPS)</label>
-                    <input
-                      type="number"
-                      placeholder="e.g. 500 = 5%"
-                      value={formArbiterFeeBps}
-                      onChange={(e) => setFormArbiterFeeBps(Number(e.target.value))}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors"
-                      min="0"
-                      max="2000"
-                      required
-                    />
-                  </div>
-                </div>
 
                 {/* Milestone Details */}
                 <div className="border-t border-zinc-800 pt-6 space-y-4">
