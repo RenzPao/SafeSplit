@@ -19,7 +19,7 @@ import {
 import MilestoneDetailView from '@/components/MilestoneDetailView';
 
 // Freighter Wallet API
-import { isConnected, getPublicKey } from '@stellar/freighter-api';
+import { isConnected, getAddress } from '@stellar/freighter-api';
 
 interface Milestone {
   id: string;
@@ -90,11 +90,11 @@ export default function Home() {
   useEffect(() => {
     const checkFreighter = async () => {
       try {
-        const connected = await isConnected();
-        if (connected) {
-          const pubKey = await getPublicKey();
-          if (pubKey) {
-            setWalletAddress(pubKey);
+        const connectedRes = await isConnected();
+        if (connectedRes && connectedRes.isConnected) {
+          const addressRes = await getAddress();
+          if (addressRes && addressRes.address) {
+            setWalletAddress(addressRes.address);
             setWalletConnected(true);
           }
         }
@@ -117,14 +117,14 @@ export default function Home() {
 
   const connectFreighterWallet = async () => {
     try {
-      const connected = await isConnected();
-      if (!connected) {
+      const connectedRes = await isConnected();
+      if (!connectedRes || !connectedRes.isConnected) {
         alert('Freighter wallet extension not detected. Please install it or use the mock role selector.');
         return;
       }
-      const pubKey = await getPublicKey();
-      if (pubKey) {
-        setWalletAddress(pubKey);
+      const addressRes = await getAddress();
+      if (addressRes && addressRes.address) {
+        setWalletAddress(addressRes.address);
         setWalletConnected(true);
       }
     } catch (err: any) {
