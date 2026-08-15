@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Escrow {
+  id                 String        @id @default(uuid())
+  contract_address   String        @unique
+  client_address     String
+  freelancer_address String
+  arbiter_address    String
+  total_xlm          Decimal
+  status             String        // EscrowState: Initialized, Funded, InProgress, Disputed, Completed, Cancelled
+  created_at         DateTime      @default(now())
+  milestones         Milestone[]
+  activity_logs      ActivityLog[]
+}
+
+model Milestone {
+  id              String   @id @default(uuid())
+  escrow_id       String
+  escrow          Escrow   @relation(fields: [escrow_id], references: [id], onDelete: Cascade)
+  milestone_index Int
+  title           String
+  description     String
+  amount_xlm      Decimal
+  status          String   // MilestoneStatus: Pending, Submitted, Approved, Disputed, Refunded
+  deliverable_url String?
+  submission_cid  String?
+
+  @@unique([escrow_id, milestone_index])
+}
+
+model ActivityLog {
+  id         String   @id @default(uuid())
+  escrow_id  String
+  escrow     Escrow   @relation(fields: [escrow_id], references: [id], onDelete: Cascade)
+  tx_hash    String
+  event_name String
+  timestamp  DateTime @default(now())
+  details    String?  // JSON string or description text
+}
