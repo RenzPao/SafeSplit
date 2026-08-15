@@ -24,11 +24,11 @@ export async function POST(req: NextRequest) {
         headers: {
           Authorization: `Bearer ${pinataJwt}`,
         },
-        body: data as any,
+        body: data,
       });
 
       if (pinataRes.ok) {
-        const result = await pinataRes.json();
+        const result = await pinataRes.json() as { IpfsHash: string };
         return NextResponse.json({
           success: true,
           cid: result.IpfsHash,
@@ -50,9 +50,10 @@ export async function POST(req: NextRequest) {
       url: `https://ipfs.io/ipfs/${mockCid}`,
       note: 'Offline fallback CID generated (Pinata keys missing)',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('File upload api error:', error);
-    return NextResponse.json({ error: error.message || 'Upload failed' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Upload failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 export const maxDuration = 30; // Limit execution to 30s

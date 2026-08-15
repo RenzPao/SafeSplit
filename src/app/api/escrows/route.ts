@@ -12,7 +12,6 @@ export async function POST(req: NextRequest) {
       arbiterAddress,
       totalXlm,
       milestones,
-      arbiterFeeBps,
     } = body;
 
     if (
@@ -31,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Map and generate SHA-256 description hashes for on-chain parameter parity
-    const processedMilestones = milestones.map((m: any, index: number) => {
+    const processedMilestones = milestones.map((m: { title: string; description: string; amountXlm: number | string }, index: number) => {
       const { title, description, amountXlm } = m;
       if (!title || !description || amountXlm === undefined) {
         throw new Error(`Milestone at index ${index} is missing details`);
@@ -94,10 +93,11 @@ export async function POST(req: NextRequest) {
         descriptionHash: pm.descriptionHash,
       })),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating escrow metadata:', error);
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
+      { error: message },
       { status: 500 }
     );
   }
