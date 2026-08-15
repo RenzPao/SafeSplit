@@ -16,8 +16,9 @@ export interface MilestoneInput {
 
 export class SafeSplitClient {
   public contractId: string;
-  public contract: Contract;
+  public contract: Contract | null = null;
   public networkPassphrase: string;
+  public isValid: boolean = false;
 
   constructor(contractId: string, network: 'testnet' | 'mainnet' | string) {
     let resolvedId = contractId ? contractId.trim() : '';
@@ -33,7 +34,14 @@ export class SafeSplitClient {
       }
     }
     this.contractId = resolvedId;
-    this.contract = new Contract(resolvedId);
+    try {
+      if (StrKey.isValidContract(resolvedId)) {
+        this.contract = new Contract(resolvedId);
+        this.isValid = true;
+      }
+    } catch (err) {
+      console.warn('Invalid contract address:', err);
+    }
     if (network === 'testnet') {
       this.networkPassphrase = Networks.TESTNET;
     } else if (network === 'mainnet') {

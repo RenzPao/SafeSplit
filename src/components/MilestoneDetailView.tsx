@@ -16,7 +16,9 @@ import {
   AlertOctagon
 } from 'lucide-react';
 import { SafeSplitClient } from '@/lib/stellar/SafeSplitClient';
+import { buildAndSubmitSorobanTx } from '@/lib/stellar/sorobanTx';
 import { uploadDeliverableFile, updateMilestoneStatus, updateEscrowStatus } from '@/lib/stellar/supabaseBackend';
+
 
 
 interface Milestone {
@@ -143,24 +145,24 @@ export default function MilestoneDetailView({
 
       // Request transaction signature via Freighter
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      client.submitWorkTx(currentWalletAddress, {
+      const operation = client.submitWorkTx(currentWalletAddress, {
         freelancer: currentWalletAddress,
         milestoneId: milestone.milestone_index,
         submissionRef: cid,
       });
 
       // Construct transaction and request Freighter signing
-      // (Simplified logic representing final freighter signature request)
-      setStatusMessage({ type: 'info', text: 'Signing on-chain submission transaction...' });
+      setStatusMessage({ type: 'info', text: 'Signing & submitting transaction to Testnet...' });
+      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
       
       // Update off-chain database via Supabase
       await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
         status: 'Submitted',
         deliverableUrl: url,
         submissionCid: cid,
-        txHash: 'simulated-stellar-tx-hash',
+        txHash: txHash,
         eventName: 'WorkSubmitted',
-        details: `Freelancer submitted work for milestone ${milestone.milestone_index + 1}. CID: ${cid}`,
+        details: `Freelancer submitted work for milestone ${milestone.milestone_index + 1}. CID: ${cid}. Tx: ${txHash}`,
       });
 
       setStatusMessage({ type: 'success', text: 'Milestone submitted successfully on-chain!' });
@@ -178,22 +180,24 @@ export default function MilestoneDetailView({
   // 2. Approve Milestone (Client)
   const handleApproveMilestone = async () => {
     setIsSigning(true);
-    setStatusMessage({ type: 'info', text: 'Preparing approval... Please approve transaction in Freighter.' });
+    setStatusMessage({ type: 'info', text: 'Preparing approval... Please sign transaction in Freighter.' });
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      client.approveMilestoneTx(currentWalletAddress, {
+      const operation = client.approveMilestoneTx(currentWalletAddress, {
         client: currentWalletAddress,
         milestoneId: milestone.milestone_index,
       });
 
-      // Simulate Freighter signature & submission
+      setStatusMessage({ type: 'info', text: 'Signing & submitting approval to Testnet...' });
+      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+
       // Update database status via Supabase
       await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
         status: 'Approved',
-        txHash: 'simulated-stellar-tx-hash-approve',
+        txHash: txHash,
         eventName: 'MilestoneApproved',
-        details: `Client approved milestone ${milestone.milestone_index + 1} and funds were released.`,
+        details: `Client approved milestone ${milestone.milestone_index + 1} and funds were released. Tx: ${txHash}`,
       });
 
       setStatusMessage({ type: 'success', text: 'Milestone approved and XLM released to freelancer!' });
@@ -214,14 +218,15 @@ export default function MilestoneDetailView({
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      client.depositXlmTx(currentWalletAddress, escrow.client_address);
+      const operation = client.depositXlmTx(currentWalletAddress, escrow.client_address);
+      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
       // Update database status via Supabase
       await updateEscrowStatus(escrow.id, {
         status: 'Funded',
-        txHash: 'simulated-stellar-tx-hash-fund',
+        txHash: txHash,
         eventName: 'EscrowFunded',
-        details: `Client funded the escrow with ${escrow.total_xlm} XLM on-chain.`,
+        details: `Client funded the escrow with ${escrow.total_xlm} XLM on-chain. Tx: ${txHash}`,
       });
 
       setStatusMessage({ type: 'success', text: 'Escrow contract funded successfully on-chain!' });
@@ -242,14 +247,15 @@ export default function MilestoneDetailView({
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      client.cancelAndRefundTx(currentWalletAddress, escrow.client_address);
+      const operation = client.cancelAndRefundTx(currentWalletAddress, escrow.client_address);
+      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
       // Update database status via Supabase
       await updateEscrowStatus(escrow.id, {
         status: 'Cancelled',
-        txHash: 'simulated-stellar-tx-hash-cancel',
+        txHash: txHash,
         eventName: 'EscrowCancelled',
-        details: 'Client cancelled the escrow agreement and refunded all remaining funds.',
+        details: `Client cancelled the escrow agreement and refunded all remaining funds. Tx: ${txHash}`,
       });
 
       setStatusMessage({ type: 'success', text: 'Escrow cancelled and funds refunded to your wallet!' });
@@ -272,18 +278,19 @@ export default function MilestoneDetailView({
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
       const reasonHash = 'd3f4b50000000000000000000000000000000000000000000000000000000000'; // 32-byte hex mock
-      client.raiseDisputeTx(currentWalletAddress, {
+      const operation = client.raiseDisputeTx(currentWalletAddress, {
         caller: currentWalletAddress,
         milestoneId: milestone.milestone_index,
         reasonHash,
       });
+      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
       // Update status via Supabase
       await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
         status: 'Disputed',
-        txHash: 'simulated-stellar-tx-hash-dispute',
+        txHash: txHash,
         eventName: 'DisputeRaised',
-        details: `Dispute raised on milestone ${milestone.milestone_index + 1} by caller ${currentWalletAddress}`,
+        details: `Dispute raised on milestone ${milestone.milestone_index + 1} by caller ${currentWalletAddress}. Tx: ${txHash}`,
       });
 
       setStatusMessage({ type: 'success', text: 'Dispute raised successfully. Contract locked pending arbiter resolution.' });
@@ -304,18 +311,19 @@ export default function MilestoneDetailView({
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      client.resolveDisputeTx(currentWalletAddress, {
+      const operation = client.resolveDisputeTx(currentWalletAddress, {
         arbiter: currentWalletAddress,
         milestoneId: milestone.milestone_index,
         clientSplitBps: splitBps,
       });
+      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
       // Update status via Supabase
       await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
         status: splitBps === 10000 ? 'Refunded' : 'Approved',
-        txHash: 'simulated-stellar-tx-hash-resolve',
+        txHash: txHash,
         eventName: 'DisputeResolved',
-        details: `Arbiter resolved dispute on milestone ${milestone.milestone_index + 1} with client split of ${splitBps / 100}%`,
+        details: `Arbiter resolved dispute on milestone ${milestone.milestone_index + 1} with client split of ${splitBps / 100}%. Tx: ${txHash}`,
       });
 
       setStatusMessage({ type: 'success', text: `Dispute resolved successfully! Client split: ${splitBps / 100}%, Freelancer split: ${(10000 - splitBps) / 100}%` });
