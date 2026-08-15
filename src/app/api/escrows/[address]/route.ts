@@ -6,10 +6,10 @@ const TESTNET_RPC_URL = 'https://soroban-testnet.stellar.org';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { address: string } }
+  { params }: { params: Promise<{ address: string }> }
 ) {
   try {
-    const address = params.address;
+    const { address } = await params;
 
     if (!address) {
       return NextResponse.json({ error: 'Contract address is required' }, { status: 400 });
@@ -42,23 +42,23 @@ export async function GET(
       const contract = new Contract(address);
       const ledgerKey = xdr.LedgerKey.contractData(
         new xdr.LedgerKeyContractData({
-          contract: contract.address().toXdrObject(),
+          contract: contract.address().toScAddress(),
           key: xdr.ScVal.scvVec([
-            xdr.ScVal.scvSym('Config') // DataKey::Config
+            xdr.ScVal.scvSymbol('Config') // DataKey::Config
           ]),
-          durability: xdr.ContractDataDurability.instance()
+          durability: xdr.ContractDataDurability.persistent()
         })
       );
 
-      const response = await server.getLedgerEntries([ledgerKey]);
+      const response = await server.getLedgerEntries(ledgerKey);
 
       if (response && response.entries && response.entries.length > 0) {
         const entry = response.entries[0];
-        const contractData = xdr.LedgerEntryData.fromXdr(Buffer.from(entry.xdr, 'base64'));
-        const val = contractData.contractData().val();
+        const val = entry.val;
         
         // Decode the EscrowConfig struct
-        const nativeConfig: any = scValToNative(val);
+        const nativeConfig: any = scValToNative(val.contractData().val());
+
         
         onChainState = {
           client: nativeConfig.client,
