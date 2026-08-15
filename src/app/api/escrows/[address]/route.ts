@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { rpc, Contract, Address, scValToNative, xdr } from '@stellar/stellar-sdk';
+import { rpc, Contract, scValToNative, xdr } from '@stellar/stellar-sdk';
 
 const TESTNET_RPC_URL = 'https://soroban-testnet.stellar.org';
 
@@ -57,7 +57,16 @@ export async function GET(
         const val = entry.val;
         
         // Decode the EscrowConfig struct
-        const nativeConfig: any = scValToNative(val.contractData().val());
+        interface NativeEscrowConfig {
+          client: string;
+          freelancer: string;
+          arbiter: string;
+          total_xlm_stroops: { toString: () => string };
+          current_milestone_index: number;
+          arbiter_fee_bps: number;
+          state: string;
+        }
+        const nativeConfig = scValToNative(val.contractData().val()) as NativeEscrowConfig;
 
         
         onChainState = {
@@ -88,10 +97,11 @@ export async function GET(
       escrow,
       onChainState,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching escrow details:', error);
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
+      { error: message },
       { status: 500 }
     );
   }
