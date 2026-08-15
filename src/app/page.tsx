@@ -67,7 +67,19 @@ export default function Home() {
   const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [recentEscrows, setRecentEscrows] = useState<string[]>([]);
+  const [recentEscrows, setRecentEscrows] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('safesplit_recent_escrows');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    return [];
+  });
 
   // Create Escrow form states
   const [formContractAddress, setFormContractAddress] = useState('');
@@ -103,16 +115,6 @@ export default function Home() {
       }
     };
     checkFreighter();
-
-    // Load recent escrows from localStorage
-    const saved = localStorage.getItem('safesplit_recent_escrows');
-    if (saved) {
-      try {
-        setRecentEscrows(JSON.parse(saved));
-      } catch (e) {
-        console.error(e);
-      }
-    }
   }, []);
 
   const connectFreighterWallet = async () => {
@@ -127,8 +129,9 @@ export default function Home() {
         setWalletAddress(addressRes.address);
         setWalletConnected(true);
       }
-    } catch (err: any) {
-      alert(`Connection failed: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      alert(`Connection failed: ${message}`);
     }
   };
 
@@ -163,9 +166,10 @@ export default function Home() {
       if (!addressToLoad) {
         setSearchAddress('');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMsg(err.message || 'Error occurred while loading escrow');
+      const message = err instanceof Error ? err.message : 'Error occurred while loading escrow';
+      setErrorMsg(message);
     } finally {
       setIsLoading(false);
     }
@@ -181,12 +185,12 @@ export default function Home() {
     setFormMilestones(formMilestones.filter((_, i) => i !== index));
   };
 
-  const handleMilestoneChange = (index: number, field: 'title' | 'description' | 'amountXlm', value: any) => {
+  const handleMilestoneChange = (index: number, field: 'title' | 'description' | 'amountXlm', value: string | number) => {
     const updated = [...formMilestones];
     if (field === 'amountXlm') {
       updated[index] = { ...updated[index], [field]: Number(value) };
     } else {
-      updated[index] = { ...updated[index], [field]: value };
+      updated[index] = { ...updated[index], [field]: value as string };
     }
     setFormMilestones(updated);
   };
@@ -233,8 +237,9 @@ export default function Home() {
 
       // Reset form
       setFormContractAddress('');
-    } catch (err: any) {
-      alert(`Creation failed: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      alert(`Creation failed: ${message}`);
     } finally {
       setIsSubmitting(false);
     }
