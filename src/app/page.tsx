@@ -777,7 +777,18 @@ export default function Home() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs text-zinc-400 font-semibold">Client Wallet (Funder)</label>
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs text-zinc-400 font-semibold">Client Wallet (Funder)</label>
+                        {walletAddress && (
+                          <button
+                            type="button"
+                            onClick={() => setFormClientAddress(walletAddress)}
+                            className="text-[9px] font-bold text-purple-400 hover:underline hover:text-purple-300 transition-all"
+                          >
+                            Use Connected Wallet
+                          </button>
+                        )}
+                      </div>
                       <input
                         type="text"
                         placeholder="e.g. GD..."
@@ -788,7 +799,18 @@ export default function Home() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs text-zinc-400 font-semibold">Freelancer Wallet (Worker)</label>
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs text-zinc-400 font-semibold">Freelancer Wallet (Worker)</label>
+                        {walletAddress && (
+                          <button
+                            type="button"
+                            onClick={() => setFormFreelancerAddress(walletAddress)}
+                            className="text-[9px] font-bold text-purple-400 hover:underline hover:text-purple-300 transition-all"
+                          >
+                            Use Connected Wallet
+                          </button>
+                        )}
+                      </div>
                       <input
                         type="text"
                         placeholder="e.g. GB..."
@@ -799,7 +821,18 @@ export default function Home() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs text-zinc-400 font-semibold">Mediator Wallet (Neutral Third-Party)</label>
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs text-zinc-400 font-semibold">Mediator Wallet (Neutral Third-Party)</label>
+                        {walletAddress && (
+                          <button
+                            type="button"
+                            onClick={() => setFormArbiterAddress(walletAddress)}
+                            className="text-[9px] font-bold text-purple-400 hover:underline hover:text-purple-300 transition-all"
+                          >
+                            Use Connected Wallet
+                          </button>
+                        )}
+                      </div>
                       <input
                         type="text"
                         placeholder="e.g. GA..."
