@@ -90,6 +90,52 @@ export default function Home() {
     descriptionHashes: { index: number; descriptionHash: string }[];
   } | null>(null);
 
+  // Stellar Dev Sandbox States
+  const [generatedKeys, setGeneratedKeys] = useState<{ publicKey: string; secretKey: string } | null>(null);
+  const [showSecretKey, setShowSecretKey] = useState(false);
+  const [isFunding, setIsFunding] = useState(false);
+  const [faucetAddress, setFaucetAddress] = useState('');
+  const [faucetMessage, setFaucetMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+
+  const handleGenerateKeypair = () => {
+    const kp = Keypair.random();
+    setGeneratedKeys({
+      publicKey: kp.publicKey(),
+      secretKey: kp.secret(),
+    });
+    setFaucetAddress(kp.publicKey());
+    setShowSecretKey(false);
+    setFaucetMessage(null);
+  };
+
+  const handleFundWithFriendbot = async (targetAddr?: string) => {
+    const addressToFund = targetAddr || faucetAddress;
+    if (!addressToFund) {
+      setFaucetMessage({ type: 'error', text: 'Please enter or generate a public address first.' });
+      return;
+    }
+
+    setIsFunding(true);
+    setFaucetMessage({ type: 'info', text: 'Requesting 10,000 XLM from Friendbot Faucet...' });
+
+    try {
+      const response = await fetch(`https://friendbot.stellar.org/?addr=${encodeURIComponent(addressToFund)}`);
+      if (response.ok) {
+        setFaucetMessage({ type: 'success', text: `Successfully funded 10,000 XLM into account: ${addressToFund.substring(0, 8)}...` });
+      } else {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Friendbot error');
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      setFaucetMessage({ type: 'error', text: `Friendbot faucet request failed: ${message}` });
+    } finally {
+      setIsFunding(false);
+    }
+  };
+
+
   // Check Freighter connection on load
   useEffect(() => {
     // Load recent escrows from localStorage on client-side mount
@@ -685,223 +731,377 @@ export default function Home() {
 
         {/* Tab Content 2: REGISTER ESCROW */}
         {activeTab === 'create' && (
-          <div className="max-w-3xl mx-auto w-full space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
             
-            {/* Explanatory notes */}
-            <div className="bg-zinc-900/40 border border-zinc-900 rounded-3xl p-6">
-              <h2 className="text-base font-bold text-zinc-200">Register Escrow Contract Metadata</h2>
-              <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                Before deploying or initializing the SafeSplit Soroban smart contract on-chain, register the escrow milestones, titles, descriptions, and budget breakdowns.
-              </p>
-              <div className="bg-purple-950/10 border border-purple-900/30 rounded-2xl p-4 mt-4 text-xs text-purple-300 leading-relaxed flex items-start gap-2.5">
-                 <HelpCircle className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                 <div>
-                   <strong>How it works</strong>: Storing plain-text details on the blockchain is expensive. SafeSplit automatically converts your milestone terms into a secure 32-byte description hash to store it cheaply on-chain, while saving the full text details in your Supabase cloud database for easy viewing.
-                 </div>
-               </div>
-             </div>
- 
-             {/* Creation Form */}
-             <div className="bg-zinc-900/40 border border-zinc-900 rounded-3xl p-6 md:p-8 shadow-xl">
-               <form onSubmit={handleCreateEscrow} className="space-y-6">
-                 
-                 <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-                   <h3 className="text-sm font-bold text-zinc-200">Agreement Settings & Participant Wallets</h3>
-                   <button
-                     type="button"
-                     onClick={populateMockAddresses}
-                     className="text-[10px] font-bold text-purple-400 hover:text-purple-300 bg-purple-950/30 border border-purple-900/40 px-2.5 py-1 rounded-lg transition-all"
-                   >
-                     Simulate Testing Addresses
-                   </button>
-                 </div>
- 
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <div className="space-y-1.5 md:col-span-2">
-                     <label className="text-xs text-zinc-400 font-semibold">Agreement ID (Contract Address)</label>
-                     <input
-                       type="text"
-                       placeholder="e.g. CDLZFC3SYJYDZT7K67VZ75HPJGWK3S..."
-                       value={formContractAddress}
-                       onChange={(e) => setFormContractAddress(e.target.value)}
-                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
-                       required
-                     />
-                   </div>
-                   <div className="space-y-1.5">
-                     <label className="text-xs text-zinc-400 font-semibold">Client Wallet (Funder)</label>
-                     <input
-                       type="text"
-                       placeholder="e.g. GD..."
-                       value={formClientAddress}
-                       onChange={(e) => setFormClientAddress(e.target.value)}
-                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
-                       required
-                     />
-                   </div>
-                   <div className="space-y-1.5">
-                     <label className="text-xs text-zinc-400 font-semibold">Freelancer Wallet (Worker)</label>
-                     <input
-                       type="text"
-                       placeholder="e.g. GB..."
-                       value={formFreelancerAddress}
-                       onChange={(e) => setFormFreelancerAddress(e.target.value)}
-                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
-                       required
-                     />
-                   </div>
-                   <div className="space-y-1.5">
-                     <label className="text-xs text-zinc-400 font-semibold">Mediator Wallet (Neutral Third-Party)</label>
-                     <input
-                       type="text"
-                       placeholder="e.g. GA..."
-                       value={formArbiterAddress}
-                       onChange={(e) => setFormArbiterAddress(e.target.value)}
-                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
-                       required
-                     />
-                   </div>
-                   <div className="space-y-1.5">
-                     <label className="text-xs text-zinc-400 font-semibold">Mediator Dispute Fee (Basis Points BPS)</label>
-                     <input
-                       type="number"
-                       placeholder="e.g. 500 = 5% fee"
-                       value={formArbiterFeeBps}
-                       onChange={(e) => setFormArbiterFeeBps(Number(e.target.value))}
-                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors"
-                       min="0"
-                       max="2000"
-                       required
-                     />
-                   </div>
-                 </div>
-
-
-                {/* Milestone Details */}
-                <div className="border-t border-zinc-800 pt-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Milestone Breakdown</h3>
+            {/* Left: Explanatory & Form */}
+            <div className="lg:col-span-8 space-y-8">
+              {/* Explanatory notes */}
+              <div className="bg-zinc-900/40 border border-zinc-900 rounded-3xl p-6">
+                <h2 className="text-base font-bold text-zinc-200">Register Escrow Contract Metadata</h2>
+                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                  Before deploying or initializing the SafeSplit Soroban smart contract on-chain, register the escrow milestones, titles, descriptions, and budget breakdowns.
+                </p>
+                <div className="bg-purple-950/10 border border-purple-900/30 rounded-2xl p-4 mt-4 text-xs text-purple-300 leading-relaxed flex items-start gap-2.5">
+                  <HelpCircle className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong>How it works</strong>: Storing plain-text details on the blockchain is expensive. SafeSplit automatically converts your milestone terms into a secure 32-byte description hash to store it cheaply on-chain, while saving the full text details in your Supabase cloud database for easy viewing.
+                  </div>
+                </div>
+              </div>
+  
+              {/* Creation Form */}
+              <div className="bg-zinc-900/40 border border-zinc-900 rounded-3xl p-6 md:p-8 shadow-xl">
+                <form onSubmit={handleCreateEscrow} className="space-y-6">
+                  
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+                    <h3 className="text-sm font-bold text-zinc-200">Agreement Settings & Participant Wallets</h3>
                     <button
                       type="button"
-                      onClick={handleAddMilestone}
-                      className="px-3 py-1.5 rounded-lg bg-zinc-850 hover:bg-zinc-800 text-zinc-300 text-xs font-bold transition-all border border-zinc-800/60 flex items-center gap-1.5"
+                      onClick={populateMockAddresses}
+                      className="text-[10px] font-bold text-purple-400 hover:text-purple-300 bg-purple-950/30 border border-purple-900/40 px-2.5 py-1 rounded-lg transition-all"
                     >
-                      <Plus className="w-3.5 h-3.5" />
-                      Add Milestone
+                      Simulate Testing Addresses
                     </button>
                   </div>
-
-                  <div className="space-y-4">
-                    {formMilestones.map((m, index) => (
-                      <div key={index} className="bg-zinc-950/60 border border-zinc-900 rounded-2xl p-4 space-y-3 relative">
-                        {formMilestones.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveMilestone(index)}
-                            className="absolute right-3 top-3 p-1.5 text-zinc-500 hover:text-rose-400 rounded-lg hover:bg-zinc-900 transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                        <span className="text-[10px] font-bold text-purple-400/80 uppercase">Milestone {index + 1}</span>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                          <div className="md:col-span-3 space-y-1">
-                            <label className="text-[11px] text-zinc-500 font-medium">Milestone Title</label>
-                            <input
-                              type="text"
-                              placeholder="e.g. Design mockup approval"
-                              value={m.title}
-                              onChange={(e) => handleMilestoneChange(index, 'title', e.target.value)}
-                              className="w-full bg-zinc-900 border border-zinc-800/80 rounded-xl px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors"
-                              required
-                            />
+  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className="text-xs text-zinc-400 font-semibold">Agreement ID (Contract Address)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. CDLZFC3SYJYDZT7K67VZ75HPJGWK3S..."
+                        value={formContractAddress}
+                        onChange={(e) => setFormContractAddress(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-zinc-400 font-semibold">Client Wallet (Funder)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. GD..."
+                        value={formClientAddress}
+                        onChange={(e) => setFormClientAddress(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-zinc-400 font-semibold">Freelancer Wallet (Worker)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. GB..."
+                        value={formFreelancerAddress}
+                        onChange={(e) => setFormFreelancerAddress(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-zinc-400 font-semibold">Mediator Wallet (Neutral Third-Party)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. GA..."
+                        value={formArbiterAddress}
+                        onChange={(e) => setFormArbiterAddress(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-zinc-400 font-semibold">Mediator Dispute Fee (Basis Points BPS)</label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 500 = 5% fee"
+                        value={formArbiterFeeBps}
+                        onChange={(e) => setFormArbiterFeeBps(Number(e.target.value))}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors"
+                        min="0"
+                        max="2000"
+                        required
+                      />
+                    </div>
+                  </div>
+  
+  
+                  {/* Milestone Details */}
+                  <div className="border-t border-zinc-800 pt-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Milestone Breakdown</h3>
+                      <button
+                        type="button"
+                        onClick={handleAddMilestone}
+                        className="px-3 py-1.5 rounded-lg bg-zinc-850 hover:bg-zinc-800 text-zinc-300 text-xs font-bold transition-all border border-zinc-800/60 flex items-center gap-1.5"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Add Milestone
+                      </button>
+                    </div>
+  
+                    <div className="space-y-4">
+                      {formMilestones.map((m, index) => (
+                        <div key={index} className="bg-zinc-950/60 border border-zinc-900 rounded-2xl p-4 space-y-3 relative">
+                          {formMilestones.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveMilestone(index)}
+                              className="absolute right-3 top-3 p-1.5 text-zinc-500 hover:text-rose-400 rounded-lg hover:bg-zinc-900 transition-all"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                          <span className="text-[10px] font-bold text-purple-400/80 uppercase">Milestone {index + 1}</span>
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div className="md:col-span-3 space-y-1">
+                              <label className="text-[11px] text-zinc-500 font-medium">Milestone Title</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. Design mockup approval"
+                                value={m.title}
+                                onChange={(e) => handleMilestoneChange(index, 'title', e.target.value)}
+                                className="w-full bg-zinc-900 border border-zinc-800/80 rounded-xl px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors"
+                                required
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[11px] text-zinc-500 font-medium">Value (XLM)</label>
+                              <input
+                                type="number"
+                                placeholder="e.g. 50"
+                                value={m.amountXlm}
+                                onChange={(e) => handleMilestoneChange(index, 'amountXlm', e.target.value)}
+                                className="w-full bg-zinc-900 border border-zinc-800/80 rounded-xl px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors"
+                                min="1"
+                                required
+                              />
+                            </div>
+                            <div className="md:col-span-4 space-y-1">
+                              <label className="text-[11px] text-zinc-500 font-medium">Milestone Verification Description</label>
+                              <textarea
+                                placeholder="Describe deliverables and how the client or arbiter can verify completion..."
+                                value={m.description}
+                                onChange={(e) => handleMilestoneChange(index, 'description', e.target.value)}
+                                className="w-full bg-zinc-900 border border-zinc-800/80 rounded-xl px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors h-16 resize-none"
+                                required
+                              />
+                            </div>
                           </div>
-                          <div className="space-y-1">
-                            <label className="text-[11px] text-zinc-500 font-medium">Value (XLM)</label>
-                            <input
-                              type="number"
-                              placeholder="e.g. 50"
-                              value={m.amountXlm}
-                              onChange={(e) => handleMilestoneChange(index, 'amountXlm', e.target.value)}
-                              className="w-full bg-zinc-900 border border-zinc-800/80 rounded-xl px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors"
-                              min="1"
-                              required
-                            />
-                          </div>
-                          <div className="md:col-span-4 space-y-1">
-                            <label className="text-[11px] text-zinc-500 font-medium">Milestone Verification Description</label>
-                            <textarea
-                              placeholder="Describe deliverables and how the client or arbiter can verify completion..."
-                              value={m.description}
-                              onChange={(e) => handleMilestoneChange(index, 'description', e.target.value)}
-                              className="w-full bg-zinc-900 border border-zinc-800/80 rounded-xl px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors h-16 resize-none"
-                              required
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="text-right text-xs font-semibold text-zinc-400 bg-zinc-950/20 border border-zinc-900 rounded-xl p-3.5">
-                    Total Escrow Value: <span className="text-purple-400 text-sm font-bold">{formMilestones.reduce((sum, m) => sum + m.amountXlm, 0)} XLM</span>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full py-3.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white text-xs font-bold transition-all shadow-lg hover:shadow-purple-500/10 flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Register Escrow Metadata'}
-                </button>
-
-              </form>
-            </div>
-
-            {/* Creation Result Modal / View */}
-            {creationResult && (
-              <div className="bg-zinc-900/60 border border-purple-500/20 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -z-10" />
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                    <CheckCircle className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-zinc-100">Escrow Registered Successfully!</h3>
-                    <p className="text-xs text-zinc-500">Milestone metadata has been securely hashed and stored off-chain.</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="bg-zinc-950 border border-zinc-850 rounded-2xl p-4 space-y-2">
-                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wide">On-chain Initialization Parameters</h4>
-                    <p className="text-[11px] text-zinc-500 leading-relaxed">
-                      You can now initialize the contract on-chain using Freighter or CLI, passing the following matching milestone description hashes in order:
-                    </p>
-                    <div className="space-y-2 mt-3 font-mono text-xs">
-                      {creationResult.descriptionHashes.map((dh) => (
-                        <div key={dh.index} className="flex flex-col md:flex-row md:items-center justify-between gap-1 bg-zinc-900 p-2.5 rounded-xl border border-zinc-800/80">
-                          <span className="text-purple-400 font-bold">Milestone {dh.index + 1}:</span>
-                          <span className="text-zinc-300 break-all">{dh.descriptionHash}</span>
                         </div>
                       ))}
                     </div>
+  
+                    <div className="text-right text-xs font-semibold text-zinc-400 bg-zinc-950/20 border border-zinc-900 rounded-xl p-3.5">
+                      Total Escrow Value: <span className="text-purple-400 text-sm font-bold">{formMilestones.reduce((sum, m) => sum + m.amountXlm, 0)} XLM</span>
+                    </div>
                   </div>
-
+  
                   <button
-                    onClick={() => {
-                      setLoadedEscrow(creationResult.escrow);
-                      setActiveTab('manage');
-                      setCreationResult(null);
-                    }}
-                    className="w-full py-3 px-4 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-3.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white text-xs font-bold transition-all shadow-lg hover:shadow-purple-500/10 flex items-center justify-center gap-2"
                   >
-                    Go to Manage Dashboard
+                    {isSubmitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Register Escrow Metadata'}
+                  </button>
+  
+                </form>
+              </div>
+  
+              {/* Creation Result Modal / View */}
+              {creationResult && (
+                <div className="bg-zinc-900/60 border border-purple-500/20 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -z-10" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                      <CheckCircle className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-zinc-100">Escrow Registered Successfully!</h3>
+                      <p className="text-xs text-zinc-500">Milestone metadata has been securely hashed and stored off-chain.</p>
+                    </div>
+                  </div>
+  
+                  <div className="space-y-4">
+                    <div className="bg-zinc-950 border border-zinc-850 rounded-2xl p-4 space-y-2">
+                      <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wide">On-chain Initialization Parameters</h4>
+                      <p className="text-[11px] text-zinc-500 leading-relaxed">
+                        You can now initialize the contract on-chain using Freighter or CLI, passing the following matching milestone description hashes in order:
+                      </p>
+                      <div className="space-y-2 mt-3 font-mono text-xs">
+                        {creationResult.descriptionHashes.map((dh) => (
+                          <div key={dh.index} className="flex flex-col md:flex-row md:items-center justify-between gap-1 bg-zinc-900 p-2.5 rounded-xl border border-zinc-800/80">
+                            <span className="text-purple-400 font-bold">Milestone {dh.index + 1}:</span>
+                            <span className="text-zinc-300 break-all">{dh.descriptionHash}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+  
+                    <button
+                      onClick={() => {
+                        setLoadedEscrow(creationResult.escrow);
+                        setActiveTab('manage');
+                        setCreationResult(null);
+                      }}
+                      className="w-full py-3 px-4 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                    >
+                      Go to Manage Dashboard
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Stellar Dev Sandbox */}
+            <div className="lg:col-span-4 bg-zinc-900/40 border border-zinc-900 rounded-3xl p-6 space-y-6 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-1/4 w-64 h-64 bg-purple-600/5 rounded-full blur-3xl -z-10" />
+              
+              <div>
+                <h3 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
+                  <Wallet className="w-4 h-4 text-purple-400" />
+                  Stellar Developer Sandbox
+                </h3>
+                <p className="text-[11px] text-zinc-500 mt-1 leading-normal font-medium">
+                  Generate real Stellar testnet keypairs, import them to Freighter, and fund them instantly with Friendbot to test the contract logic.
+                </p>
+              </div>
+
+              {/* 1. Account Generator */}
+              <div className="bg-zinc-950/60 border border-zinc-900 rounded-2xl p-4 space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-zinc-300">Stellar Keypair Generator</span>
+                  <button
+                    type="button"
+                    onClick={handleGenerateKeypair}
+                    className="text-[10px] font-bold text-purple-400 hover:text-purple-300 bg-purple-950/30 border border-purple-900/40 px-2 py-1 rounded-lg transition-all"
+                  >
+                    Generate Real Keypair
                   </button>
                 </div>
+
+                {generatedKeys ? (
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500">
+                        <span>PUBLIC ADDRESS</span>
+                        <div className="flex gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(generatedKeys.publicKey, 'pubkey')}
+                            className="text-purple-400 hover:text-purple-300"
+                          >
+                            {copiedText === 'pubkey' ? 'Copied!' : 'Copy'}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="bg-zinc-950 border border-zinc-900 p-2 rounded-xl text-[10px] font-mono text-zinc-300 truncate">
+                        {generatedKeys.publicKey}
+                      </div>
+                      <div className="grid grid-cols-3 gap-1 mt-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setFormClientAddress(generatedKeys.publicKey)}
+                          className="py-1 px-1.5 bg-zinc-900 hover:bg-zinc-850 rounded text-[9px] font-bold text-zinc-400 text-center transition-all border border-zinc-800"
+                        >
+                          As Client
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormFreelancerAddress(generatedKeys.publicKey)}
+                          className="py-1 px-1.5 bg-zinc-900 hover:bg-zinc-850 rounded text-[9px] font-bold text-zinc-400 text-center transition-all border border-zinc-800"
+                        >
+                          As Worker
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormArbiterAddress(generatedKeys.publicKey)}
+                          className="py-1 px-1.5 bg-zinc-900 hover:bg-zinc-850 rounded text-[9px] font-bold text-zinc-400 text-center transition-all border border-zinc-800"
+                        >
+                          As Mediator
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 border-t border-zinc-900 pt-2.5">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500">
+                        <span>SECRET KEY (PRIVATE)</span>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowSecretKey(!showSecretKey)}
+                            className="text-zinc-400 hover:text-zinc-300"
+                          >
+                            {showSecretKey ? 'Hide' : 'Show'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(generatedKeys.secretKey, 'seckey')}
+                            className="text-purple-400 hover:text-purple-300"
+                          >
+                            {copiedText === 'seckey' ? 'Copied!' : 'Copy'}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="bg-zinc-950 border border-zinc-900 p-2 rounded-xl text-[10px] font-mono text-zinc-300 truncate">
+                        {showSecretKey ? generatedKeys.secretKey : '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'}
+                      </div>
+                      <p className="text-[9px] text-amber-500/80 leading-normal mt-1 leading-normal font-semibold">
+                        ⚠️ Never use mock secret keys on Mainnet. Safe to import to Freighter for Testnet testing.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-6 border border-dashed border-zinc-900 rounded-xl text-[10px] text-zinc-500 font-medium">
+                    No keys generated yet. Click above to generate.
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* 2. Friendbot Faucet */}
+              <div className="bg-zinc-950/60 border border-zinc-900 rounded-2xl p-4 space-y-4">
+                <span className="text-xs font-bold text-zinc-300 block">Friendbot Testnet Faucet</span>
+                
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-zinc-500 font-semibold block">Target Address to Fund</label>
+                  <input
+                    type="text"
+                    placeholder="Enter G... address"
+                    value={faucetAddress}
+                    onChange={(e) => setFaucetAddress(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-900 rounded-xl px-3 py-2 text-[10px] text-zinc-200 focus:outline-none focus:border-purple-500/80 font-mono transition-colors"
+                  />
+                  {walletAddress && (
+                    <button
+                      type="button"
+                      onClick={() => setFaucetAddress(walletAddress)}
+                      className="text-[9px] font-semibold text-purple-400 hover:underline block"
+                    >
+                      Use connected Freighter wallet ({walletAddress.substring(0, 6)}...{walletAddress.slice(-4)})
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleFundWithFriendbot()}
+                  disabled={isFunding || !faucetAddress}
+                  className="w-full py-2.5 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-900 disabled:text-zinc-600 text-slate-100 text-[11px] font-bold transition-all shadow-md flex items-center justify-center gap-1.5"
+                >
+                  {isFunding && <RefreshCw className="w-3 h-3 animate-spin" />}
+                  Fund 10,000 Testnet XLM
+                </button>
+
+                {faucetMessage && (
+                  <div className={`p-3 rounded-xl border text-[10px] font-semibold leading-normal ${
+                    faucetMessage.type === 'error' ? 'bg-rose-500/10 border-rose-500/20 text-rose-300' :
+                    faucetMessage.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300' :
+                    'bg-zinc-900 border-zinc-800 text-purple-300'
+                  }`}>
+                    {faucetMessage.text}
+                  </div>
+                )}
+              </div>
+            </div>
 
           </div>
         )}
