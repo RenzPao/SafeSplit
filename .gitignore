@@ -42,6 +42,8 @@ next-env.d.ts
 
 # agent memory
 .agent_memory.md
+scratch/
+
 
 # cargo build target
 **/target/
