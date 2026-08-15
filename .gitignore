@@ -52,7 +52,7 @@ scratch/
 
 
 
-/generated/
+/src/generated/prisma/
 
 # IDE/Agent folders
 .agents/
