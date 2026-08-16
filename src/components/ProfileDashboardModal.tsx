@@ -15,11 +15,11 @@ export default function ProfileDashboardModal({ user, balance, onClose }: Profil
       <div className="bg-zinc-950 border border-zinc-800 rounded-3xl w-full max-w-4xl shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header Background Gradient */}
-        <div className="h-32 bg-gradient-to-r from-purple-900/40 via-blue-900/20 to-zinc-950 border-b border-zinc-800/50 absolute top-0 left-0 right-0" />
+        <div className="h-32 bg-gradient-to-r from-purple-900/40 via-blue-900/20 to-zinc-950 border-b border-zinc-800/50 absolute top-0 left-0 right-0 pointer-events-none" />
         
         <button 
           onClick={onClose}
-          className="absolute top-6 right-6 z-10 p-2 bg-black/20 hover:bg-black/40 rounded-full text-zinc-300 hover:text-white transition-colors backdrop-blur-sm"
+          className="absolute top-6 right-6 z-50 p-2 bg-black/20 hover:bg-black/40 rounded-full text-zinc-300 hover:text-white transition-colors backdrop-blur-sm"
         >
           <X className="w-5 h-5" />
         </button>

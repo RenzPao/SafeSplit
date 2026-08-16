@@ -78,9 +78,12 @@ export default function Home() {
   const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [recentEscrows, setRecentEscrows] = useState<{id: string, title: string}[]>([]);
+  const [recentEscrows, setRecentEscrows] = useState<{id: string, title: string, status?: string}[]>([]);
+  const [escrowFilter, setEscrowFilter] = useState<'All' | 'Ongoing' | 'Finished' | 'Rejected'>('All');
   const [invitations, setInvitations] = useState<Escrow[]>([]);
   const [isFetchingInvitations, setIsFetchingInvitations] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Fetch invitations when wallet connects
   const [walletUser, setWalletUser] = useState<any>(null);
@@ -150,6 +153,52 @@ export default function Home() {
     };
 
     fetchUserAndBalance();
+  }, [walletAddress]);
+
+  // Fetch User Escrows and Notifications
+  useEffect(() => {
+    const fetchUserEscrows = async () => {
+      if (!walletAddress) return;
+      try {
+        const res = await fetch(`/api/escrows?user=${encodeURIComponent(walletAddress)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.escrows) {
+            const fetchedEscrows = data.escrows.map((escrow: Escrow) => ({
+              id: escrow.id,
+              title: escrow.title,
+              status: escrow.status,
+            }));
+            
+            setRecentEscrows((prev) => {
+              const prevMap = new Map(prev.map(p => [p.id, p]));
+              fetchedEscrows.forEach((e: any) => prevMap.set(e.id, e));
+              return Array.from(prevMap.values()).slice(0, 10);
+            });
+
+            // Fetch recent notifications using the escrow IDs
+            const escrowIds = data.escrows.map((e: Escrow) => e.id);
+            if (escrowIds.length > 0) {
+              const { supabase } = await import('@/lib/supabaseClient');
+              const { data: logsData } = await supabase
+                .from('ActivityLog')
+                .select('*')
+                .in('escrow_id', escrowIds)
+                .order('timestamp', { ascending: false })
+                .limit(10);
+                
+              if (logsData) {
+                // Filter out some internal events to only show important ones
+                setNotifications(logsData.filter(log => ['MilestoneApproved', 'WorkSubmitted', 'EscrowInitializedOnChain', 'DisputeRaised'].includes(log.event_name)));
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch user escrows:', err);
+      }
+    };
+    fetchUserEscrows();
   }, [walletAddress]);
 
   // Create Escrow form states
@@ -366,10 +415,29 @@ export default function Home() {
       if (!idToLoad) {
         setSearchAddress('');
       }
-    } catch (err: unknown) {
-      console.error(err);
-      const message = err instanceof Error ? err.message : 'Error occurred while loading escrow';
-      setErrorMsg(message);
+    } catch (err) {
+      console.error('Failed to load escrow:', err);
+      setErrorMsg('Failed to load escrow details.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFinishEscrow = async () => {
+    if (!loadedEscrow || loadedEscrow.client_address.toLowerCase() !== walletAddress.toLowerCase()) return;
+    setIsLoading(true);
+    try {
+      const { updateEscrowStatus } = await import('@/lib/stellar/supabaseBackend');
+      await updateEscrowStatus(loadedEscrow.id, {
+        status: 'Completed',
+        eventName: 'EscrowCompleted',
+        details: 'Client has manually completed and finalized the escrow.'
+      });
+      alert('Escrow finalized successfully.');
+      handleLoadEscrow(loadedEscrow.id);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to finalize escrow.');
     } finally {
       setIsLoading(false);
     }
@@ -548,6 +616,43 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
+            {walletConnected && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="h-10 w-10 flex items-center justify-center rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-400 hover:text-white transition-colors relative"
+                >
+                  <Bell className="w-4 h-4" />
+                  {notifications.length > 0 && (
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
+                  )}
+                </button>
+                
+                {/* Notifications Dropdown */}
+                {showNotifications && (
+                  <div className="absolute right-0 mt-2 w-80 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[400px]">
+                    <div className="p-3 border-b border-zinc-800 bg-zinc-950/50 flex justify-between items-center">
+                      <span className="text-xs font-bold text-zinc-300">Activity & Alerts</span>
+                      <span className="text-[10px] bg-zinc-800 px-2 py-0.5 rounded text-zinc-400">{notifications.length}</span>
+                    </div>
+                    <div className="overflow-y-auto flex-1 p-2">
+                      {notifications.length === 0 ? (
+                        <div className="text-center p-4 text-xs text-zinc-500">No recent activity</div>
+                      ) : (
+                        notifications.map(notif => (
+                          <div key={notif.id} className="p-3 mb-1 bg-zinc-950/30 rounded-lg border border-zinc-800/50 hover:bg-zinc-800/30 cursor-pointer" onClick={() => { handleLoadEscrow(notif.escrow_id); setShowNotifications(false); }}>
+                            <div className="text-[10px] font-bold text-purple-400 mb-1">{notif.event_name}</div>
+                            <div className="text-xs text-zinc-300">{notif.details}</div>
+                            <div className="text-[9px] text-zinc-500 mt-2 text-right">{new Date(notif.timestamp).toLocaleString()}</div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
             {walletConnected && walletUser ? (
               <button
                 onClick={() => setShowProfileDashboard(true)}
@@ -736,19 +841,49 @@ export default function Home() {
               </div>
             )}
 
-            {/* Recents escrows shortcut */}
+            {/* User's escrows */}
             {!loadedEscrow && recentEscrows.length > 0 && (
               <div className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-6">
-                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Recently Viewed Escrows</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Your Escrows</h3>
+                  <div className="flex gap-1 bg-zinc-950 p-1 rounded-lg border border-zinc-800">
+                    {['All', 'Ongoing', 'Finished', 'Rejected'].map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => setEscrowFilter(filter as any)}
+                        className={`text-[10px] px-3 py-1.5 rounded-md font-semibold transition-colors ${escrowFilter === filter ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="flex flex-col gap-2">
-                  {recentEscrows.map((item) => (
+                  {recentEscrows
+                    .filter(item => {
+                      if (escrowFilter === 'All') return true;
+                      if (escrowFilter === 'Ongoing') return ['Initialized', 'Funded', 'InProgress'].includes(item.status || '');
+                      if (escrowFilter === 'Finished') return item.status === 'Completed';
+                      if (escrowFilter === 'Rejected') return ['Disputed', 'Cancelled', 'Refunded'].includes(item.status || '');
+                      return true;
+                    })
+                    .map((item) => (
                     <button
                       key={item.id}
                       onClick={() => handleLoadEscrow(item.id)}
                       className="flex items-center justify-between text-left p-3 rounded-xl bg-zinc-950 border border-zinc-900 hover:border-zinc-800 hover:bg-zinc-900/20 transition-all group"
                     >
                       <div className="flex flex-col min-w-0 pr-4">
-                        <span className="text-xs font-bold text-zinc-200 truncate">{item.title}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-zinc-200 truncate">{item.title}</span>
+                          {item.status && (
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded-sm ${
+                              ['Completed'].includes(item.status) ? 'bg-emerald-500/10 text-emerald-400' :
+                              ['Disputed', 'Cancelled', 'Refunded'].includes(item.status) ? 'bg-rose-500/10 text-rose-400' :
+                              'bg-purple-500/10 text-purple-400'
+                            }`}>{item.status}</span>
+                          )}
+                        </div>
                         <span className="text-[10px] font-mono text-zinc-500 truncate mt-0.5">{item.id}</span>
                       </div>
                       <span className="text-[10px] font-semibold text-purple-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
@@ -784,9 +919,18 @@ export default function Home() {
                       
                       <div className="flex justify-between items-start mb-6">
                         <div>
-                          <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                            <Lock className="w-3.5 h-3.5 text-purple-400" />
-                            Escrow Overview
+                          <div className="flex items-center gap-3 mb-2">
+                            <button
+                              onClick={() => { setLoadedEscrow(null); setSearchAddress(''); }}
+                              className="w-6 h-6 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+                              title="Close Escrow"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                            <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                              <Lock className="w-3.5 h-3.5 text-purple-400" />
+                              Escrow Overview
+                            </div>
                           </div>
                           <h2 className="text-2xl font-bold text-white leading-tight">
                             {loadedEscrow.title || 'Untitled Escrow'}
@@ -810,6 +954,19 @@ export default function Home() {
                               >
                                 <Bell className="w-3 h-3" />
                                 Resend Request
+                              </button>
+                            )}
+                            {loadedEscrow.client_address.toLowerCase() === walletAddress.toLowerCase() && 
+                             loadedEscrow.status !== 'Completed' &&
+                             loadedEscrow.milestones.length > 0 &&
+                             loadedEscrow.milestones.every(m => m.status === 'Approved') && (
+                              <button
+                                onClick={handleFinishEscrow}
+                                disabled={isLoading}
+                                className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 hover:border-emerald-500/40 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition-all disabled:opacity-50"
+                              >
+                                <CheckCircle2 className="w-3 h-3" />
+                                {isLoading ? 'Finalizing...' : 'Finalize & Finish Escrow'}
                               </button>
                             )}
                           </div>
