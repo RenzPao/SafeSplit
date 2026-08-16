@@ -30,6 +30,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Build Smart Contract
+        run: |
+          cd contracts/safesplit
+          cargo build --target wasm32-unknown-unknown --release
+
       - name: Run Smart Contract Unit Tests
         run: |
           cd contracts/safesplit
