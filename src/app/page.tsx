@@ -21,6 +21,7 @@ import {
 import MilestoneDetailView from '@/components/MilestoneDetailView';
 import RegistrationModal from '@/components/RegistrationModal';
 import ProfileDashboardModal from '@/components/ProfileDashboardModal';
+import ChatBox from '@/components/ChatBox';
 import { createEscrowMetadata, fetchEscrowMetadata } from '@/lib/stellar/supabaseBackend';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -773,203 +774,210 @@ export default function Home() {
             )}
 
             {loadedEscrow && hasPermission && (
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-                
-                {/* Left: Escrow detail & Milestones list (Col 5) */}
-                <div className="xl:col-span-5 space-y-6">
-                  
-                  {/* Escrow overview card */}
-                  <div className="bg-zinc-900/40 border border-zinc-900 rounded-3xl p-6 space-y-4">
-                    <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
-                      <div>
-                        <div className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Escrow Unique ID</div>
-                        <h2 className="text-sm font-mono text-zinc-200 mt-1 flex items-center gap-1.5">
-                          {loadedEscrow.id}
-                          <button
-                            onClick={() => copyToClipboard(loadedEscrow.id, 'id')}
-                            className="p-1 hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-300 transition-colors"
-                          >
-                            {copiedText === 'id' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-                        </h2>
-                        
-                        {/* Sharing / Resend Request */}
-                        <div className="mt-3 flex items-center gap-2">
-                          <button
-                            onClick={() => copyInviteLink(loadedEscrow.id)}
-                            className="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/40 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition-all"
-                          >
-                            {copiedText === 'invite' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                            Copy Invite Link
-                          </button>
-                          
-                          {(loadedEscrow.status === 'Initialized' || loadedEscrow.status === 'Funded') && (
-                            <button
-                              onClick={() => {
-                                copyInviteLink(loadedEscrow.id);
-                                alert('Invite link copied! Send this link to the other party.');
-                              }}
-                              className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition-all"
-                            >
-                              <Bell className="w-3 h-3" />
-                              Resend Request
-                            </button>
-                          )}
-                        </div>
-                        
-                        <div className="text-[10px] text-zinc-600 mt-3 font-mono flex items-center gap-1">
-                          Contract: {loadedEscrow.contract_address.substring(0, 6)}...{loadedEscrow.contract_address.slice(-6)}
-                          <button
-                            onClick={() => copyToClipboard(loadedEscrow.contract_address, 'contract')}
-                            className="hover:text-zinc-400 ml-1"
-                          >
-                            <Copy className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-500/10 border border-purple-500/20 text-purple-400">
-                          {loadedEscrow.status}
-                        </span>
-                        <button
-                          onClick={() => handleLoadEscrow(loadedEscrow.id)}
-                          disabled={isLoading}
-                          className="p-2 hover:bg-zinc-800 rounded-xl text-zinc-400 hover:text-zinc-200 transition-colors"
-                        >
-                          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-xs">
-                      <div>
-                        <div className="text-zinc-500 font-medium">Total Value</div>
-                        <div className="text-lg font-bold text-zinc-200 mt-0.5">{loadedEscrow.total_xlm} XLM</div>
-                      </div>
-                      <div>
-                        <div className="text-zinc-500 font-medium">Milestones</div>
-                        <div className="text-lg font-bold text-zinc-200 mt-0.5">{loadedEscrow.milestones.length} Stages</div>
-                      </div>
-                    </div>
-
-                    {/* Participant addresses list */}
-                    <div className="border-t border-zinc-900 pt-4 space-y-2.5 text-xs">
-                      <div className="flex justify-between items-center bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-900/50">
-                        <span className="text-zinc-500">Client:</span>
-                        <span className="font-mono text-zinc-300 flex items-center gap-1">
-                          {loadedEscrow.client_address.substring(0, 6)}...{loadedEscrow.client_address.slice(-6)}
-                          <button
-                            onClick={() => copyToClipboard(loadedEscrow.client_address, 'client')}
-                            className="text-zinc-600 hover:text-zinc-400"
-                          >
-                            {copiedText === 'client' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-900/50">
-                        <span className="text-zinc-500">Freelancer:</span>
-                        <span className="font-mono text-zinc-300 flex items-center gap-1">
-                          {loadedEscrow.freelancer_address.substring(0, 6)}...{loadedEscrow.freelancer_address.slice(-6)}
-                          <button
-                            onClick={() => copyToClipboard(loadedEscrow.freelancer_address, 'freelancer')}
-                            className="text-zinc-600 hover:text-zinc-400"
-                          >
-                            {copiedText === 'freelancer' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-                        </span>
-                      </div>
-                      {loadedEscrow.arbiter_address && loadedEscrow.arbiter_address !== 'G0000000000000000000000000000000000000000000000000000000' && (
-                        <div className="flex justify-between items-center bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-900/50">
-                          <span className="text-zinc-500">Arbiter:</span>
-                          <span className="font-mono text-zinc-300 flex items-center gap-1">
-                            {loadedEscrow.arbiter_address.substring(0, 6)}...{loadedEscrow.arbiter_address.slice(-6)}
-                            <button
-                              onClick={() => copyToClipboard(loadedEscrow.arbiter_address || '', 'arbiter')}
-                              className="text-zinc-600 hover:text-zinc-400"
-                            >
-                              {copiedText === 'arbiter' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                            </button>
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Milestones Navigation List */}
-                  <div className="space-y-3">
-                    <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider pl-1">Contract Milestones</h3>
-                    <div className="flex flex-col gap-2">
-                      {loadedEscrow.milestones.map((m, index) => (
-                        <button
-                          key={m.id}
-                          onClick={() => setSelectedMilestoneIndex(index)}
-                          className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-4 ${
-                            selectedMilestoneIndex === index 
-                              ? 'bg-purple-950/20 border-purple-800/80 shadow-md shadow-purple-900/5' 
-                              : 'bg-zinc-900/40 border-zinc-900 hover:border-zinc-800'
-                          }`}
-                        >
-                          <div className="min-w-0">
-                            <div className="text-[10px] font-bold uppercase tracking-wider text-purple-400/80">Stage {index + 1}</div>
-                            <div className="text-sm font-bold text-zinc-200 mt-0.5 truncate">{m.title}</div>
-                            <div className="text-[11px] text-zinc-400 mt-1 font-semibold">{m.amount_xlm} XLM</div>
+              <div className="w-full flex flex-col gap-8">
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start w-full">
+                  {/* Left: Escrow details and activity logs (Col 5) */}
+                  <div className="xl:col-span-5 flex flex-col gap-8">
+                    {/* Details section code remains identical... */}
+                    <div className="bg-zinc-900/40 border border-zinc-900 rounded-3xl p-8 shadow-xl relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-3xl rounded-full" />
+                      
+                      <div className="flex justify-between items-start mb-6">
+                        <div>
+                          <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <Lock className="w-3.5 h-3.5 text-purple-400" />
+                            Escrow Overview
                           </div>
-
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            m.status === 'Approved' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' :
-                            m.status === 'Submitted' ? 'bg-blue-500/10 border border-blue-500/20 text-blue-400' :
-                            m.status === 'Disputed' ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400' :
-                            m.status === 'Refunded' ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400' :
-                            'bg-zinc-800 text-zinc-400'
-                          }`}>
-                            {m.status}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Activity Logs Section */}
-                  {loadedEscrow.activity_logs && loadedEscrow.activity_logs.length > 0 && (
-                    <div className="bg-zinc-900/40 border border-zinc-900 rounded-3xl p-6 space-y-4">
-                      <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-purple-400" />
-                        Activity Logs
-                      </h3>
-                      <div className="space-y-4 max-h-60 overflow-y-auto pr-1">
-                        {loadedEscrow.activity_logs.map((log) => (
-                          <div key={log.id} className="relative pl-4 border-l border-zinc-800 pb-1 text-xs">
-                            <div className="absolute left-0 top-1.5 -translate-x-1/2 w-1.5 h-1.5 bg-purple-500 rounded-full" />
-                            <div className="flex items-center justify-between text-[10px] text-zinc-500">
-                              <span>{new Date(log.timestamp).toLocaleString()}</span>
-                              {log.tx_hash !== 'off-chain-init' && (
-                                <span className="font-mono text-zinc-600">
-                                  tx: {log.tx_hash.substring(0, 6)}...
-                                </span>
-                              )}
-                            </div>
-                            <div className="font-bold text-zinc-300 mt-0.5">{log.event_name}</div>
-                            {log.details && (
-                              <p className="text-[11px] text-zinc-400 mt-0.5 leading-relaxed">{log.details}</p>
+                          <h2 className="text-2xl font-bold text-white leading-tight">
+                            {loadedEscrow.title || 'Untitled Escrow'}
+                          </h2>
+                          <div className="mt-3 flex items-center gap-2">
+                            <button
+                              onClick={() => copyInviteLink(loadedEscrow.id)}
+                              className="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/40 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition-all"
+                            >
+                              {copiedText === 'invite' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                              Copy Invite Link
+                            </button>
+                            
+                            {(loadedEscrow.status === 'Initialized' || loadedEscrow.status === 'Funded') && (
+                              <button
+                                onClick={() => {
+                                  copyInviteLink(loadedEscrow.id);
+                                  alert('Invite link copied! Send this link to the other party.');
+                                }}
+                                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition-all"
+                              >
+                                <Bell className="w-3 h-3" />
+                                Resend Request
+                              </button>
                             )}
                           </div>
+                          
+                          <div className="text-[10px] text-zinc-600 mt-3 font-mono flex items-center gap-1">
+                            Contract: {loadedEscrow.contract_address.substring(0, 6)}...{loadedEscrow.contract_address.slice(-6)}
+                            <button
+                              onClick={() => copyToClipboard(loadedEscrow.contract_address, 'contract')}
+                              className="hover:text-zinc-400 ml-1"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                            {loadedEscrow.status}
+                          </span>
+                          <button
+                            onClick={() => handleLoadEscrow(loadedEscrow.id)}
+                            disabled={isLoading}
+                            className="p-2 hover:bg-zinc-800 rounded-xl text-zinc-400 hover:text-zinc-200 transition-colors"
+                          >
+                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <div className="text-zinc-500 font-medium">Total Value</div>
+                          <div className="text-lg font-bold text-zinc-200 mt-0.5">{loadedEscrow.total_xlm} XLM</div>
+                        </div>
+                        <div>
+                          <div className="text-zinc-500 font-medium">Milestones</div>
+                          <div className="text-lg font-bold text-zinc-200 mt-0.5">{loadedEscrow.milestones?.length || 0} stages</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 space-y-2">
+                        <div className="flex justify-between items-center bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-900/50">
+                          <span className="text-zinc-500">Client:</span>
+                          <span className="font-mono text-zinc-300 flex items-center gap-1">
+                            {loadedEscrow.client_address.substring(0, 6)}...{loadedEscrow.client_address.slice(-6)}
+                            <button
+                              onClick={() => copyToClipboard(loadedEscrow.client_address, 'client')}
+                              className="text-zinc-600 hover:text-zinc-400"
+                            >
+                              {copiedText === 'client' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-900/50">
+                          <span className="text-zinc-500">Freelancer:</span>
+                          <span className="font-mono text-zinc-300 flex items-center gap-1">
+                            {loadedEscrow.freelancer_address.substring(0, 6)}...{loadedEscrow.freelancer_address.slice(-6)}
+                            <button
+                              onClick={() => copyToClipboard(loadedEscrow.freelancer_address, 'freelancer')}
+                              className="text-zinc-600 hover:text-zinc-400"
+                            >
+                              {copiedText === 'freelancer' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </span>
+                        </div>
+                        {loadedEscrow.arbiter_address && loadedEscrow.arbiter_address !== 'G0000000000000000000000000000000000000000000000000000000' && (
+                          <div className="flex justify-between items-center bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-900/50">
+                            <span className="text-zinc-500">Arbiter:</span>
+                            <span className="font-mono text-zinc-300 flex items-center gap-1">
+                              {loadedEscrow.arbiter_address.substring(0, 6)}...{loadedEscrow.arbiter_address.slice(-6)}
+                              <button
+                                onClick={() => copyToClipboard(loadedEscrow.arbiter_address || '', 'arbiter')}
+                                className="text-zinc-600 hover:text-zinc-400"
+                              >
+                                {copiedText === 'arbiter' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                              </button>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Milestones Navigation List */}
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider pl-1">Contract Milestones</h3>
+                      <div className="flex flex-col gap-2">
+                        {loadedEscrow.milestones.map((m, index) => (
+                          <button
+                            key={m.id}
+                            onClick={() => setSelectedMilestoneIndex(index)}
+                            className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between gap-4 ${
+                              selectedMilestoneIndex === index 
+                                ? 'bg-purple-950/20 border-purple-800/80 shadow-md shadow-purple-900/5' 
+                                : 'bg-zinc-900/40 border-zinc-900 hover:border-zinc-800'
+                            }`}
+                          >
+                            <div className="min-w-0">
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-purple-400/80">Stage {index + 1}</div>
+                              <div className="text-sm font-bold text-zinc-200 mt-0.5 truncate">{m.title}</div>
+                              <div className="text-[11px] text-zinc-400 mt-1 font-semibold">{m.amount_xlm} XLM</div>
+                            </div>
+
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                              m.status === 'Approved' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' :
+                              m.status === 'Submitted' ? 'bg-blue-500/10 border border-blue-500/20 text-blue-400' :
+                              m.status === 'Disputed' ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400' :
+                              m.status === 'Refunded' ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400' :
+                              'bg-zinc-800 text-zinc-400'
+                            }`}>
+                              {m.status}
+                            </span>
+                          </button>
                         ))}
                       </div>
                     </div>
-                  )}
+
+                    {/* Activity Logs Section */}
+                    {loadedEscrow.activity_logs && loadedEscrow.activity_logs.length > 0 && (
+                      <div className="bg-zinc-900/40 border border-zinc-900 rounded-3xl p-6 space-y-4">
+                        <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-purple-400" />
+                          Activity Logs
+                        </h3>
+                        <div className="space-y-4 max-h-60 overflow-y-auto pr-1">
+                          {loadedEscrow.activity_logs.map((log) => (
+                            <div key={log.id} className="relative pl-4 border-l border-zinc-800 pb-1 text-xs">
+                              <div className="absolute left-0 top-1.5 -translate-x-1/2 w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                              <div className="flex items-center justify-between text-[10px] text-zinc-500">
+                                <span>{new Date(log.timestamp).toLocaleString()}</span>
+                                {log.tx_hash !== 'off-chain-init' && (
+                                  <span className="font-mono text-zinc-600">
+                                    tx: {log.tx_hash.substring(0, 6)}...
+                                  </span>
+                                )}
+                              </div>
+                              <div className="font-bold text-zinc-300 mt-0.5">{log.event_name}</div>
+                              {log.details && (
+                                <p className="text-[11px] text-zinc-400 mt-0.5 leading-relaxed">{log.details}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* Right: Milestone actions workspace (Col 7) */}
+                  <div className="xl:col-span-7">
+                    <MilestoneDetailView
+                      escrow={loadedEscrow}
+                      milestoneIndex={selectedMilestoneIndex}
+                      currentWalletAddress={walletAddress}
+                      onActionSuccess={() => handleLoadEscrow(loadedEscrow.id)}
+                    />
+                  </div>
 
                 </div>
-
-                {/* Right: Milestone actions workspace (Col 7) */}
-                <div className="xl:col-span-7">
-                  <MilestoneDetailView
-                    escrow={loadedEscrow}
-                    milestoneIndex={selectedMilestoneIndex}
+                
+                {/* ChatBox Row */}
+                <div className="mt-4">
+                  <ChatBox 
+                    escrowId={loadedEscrow.id}
                     currentWalletAddress={walletAddress}
-                    onActionSuccess={() => handleLoadEscrow(loadedEscrow.id)}
+                    clientAddress={loadedEscrow.client_address}
+                    freelancerAddress={loadedEscrow.freelancer_address}
+                    arbiterAddress={loadedEscrow.arbiter_address}
                   />
                 </div>
-
               </div>
             )}
 

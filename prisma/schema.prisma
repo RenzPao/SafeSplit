@@ -12,6 +12,7 @@ datasource db {
 
 model Escrow {
   id                 String        @id @default(uuid())
+  title              String?       @default("Untitled Escrow")
   contract_address   String
   client_address     String
   freelancer_address String
@@ -21,6 +22,7 @@ model Escrow {
   created_at         DateTime      @default(now())
   milestones         Milestone[]
   activity_logs      ActivityLog[]
+  messages           Message[]
 }
 
 model Milestone {
@@ -46,6 +48,15 @@ model ActivityLog {
   event_name String
   timestamp  DateTime @default(now())
   details    String?  // JSON string or description text
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  escrow_id      String
+  escrow         Escrow   @relation(fields: [escrow_id], references: [id], onDelete: Cascade)
+  sender_address String
+  content        String
+  created_at     DateTime @default(now())
 }
 
 model User {
