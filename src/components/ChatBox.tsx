@@ -26,6 +26,7 @@ export default function ChatBox({
   arbiterAddress
 }: ChatBoxProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -34,23 +35,43 @@ export default function ChatBox({
   useEffect(() => {
     let isMounted = true;
 
-    const fetchMessages = async () => {
+    const fetchMessagesAndUsers = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase
+      
+      // Fetch messages
+      const { data: msgData, error: msgError } = await supabase
         .from('Message')
         .select('*')
         .eq('escrow_id', escrowId)
         .order('created_at', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching messages:', error);
-      } else if (isMounted && data) {
-        setMessages(data as ChatMessage[]);
+      if (msgError) {
+        console.error('Error fetching messages:', msgError);
+      } else if (isMounted && msgData) {
+        setMessages(msgData as ChatMessage[]);
       }
+
+      // Fetch user names
+      const addressesToFetch = [clientAddress, freelancerAddress];
+      if (arbiterAddress) addressesToFetch.push(arbiterAddress);
+
+      const { data: userData, error: userError } = await supabase
+        .from('User')
+        .select('wallet_address, name')
+        .in('wallet_address', addressesToFetch);
+
+      if (!userError && userData && isMounted) {
+        const namesMap: Record<string, string> = {};
+        userData.forEach(u => {
+          namesMap[u.wallet_address] = u.name;
+        });
+        setUserNames(namesMap);
+      }
+
       if (isMounted) setIsLoading(false);
     };
 
-    fetchMessages();
+    fetchMessagesAndUsers();
 
     // Subscribe to new messages
     const channel = supabase
@@ -149,7 +170,11 @@ export default function ChatBox({
             return (
               <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                 <div className="flex items-center gap-1 mb-1">
-                  {!isMe && <span className="text-[10px] font-mono text-zinc-500">{truncateAddress(msg.sender_address)}</span>}
+                  {!isMe && (
+                    <span className="text-[10px] text-zinc-400 font-medium">
+                      {userNames[msg.sender_address] || truncateAddress(msg.sender_address)}
+                    </span>
+                  )}
                   {getRoleBadge(msg.sender_address)}
                 </div>
                 <div 
