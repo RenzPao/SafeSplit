@@ -171,7 +171,14 @@ export default function Home() {
     const saved = localStorage.getItem('safesplit_recent_escrows');
     if (saved) {
       try {
-        setRecentEscrows(JSON.parse(saved));
+        const parsed = JSON.parse(saved) as string[];
+        // Filter out Stellar Contract Addresses (which start with C and are 56 chars) 
+        // to only keep UUIDs
+        const validUuids = parsed.filter(item => !item.startsWith('C') || item.length < 50);
+        setRecentEscrows(validUuids);
+        if (validUuids.length !== parsed.length) {
+          localStorage.setItem('safesplit_recent_escrows', JSON.stringify(validUuids));
+        }
       } catch (e) {
         console.error(e);
       }
