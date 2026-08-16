@@ -61,7 +61,7 @@ export default function MilestoneDetailView({
   // Determine user role
   const isClient = currentWalletAddress.toLowerCase() === escrow.client_address.toLowerCase();
   const isFreelancer = currentWalletAddress.toLowerCase() === escrow.freelancer_address.toLowerCase();
-  const isArbiter = currentWalletAddress.toLowerCase() === escrow.arbiter_address.toLowerCase();
+  const isArbiter = !!escrow.arbiter_address && currentWalletAddress.toLowerCase() === escrow.arbiter_address.toLowerCase();
 
   // Status mapping colors & text
   const getStatusConfig = (status: string) => {

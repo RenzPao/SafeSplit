@@ -49,7 +49,7 @@ export interface Escrow {
   contract_address: string;
   client_address: string;
   freelancer_address: string;
-  arbiter_address: string;
+  arbiter_address?: string;
   total_xlm: number | string;
   status: string;
   milestones: Milestone[];
@@ -79,6 +79,7 @@ export default function Home() {
   const [formFreelancerAddress, setFormFreelancerAddress] = useState('');
   const [formArbiterAddress, setFormArbiterAddress] = useState('');
   const [formArbiterFeeBps, setFormArbiterFeeBps] = useState(500); // 5.0%
+  const [includeArbiter, setIncludeArbiter] = useState(false);
   const [formMilestones, setFormMilestones] = useState<{ title: string; description: string; amountXlm: number }[]>([
     { title: 'Initial Draft & Wireframes', description: 'Complete UI/UX design mockups and wireframes', amountXlm: 20 },
     { title: 'Core Frontend & Integration', description: 'Complete Next.js implementation with Soroban integration', amountXlm: 40 },
@@ -292,7 +293,7 @@ export default function Home() {
 
   const handleCreateEscrow = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formContractAddress || !formClientAddress || !formFreelancerAddress || !formArbiterAddress) {
+    if (!formContractAddress || !formClientAddress || !formFreelancerAddress || (includeArbiter && !formArbiterAddress)) {
       alert('Please fill out all address fields');
       return;
     }
@@ -307,7 +308,7 @@ export default function Home() {
         contractAddress: formContractAddress.trim(),
         clientAddress: formClientAddress.trim(),
         freelancerAddress: formFreelancerAddress.trim(),
-        arbiterAddress: formArbiterAddress.trim(),
+        arbiterAddress: includeArbiter ? formArbiterAddress.trim() : '',
         totalXlm,
         milestones: formMilestones
       });
@@ -379,63 +380,7 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Quick Wallet Mock Selectors */}
-            {loadedEscrow && (
-              <div className="hidden md:flex items-center gap-1.5 bg-zinc-900/80 border border-zinc-800 rounded-xl p-1">
-                <span className="text-[10px] text-zinc-500 font-medium px-2 uppercase">Mock Role:</span>
-                <button
-                  onClick={() => {
-                    setWalletAddress(loadedEscrow.client_address);
-                    setWalletConnected(true);
-                  }}
-                  className={`text-[11px] font-semibold px-2 py-1 rounded-lg transition-all ${
-                    walletAddress === loadedEscrow.client_address ? 'bg-zinc-800 text-zinc-200 border border-zinc-700' : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  Client
-                </button>
-                <button
-                  onClick={() => {
-                    setWalletAddress(loadedEscrow.freelancer_address);
-                    setWalletConnected(true);
-                  }}
-                  className={`text-[11px] font-semibold px-2 py-1 rounded-lg transition-all ${
-                    walletAddress === loadedEscrow.freelancer_address ? 'bg-zinc-800 text-zinc-200 border border-zinc-700' : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  Freelancer
-                </button>
-                <button
-                  onClick={() => {
-                    setWalletAddress(loadedEscrow.arbiter_address);
-                    setWalletConnected(true);
-                  }}
-                  className={`text-[11px] font-semibold px-2 py-1 rounded-lg transition-all ${
-                    walletAddress === loadedEscrow.arbiter_address ? 'bg-zinc-800 text-zinc-200 border border-zinc-700' : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  Arbiter
-                </button>
-              </div>
-            )}
 
-            {/* Wallet Address Input for flexible testing */}
-            <div className="relative flex items-center bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-1.5 h-10">
-              <Wallet className="w-3.5 h-3.5 text-zinc-500 mr-2" />
-              <input
-                type="text"
-                placeholder="Enter wallet / address..."
-                value={walletAddress}
-                onChange={(e) => {
-                  setWalletAddress(e.target.value);
-                  setWalletConnected(!!e.target.value);
-                }}
-                className="bg-transparent border-none text-xs text-zinc-200 w-28 md:w-48 focus:outline-none focus:ring-0"
-              />
-              {walletConnected && (
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse ml-2" />
-              )}
-            </div>
 
             <button
               onClick={connectFreighterWallet}
@@ -674,18 +619,20 @@ export default function Home() {
                           </button>
                         </span>
                       </div>
-                      <div className="flex justify-between items-center bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-900/50">
-                        <span className="text-zinc-500">Arbiter:</span>
-                        <span className="font-mono text-zinc-300 flex items-center gap-1">
-                          {loadedEscrow.arbiter_address.substring(0, 6)}...{loadedEscrow.arbiter_address.slice(-6)}
-                          <button
-                            onClick={() => copyToClipboard(loadedEscrow.arbiter_address, 'arbiter')}
-                            className="text-zinc-600 hover:text-zinc-400"
-                          >
-                            {copiedText === 'arbiter' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-                        </span>
-                      </div>
+                      {loadedEscrow.arbiter_address && loadedEscrow.arbiter_address !== 'G0000000000000000000000000000000000000000000000000000000' && (
+                        <div className="flex justify-between items-center bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-900/50">
+                          <span className="text-zinc-500">Arbiter:</span>
+                          <span className="font-mono text-zinc-300 flex items-center gap-1">
+                            {loadedEscrow.arbiter_address.substring(0, 6)}...{loadedEscrow.arbiter_address.slice(-6)}
+                            <button
+                              onClick={() => copyToClipboard(loadedEscrow.arbiter_address || '', 'arbiter')}
+                              className="text-zinc-600 hover:text-zinc-400"
+                            >
+                              {copiedText === 'arbiter' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -863,38 +810,53 @@ export default function Home() {
                         required
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between items-center">
-                        <label className="text-xs text-zinc-400 font-semibold">Mediator Wallet (Neutral Third-Party)</label>
-                        <button
-                          type="button"
-                          onClick={() => fetchAddressForField('arbiter')}
-                          className="text-[9px] font-bold text-purple-400 hover:underline hover:text-purple-300 transition-all"
-                        >
-                          Import from Freighter
-                        </button>
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="e.g. GA..."
-                        value={formArbiterAddress}
-                        onChange={(e) => setFormArbiterAddress(e.target.value)}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-zinc-400 font-semibold">Mediator Dispute Fee (Basis Points BPS)</label>
-                      <input
-                        type="number"
-                        placeholder="e.g. 500 = 5% fee"
-                        value={formArbiterFeeBps}
-                        onChange={(e) => setFormArbiterFeeBps(Number(e.target.value))}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors"
-                        min="0"
-                        max="2000"
-                        required
-                      />
+                    <div className="space-y-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={includeArbiter}
+                          onChange={(e) => setIncludeArbiter(e.target.checked)}
+                          className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-purple-500 focus:ring-purple-500/30 focus:ring-offset-0"
+                        />
+                        <span className="text-xs text-zinc-300 font-semibold">Include a Mediator / Arbiter (Optional - recommended for transactions &gt; 100,000 XLM)</span>
+                      </label>
+                      {includeArbiter && (
+                        <div className="space-y-4 pt-2 border-t border-zinc-800">
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between items-center">
+                              <label className="text-xs text-zinc-400 font-semibold">Mediator Wallet (Neutral Third-Party)</label>
+                              <button
+                                type="button"
+                                onClick={() => fetchAddressForField('arbiter')}
+                                className="text-[9px] font-bold text-purple-400 hover:underline hover:text-purple-300 transition-all"
+                              >
+                                Import from Freighter
+                              </button>
+                            </div>
+                            <input
+                              type="text"
+                              placeholder="e.g. GA..."
+                              value={formArbiterAddress}
+                              onChange={(e) => setFormArbiterAddress(e.target.value)}
+                              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs text-zinc-400 font-semibold">Mediator Dispute Fee (Basis Points BPS)</label>
+                            <input
+                              type="number"
+                              placeholder="e.g. 500 = 5% fee"
+                              value={formArbiterFeeBps}
+                              onChange={(e) => setFormArbiterFeeBps(Number(e.target.value))}
+                              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors"
+                              min="0"
+                              max="2000"
+                              required
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
   
