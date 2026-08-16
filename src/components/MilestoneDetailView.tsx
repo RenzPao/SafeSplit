@@ -62,6 +62,7 @@ export default function MilestoneDetailView({
   const isClient = currentWalletAddress.toLowerCase() === escrow.client_address.toLowerCase();
   const isFreelancer = currentWalletAddress.toLowerCase() === escrow.freelancer_address.toLowerCase();
   const isArbiter = !!escrow.arbiter_address && currentWalletAddress.toLowerCase() === escrow.arbiter_address.toLowerCase();
+  const isInitializedOnChain = escrow.activity_logs?.some(log => log.event_name === 'EscrowInitializedOnChain');
 
   // Status mapping colors & text
   const getStatusConfig = (status: string) => {
@@ -188,6 +189,53 @@ export default function MilestoneDetailView({
     } catch (err: unknown) {
       console.error(err);
       const message = err instanceof Error ? err.message : 'Approval failed.';
+      setStatusMessage({ type: 'error', text: message });
+    } finally {
+      setIsSigning(false);
+    }
+  };
+
+  // Initialize Escrow (Client)
+  const handleInitializeEscrow = async () => {
+    setIsSigning(true);
+    setStatusMessage({ type: 'info', text: 'Preparing initialization... Please sign in Freighter.' });
+
+    try {
+      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const milestonesWithHash = await Promise.all(escrow.milestones.map(async (m) => {
+        const textToHash = `${m.title.trim()}:${m.description.trim()}:${m.amount_xlm}`;
+        const msgBuffer = new TextEncoder().encode(textToHash);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const descriptionHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+        return {
+          id: m.milestone_index,
+          descriptionHash,
+          amountStroops: BigInt(Number(m.amount_xlm) * 10000000)
+        };
+      }));
+
+      const operation = client.createEscrowTx(currentWalletAddress, {
+        client: escrow.client_address,
+        freelancer: escrow.freelancer_address,
+        nativeToken: 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC', // Testnet native token
+        milestones: milestonesWithHash
+      });
+      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+
+      // Update database status via Supabase to record the init event
+      await updateEscrowStatus(escrow.id, {
+        status: 'Initialized', // Status stays Initialized, but we log the on-chain event
+        txHash: txHash,
+        eventName: 'EscrowInitializedOnChain',
+        details: `Client initialized the escrow contract on-chain. Tx: ${txHash}`,
+      });
+
+      setStatusMessage({ type: 'success', text: 'Escrow contract initialized successfully on-chain!' });
+      onActionSuccess();
+    } catch (err: unknown) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : 'Initialization failed.';
       setStatusMessage({ type: 'error', text: message });
     } finally {
       setIsSigning(false);
@@ -592,21 +640,43 @@ export default function MilestoneDetailView({
 
                 {escrow.status === 'Initialized' ? (
                   <div className="space-y-3">
-                    <div className="bg-purple-950/20 border border-purple-900/30 text-purple-300 rounded-2xl p-4 text-xs font-semibold leading-relaxed flex items-start gap-2.5">
-                      <Coins className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
-                      <span>The contract is initialized but has no funds. Deposit {escrow.total_xlm} XLM on-chain to start the project.</span>
-                    </div>
+                    {!isInitializedOnChain ? (
+                      <>
+                        <div className="bg-blue-950/20 border border-blue-900/30 text-blue-300 rounded-2xl p-4 text-xs font-semibold leading-relaxed flex items-start gap-2.5">
+                          <AlertTriangle className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+                          <span>The contract metadata is stored in the database. Initialize it on-chain now.</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleInitializeEscrow}
+                          disabled={isSigning}
+                          className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 text-slate-100 text-xs font-bold transition-all shadow-lg flex items-center justify-center gap-2"
+                        >
+                          {isSigning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                          Initialize On-Chain
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="bg-purple-950/20 border border-purple-900/30 text-purple-300 rounded-2xl p-4 text-xs font-semibold leading-relaxed flex items-start gap-2.5">
+                          <Coins className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
+                          <span>The contract is initialized but has no funds. Deposit {escrow.total_xlm} XLM on-chain to start the project.</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleFundEscrow}
+                          disabled={isSigning}
+                          className="w-full py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-slate-100 text-xs font-bold transition-all shadow-lg hover:shadow-purple-500/20 flex items-center justify-center gap-2"
+                        >
+                          {isSigning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                          Deposit & Fund Contract ({escrow.total_xlm} XLM)
+                        </button>
+                      </>
+                    )}
 
                     <button
-                      onClick={handleFundEscrow}
-                      disabled={isSigning}
-                      className="w-full py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-slate-100 text-xs font-bold transition-all shadow-lg hover:shadow-purple-500/20 flex items-center justify-center gap-2"
-                    >
-                      {isSigning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                      Deposit & Fund Contract ({escrow.total_xlm} XLM)
-                    </button>
-
-                    <button
+                      type="button"
                       onClick={handleCancelEscrow}
                       disabled={isSigning}
                       className="w-full py-2 px-4 rounded-xl bg-slate-900 border border-rose-500/30 hover:border-rose-500/50 text-rose-400 text-xs font-bold transition-all flex items-center justify-center gap-2"

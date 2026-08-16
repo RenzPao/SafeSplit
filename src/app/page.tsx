@@ -986,7 +986,9 @@ export default function Home() {
                     </div>
   
                     <button
-                      onClick={() => {
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
                         setLoadedEscrow(creationResult.escrow);
                         setActiveTab('manage');
                         setCreationResult(null);
