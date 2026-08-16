@@ -22,6 +22,7 @@ import MilestoneDetailView from '@/components/MilestoneDetailView';
 import RegistrationModal from '@/components/RegistrationModal';
 import ProfileDashboardModal from '@/components/ProfileDashboardModal';
 import { createEscrowMetadata, fetchEscrowMetadata } from '@/lib/stellar/supabaseBackend';
+import { supabase } from '@/lib/supabaseClient';
 
 // Freighter Wallet API
 import { isConnected, getAddress, isAllowed, requestAccess, setAllowed } from '@stellar/freighter-api';
@@ -387,6 +388,35 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Realtime Subscription for loaded escrow
+  useEffect(() => {
+    if (!loadedEscrow?.id) return;
+
+    const channel = supabase
+      .channel(`escrow-${loadedEscrow.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'Escrow', filter: `id=eq.${loadedEscrow.id}` },
+        () => handleLoadEscrow(loadedEscrow.id)
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'Milestone', filter: `escrow_id=eq.${loadedEscrow.id}` },
+        () => handleLoadEscrow(loadedEscrow.id)
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'ActivityLog', filter: `escrow_id=eq.${loadedEscrow.id}` },
+        () => handleLoadEscrow(loadedEscrow.id)
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadedEscrow?.id]);
 
   // Create Escrow Form functions
   const handleAddMilestone = () => {
