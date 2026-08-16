@@ -128,7 +128,8 @@ export default function MilestoneDetailView({
       setStatusMessage({ type: 'info', text: 'Preparing transaction... Please approve in Freighter.' });
 
       // Request transaction signature via Freighter
-      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || escrow.contract_address;
+      const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.submitWorkTx(currentWalletAddress, escrow.id, {
         freelancer: currentWalletAddress,
         milestoneId: milestone.milestone_index,
@@ -167,7 +168,8 @@ export default function MilestoneDetailView({
     setStatusMessage({ type: 'info', text: 'Preparing approval... Please sign transaction in Freighter.' });
 
     try {
-      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || escrow.contract_address;
+      const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.approveMilestoneTx(currentWalletAddress, escrow.id, {
         client: currentWalletAddress,
         milestoneId: milestone.milestone_index,
@@ -201,7 +203,8 @@ export default function MilestoneDetailView({
     setStatusMessage({ type: 'info', text: 'Preparing initialization... Please sign in Freighter.' });
 
     try {
-      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || escrow.contract_address;
+      const client = new SafeSplitClient(contractAddress, 'testnet');
       const milestonesWithHash = await Promise.all(escrow.milestones.map(async (m) => {
         const textToHash = `${m.title.trim()}:${m.description.trim()}:${m.amount_xlm}`;
         const msgBuffer = new TextEncoder().encode(textToHash);
@@ -248,7 +251,8 @@ export default function MilestoneDetailView({
     setStatusMessage({ type: 'info', text: 'Preparing funding transaction... Please sign in Freighter.' });
 
     try {
-      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || escrow.contract_address;
+      const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.depositXlmTx(currentWalletAddress, escrow.id, escrow.client_address);
       const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
@@ -277,7 +281,8 @@ export default function MilestoneDetailView({
     setStatusMessage({ type: 'info', text: 'Preparing cancellation transaction... Please sign in Freighter.' });
 
     try {
-      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || escrow.contract_address;
+      const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.cancelAndRefundTx(currentWalletAddress, escrow.id, escrow.client_address);
       const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
@@ -307,7 +312,8 @@ export default function MilestoneDetailView({
     setStatusMessage({ type: 'info', text: 'Raising dispute... Please sign transaction in Freighter.' });
 
     try {
-      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || escrow.contract_address;
+      const client = new SafeSplitClient(contractAddress, 'testnet');
       const reasonHash = 'd3f4b50000000000000000000000000000000000000000000000000000000000'; // 32-byte hex mock
       const operation = client.raiseDisputeTx(currentWalletAddress, escrow.id, {
         caller: currentWalletAddress,
@@ -365,7 +371,8 @@ export default function MilestoneDetailView({
     setStatusMessage({ type: 'info', text: 'Submitting split proposal... Please sign in Freighter.' });
 
     try {
-      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || escrow.contract_address;
+      const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.proposeSettlementTx(currentWalletAddress, escrow.id, {
         proposer: currentWalletAddress,
         milestoneId: milestone.milestone_index,
@@ -404,7 +411,8 @@ export default function MilestoneDetailView({
     setStatusMessage({ type: 'info', text: 'Accepting split settlement... Please sign in Freighter.' });
 
     try {
-      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || escrow.contract_address;
+      const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.acceptSettlementTx(currentWalletAddress, escrow.id, {
         accepter: currentWalletAddress,
         milestoneId: milestone.milestone_index,
@@ -437,7 +445,8 @@ export default function MilestoneDetailView({
     setStatusMessage({ type: 'info', text: 'Upgrading contract logic WASM... Please sign in Freighter.' });
 
     try {
-      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || escrow.contract_address;
+      const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.upgradeTx(currentWalletAddress, {
         newWasmHash: wasmHash.trim(),
       });
