@@ -633,7 +633,7 @@ export default function Home() {
                 
                 {/* Notifications Dropdown */}
                 {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-80 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[400px]">
+                  <div className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-1rem)] bg-zinc-900 border border-zinc-800 rounded-2xl shadow-xl overflow-hidden z-50 flex flex-col max-h-[400px] -mr-2 sm:mr-0">
                     <div className="p-3 border-b border-zinc-800 bg-zinc-950/50 flex justify-between items-center">
                       <span className="text-xs font-bold text-zinc-300">Activity & Alerts</span>
                       <span className="text-[10px] bg-zinc-800 px-2 py-0.5 rounded text-zinc-400">{notifications.length}</span>
@@ -659,22 +659,23 @@ export default function Home() {
             {walletConnected && walletUser ? (
               <button
                 onClick={() => setShowProfileDashboard(true)}
-                className="h-10 px-4 rounded-xl bg-purple-900/20 hover:bg-purple-900/40 border border-purple-500/30 text-xs font-bold text-purple-100 hover:text-white transition-all flex items-center gap-3 shadow-sm"
+                className="h-10 px-3 sm:px-4 rounded-xl bg-purple-900/20 hover:bg-purple-900/40 border border-purple-500/30 text-xs font-bold text-purple-100 hover:text-white transition-all flex items-center gap-2 sm:gap-3 shadow-sm"
               >
-                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-[10px] font-black text-white shadow-inner">
+                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-[10px] font-black text-white shadow-inner shrink-0">
                   {walletUser.name.charAt(0).toUpperCase()}
                 </div>
-                <span>{walletUser.name}</span>
-                <span className="w-px h-4 bg-purple-500/30" />
-                <span className="text-purple-300">{walletBalance} XLM</span>
+                <span className="hidden sm:inline max-w-[100px] truncate">{walletUser.name}</span>
+                <span className="hidden sm:inline w-px h-4 bg-purple-500/30" />
+                <span className="text-purple-300 hidden sm:inline">{walletBalance} XLM</span>
               </button>
             ) : (
               <button
                 onClick={connectFreighterWallet}
-                className="h-10 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-2"
+                className="h-10 px-3 sm:px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-2"
               >
                 <Wallet className="w-4 h-4" />
-                Connect Freighter
+                <span className="hidden sm:inline">Connect Freighter</span>
+                <span className="sm:hidden">Connect</span>
               </button>
             )}
           </div>
@@ -847,9 +848,9 @@ export default function Home() {
             {/* User's escrows */}
             {!loadedEscrow && recentEscrows.length > 0 && (
               <div className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3 sm:gap-0">
                   <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Your Escrows</h3>
-                  <div className="flex gap-1 bg-zinc-950 p-1 rounded-lg border border-zinc-800">
+                  <div className="flex flex-wrap gap-1 bg-zinc-950 p-1 rounded-lg border border-zinc-800">
                     {['All', 'Ongoing', 'Finished', 'Rejected'].map((filter) => (
                       <button
                         key={filter}
@@ -938,7 +939,7 @@ export default function Home() {
                           <h2 className="text-2xl font-bold text-white leading-tight">
                             {loadedEscrow.title || 'Untitled Escrow'}
                           </h2>
-                          <div className="mt-3 flex items-center gap-2">
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
                             <button
                               onClick={() => copyInviteLink(loadedEscrow.id)}
                               className="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/40 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition-all"

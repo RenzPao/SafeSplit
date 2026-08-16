@@ -88,7 +88,7 @@ export default function RegistrationModal({ walletAddress, onComplete }: Registr
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Email (Optional)</label>
                 <div className="relative">

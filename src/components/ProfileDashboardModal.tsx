@@ -109,7 +109,7 @@ export default function ProfileDashboardModal({ user, balance, onClose }: Profil
           <div className="md:col-span-8 space-y-8">
             
             {/* Volume Stats */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-emerald-950/10 border border-emerald-500/10 rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <TrendingUp className="w-4 h-4 text-emerald-500" />
