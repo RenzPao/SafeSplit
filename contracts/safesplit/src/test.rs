@@ -13,7 +13,7 @@ fn test_escrow_happy_path() {
 
     // Register Native Token (using testutils token)
     let token_admin = Address::generate(&e);
-    let token_address = e.register_stellar_asset_contract(token_admin.clone());
+    let token_address = e.register_stellar_asset_contract_v2(token_admin.clone()).address();
     let token_client = token::Client::new(&e, &token_address);
     let token_admin_client = token::StellarAssetClient::new(&e, &token_address);
 
@@ -74,7 +74,7 @@ fn test_escrow_dispute_and_resolution() {
 
     // Register Native Token (using testutils token)
     let token_admin = Address::generate(&e);
-    let token_address = e.register_stellar_asset_contract(token_admin.clone());
+    let token_address = e.register_stellar_asset_contract_v2(token_admin.clone()).address();
     let token_client = token::Client::new(&e, &token_address);
     let token_admin_client = token::StellarAssetClient::new(&e, &token_address);
 
@@ -124,7 +124,7 @@ fn test_escrow_cancel_and_refund() {
 
     // Register Native Token
     let token_admin = Address::generate(&e);
-    let token_address = e.register_stellar_asset_contract(token_admin.clone());
+    let token_address = e.register_stellar_asset_contract_v2(token_admin.clone()).address();
     let token_client = token::Client::new(&e, &token_address);
     let token_admin_client = token::StellarAssetClient::new(&e, &token_address);
 
@@ -162,7 +162,7 @@ fn test_escrow_upgrade() {
 
     // Register Native Token
     let token_admin = Address::generate(&e);
-    let token_address = e.register_stellar_asset_contract(token_admin.clone());
+    let token_address = e.register_stellar_asset_contract_v2(token_admin.clone()).address();
 
     // Register SafeSplit contract
     let contract_id = e.register(SafeSplitContract, ());
