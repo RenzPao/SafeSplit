@@ -305,8 +305,14 @@ export default function Home() {
 
   const handleCreateEscrow = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formContractAddress || !formClientAddress || !formFreelancerAddress || (includeArbiter && !formArbiterAddress)) {
+    if (!formClientAddress || !formFreelancerAddress || (includeArbiter && !formArbiterAddress)) {
       alert('Please fill out all address fields');
+      return;
+    }
+
+    const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+    if (!contractAddress) {
+      alert('NEXT_PUBLIC_CONTRACT_ADDRESS is not set in environment variables');
       return;
     }
 
@@ -317,7 +323,7 @@ export default function Home() {
 
     try {
       const data = await createEscrowMetadata({
-        contractAddress: formContractAddress.trim(),
+        contractAddress: contractAddress.trim(),
         clientAddress: formClientAddress.trim(),
         freelancerAddress: formFreelancerAddress.trim(),
         arbiterAddress: includeArbiter ? formArbiterAddress.trim() : '',
@@ -331,10 +337,8 @@ export default function Home() {
       });
 
       // Add to recents
-      addRecentEscrow(formContractAddress.trim());
+      addRecentEscrow(contractAddress.trim());
 
-      // Reset form
-      setFormContractAddress('');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       alert(`Creation failed: ${message}`);
@@ -771,16 +775,8 @@ export default function Home() {
                   </div>
   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1.5 md:col-span-2">
-                      <label className="text-xs text-zinc-400 font-semibold">Agreement ID (Contract Address)</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. CDLZFC3SYJYDZT7K67VZ75HPJGWK3S..."
-                        value={formContractAddress}
-                        onChange={(e) => setFormContractAddress(e.target.value)}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors font-mono"
-                        required
-                      />
+                    <div className="space-y-1.5 md:col-span-2 text-xs text-zinc-400">
+                      <strong>Contract Target:</strong> Environment variables will automatically route this escrow to the central SafeSplit contract address on the Soroban network.
                     </div>
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
@@ -987,9 +983,9 @@ export default function Home() {
   
                     <button
                       type="button"
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.preventDefault();
-                        setLoadedEscrow(creationResult.escrow);
+                        await handleLoadEscrow(creationResult.escrow.contract_address);
                         setActiveTab('manage');
                         setCreationResult(null);
                       }}

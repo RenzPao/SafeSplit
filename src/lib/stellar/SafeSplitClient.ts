@@ -93,6 +93,7 @@ export class SafeSplitClient {
 
   public createEscrowTx(
     sourceAddress: string,
+    escrowId: string,
     params: {
       client: string;
       freelancer: string;
@@ -113,6 +114,7 @@ export class SafeSplitClient {
     });
 
     const args = [
+      xdr.ScVal.scvString(escrowId),
       new Address(params.client).toScVal(),
       new Address(params.freelancer).toScVal(),
       new Address(params.nativeToken).toScVal(),
@@ -125,8 +127,11 @@ export class SafeSplitClient {
   /**
    * 2. deposit_xlm
    */
-  public depositXlmTx(sourceAddress: string, clientAddress: string): Operation {
-    const args = [new Address(clientAddress).toScVal()];
+  public depositXlmTx(sourceAddress: string, escrowId: string, clientAddress: string): Operation {
+    const args = [
+      xdr.ScVal.scvString(escrowId),
+      new Address(clientAddress).toScVal()
+    ];
     return this.buildInvokeOp(sourceAddress, 'deposit_xlm', args);
   }
 
@@ -135,6 +140,7 @@ export class SafeSplitClient {
    */
   public submitWorkTx(
     sourceAddress: string,
+    escrowId: string,
     params: {
       freelancer: string;
       milestoneId: number;
@@ -142,6 +148,7 @@ export class SafeSplitClient {
     }
   ): Operation {
     const args = [
+      xdr.ScVal.scvString(escrowId),
       new Address(params.freelancer).toScVal(),
       nativeToScVal(params.milestoneId, { type: 'u32' }),
       nativeToScVal(params.submissionRef, { type: 'string' })
@@ -154,12 +161,14 @@ export class SafeSplitClient {
    */
   public approveMilestoneTx(
     sourceAddress: string,
+    escrowId: string,
     params: {
       client: string;
       milestoneId: number;
     }
   ): Operation {
     const args = [
+      xdr.ScVal.scvString(escrowId),
       new Address(params.client).toScVal(),
       nativeToScVal(params.milestoneId, { type: 'u32' })
     ];
@@ -171,6 +180,7 @@ export class SafeSplitClient {
    */
   public raiseDisputeTx(
     sourceAddress: string,
+    escrowId: string,
     params: {
       caller: string;
       milestoneId: number;
@@ -183,6 +193,7 @@ export class SafeSplitClient {
     }
 
     const args = [
+      xdr.ScVal.scvString(escrowId),
       new Address(params.caller).toScVal(),
       nativeToScVal(params.milestoneId, { type: 'u32' }),
       xdr.ScVal.scvBytes(hashBuffer)
@@ -195,6 +206,7 @@ export class SafeSplitClient {
    */
   public proposeSettlementTx(
     sourceAddress: string,
+    escrowId: string,
     params: {
       proposer: string;
       milestoneId: number;
@@ -202,6 +214,7 @@ export class SafeSplitClient {
     }
   ): Operation {
     const args = [
+      xdr.ScVal.scvString(escrowId),
       new Address(params.proposer).toScVal(),
       nativeToScVal(params.milestoneId, { type: 'u32' }),
       nativeToScVal(params.clientSplitBps, { type: 'u32' })
@@ -211,12 +224,14 @@ export class SafeSplitClient {
 
   public acceptSettlementTx(
     sourceAddress: string,
+    escrowId: string,
     params: {
       accepter: string;
       milestoneId: number;
     }
   ): Operation {
     const args = [
+      xdr.ScVal.scvString(escrowId),
       new Address(params.accepter).toScVal(),
       nativeToScVal(params.milestoneId, { type: 'u32' })
     ];
@@ -226,8 +241,11 @@ export class SafeSplitClient {
   /**
    * 7. cancel_and_refund
    */
-  public cancelAndRefundTx(sourceAddress: string, clientAddress: string): Operation {
-    const args = [new Address(clientAddress).toScVal()];
+  public cancelAndRefundTx(sourceAddress: string, escrowId: string, clientAddress: string): Operation {
+    const args = [
+      xdr.ScVal.scvString(escrowId),
+      new Address(clientAddress).toScVal()
+    ];
     return this.buildInvokeOp(sourceAddress, 'cancel_and_refund', args);
   }
 

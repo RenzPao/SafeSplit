@@ -17,12 +17,13 @@ pub struct SafeSplitContract;
 impl SafeSplitContract {
     pub fn initialize(
         e: Env,
+        escrow_id: String,
         client: Address,
         freelancer: Address,
         native_token: Address,
         milestones: Vec<MilestoneInput>,
     ) -> Result<(), Error> {
-        if e.storage().instance().has(&DataKey::Config) {
+        if e.storage().instance().has(&DataKey::Escrow(escrow_id.clone())) {
             return Err(Error::AlreadyInitialized);
         }
 
@@ -63,7 +64,7 @@ impl SafeSplitContract {
             proposal_proposer: None,
         };
 
-        e.storage().instance().set(&DataKey::Config, &config);
+        e.storage().instance().set(&DataKey::Escrow(escrow_id.clone()), &config);
 
         e.events().publish(
             (Symbol::new(&e, "initialize"), config.client.clone(), config.freelancer.clone()),
@@ -73,13 +74,13 @@ impl SafeSplitContract {
         Ok(())
     }
 
-    pub fn deposit_xlm(e: Env, client: Address) -> Result<(), Error> {
+    pub fn deposit_xlm(e: Env, escrow_id: String, client: Address) -> Result<(), Error> {
         client.require_auth();
 
         let mut config: EscrowConfig = e
             .storage()
             .instance()
-            .get(&DataKey::Config)
+            .get(&DataKey::Escrow(escrow_id.clone()))
             .ok_or(Error::NotInitialized)?;
 
         if config.state != EscrowState::Initialized {
@@ -95,7 +96,7 @@ impl SafeSplitContract {
         token_client.transfer(&client, &contract_address, &config.total_xlm_stroops);
 
         config.state = EscrowState::Funded;
-        e.storage().instance().set(&DataKey::Config, &config);
+        e.storage().instance().set(&DataKey::Escrow(escrow_id.clone()), &config);
 
         e.events().publish(
             (Symbol::new(&e, "deposit_xlm"), client),
@@ -107,6 +108,7 @@ impl SafeSplitContract {
 
     pub fn submit_milestone(
         e: Env,
+        escrow_id: String,
         freelancer: Address,
         milestone_id: u32,
         submission_ref: String,
@@ -116,7 +118,7 @@ impl SafeSplitContract {
         let mut config: EscrowConfig = e
             .storage()
             .instance()
-            .get(&DataKey::Config)
+            .get(&DataKey::Escrow(escrow_id.clone()))
             .ok_or(Error::NotInitialized)?;
 
         if freelancer != config.freelancer {
@@ -144,7 +146,7 @@ impl SafeSplitContract {
 
         config.milestones = milestones;
         config.state = EscrowState::InProgress;
-        e.storage().instance().set(&DataKey::Config, &config);
+        e.storage().instance().set(&DataKey::Escrow(escrow_id.clone()), &config);
 
         e.events().publish(
             (Symbol::new(&e, "submit_milestone"), freelancer, milestone_id),
@@ -154,13 +156,13 @@ impl SafeSplitContract {
         Ok(())
     }
 
-    pub fn approve_milestone(e: Env, client: Address, milestone_id: u32) -> Result<(), Error> {
+    pub fn approve_milestone(e: Env, escrow_id: String, client: Address, milestone_id: u32) -> Result<(), Error> {
         client.require_auth();
 
         let mut config: EscrowConfig = e
             .storage()
             .instance()
-            .get(&DataKey::Config)
+            .get(&DataKey::Escrow(escrow_id.clone()))
             .ok_or(Error::NotInitialized)?;
 
         if client != config.client {
@@ -197,7 +199,7 @@ impl SafeSplitContract {
         }
 
         config.milestones = milestones;
-        e.storage().instance().set(&DataKey::Config, &config);
+        e.storage().instance().set(&DataKey::Escrow(escrow_id.clone()), &config);
 
         e.events().publish(
             (Symbol::new(&e, "approve_milestone"), client, milestone_id),
@@ -209,6 +211,7 @@ impl SafeSplitContract {
 
     pub fn raise_dispute(
         e: Env,
+        escrow_id: String,
         caller: Address,
         milestone_id: u32,
         reason_hash: BytesN<32>,
@@ -218,7 +221,7 @@ impl SafeSplitContract {
         let mut config: EscrowConfig = e
             .storage()
             .instance()
-            .get(&DataKey::Config)
+            .get(&DataKey::Escrow(escrow_id.clone()))
             .ok_or(Error::NotInitialized)?;
 
         if caller != config.client && caller != config.freelancer {
@@ -245,7 +248,7 @@ impl SafeSplitContract {
 
         config.milestones = milestones;
         config.state = EscrowState::Disputed;
-        e.storage().instance().set(&DataKey::Config, &config);
+        e.storage().instance().set(&DataKey::Escrow(escrow_id.clone()), &config);
 
         e.events().publish(
             (Symbol::new(&e, "raise_dispute"), caller, milestone_id),
@@ -257,6 +260,7 @@ impl SafeSplitContract {
 
     pub fn propose_settlement(
         e: Env,
+        escrow_id: String,
         proposer: Address,
         milestone_id: u32,
         client_split_bps: u32,
@@ -266,7 +270,7 @@ impl SafeSplitContract {
         let mut config: EscrowConfig = e
             .storage()
             .instance()
-            .get(&DataKey::Config)
+            .get(&DataKey::Escrow(escrow_id.clone()))
             .ok_or(Error::NotInitialized)?;
 
         if proposer != config.client && proposer != config.freelancer {
@@ -294,7 +298,7 @@ impl SafeSplitContract {
 
         config.proposal_split_bps = Some(client_split_bps);
         config.proposal_proposer = Some(proposer.clone());
-        e.storage().instance().set(&DataKey::Config, &config);
+        e.storage().instance().set(&DataKey::Escrow(escrow_id.clone()), &config);
 
         e.events().publish(
             (Symbol::new(&e, "propose_settlement"), proposer, milestone_id),
@@ -306,6 +310,7 @@ impl SafeSplitContract {
 
     pub fn accept_settlement(
         e: Env,
+        escrow_id: String,
         accepter: Address,
         milestone_id: u32,
     ) -> Result<(), Error> {
@@ -314,7 +319,7 @@ impl SafeSplitContract {
         let mut config: EscrowConfig = e
             .storage()
             .instance()
-            .get(&DataKey::Config)
+            .get(&DataKey::Escrow(escrow_id.clone()))
             .ok_or(Error::NotInitialized)?;
 
         if accepter != config.client && accepter != config.freelancer {
@@ -382,7 +387,7 @@ impl SafeSplitContract {
         config.proposal_split_bps = None;
         config.proposal_proposer = None;
         config.milestones = milestones;
-        e.storage().instance().set(&DataKey::Config, &config);
+        e.storage().instance().set(&DataKey::Escrow(escrow_id.clone()), &config);
 
         e.events().publish(
             (Symbol::new(&e, "accept_settlement"), accepter, milestone_id),
@@ -392,13 +397,13 @@ impl SafeSplitContract {
         Ok(())
     }
 
-    pub fn cancel_and_refund(e: Env, client: Address) -> Result<(), Error> {
+    pub fn cancel_and_refund(e: Env, escrow_id: String, client: Address) -> Result<(), Error> {
         client.require_auth();
 
         let mut config: EscrowConfig = e
             .storage()
             .instance()
-            .get(&DataKey::Config)
+            .get(&DataKey::Escrow(escrow_id.clone()))
             .ok_or(Error::NotInitialized)?;
 
         if client != config.client {
@@ -422,7 +427,7 @@ impl SafeSplitContract {
         }
 
         config.state = EscrowState::Cancelled;
-        e.storage().instance().set(&DataKey::Config, &config);
+        e.storage().instance().set(&DataKey::Escrow(escrow_id.clone()), &config);
 
         e.events().publish(
             (Symbol::new(&e, "cancel_and_refund"), client),
@@ -432,14 +437,22 @@ impl SafeSplitContract {
         Ok(())
     }
 
+    pub fn init_admin(e: Env, admin: Address) -> Result<(), Error> {
+        if e.storage().instance().has(&DataKey::Admin) {
+            return Err(Error::AlreadyInitialized);
+        }
+        e.storage().instance().set(&DataKey::Admin, &admin);
+        Ok(())
+    }
+
     pub fn upgrade(e: Env, new_wasm_hash: BytesN<32>) -> Result<(), Error> {
-        let config: EscrowConfig = e
+        let admin: Address = e
             .storage()
             .instance()
-            .get(&DataKey::Config)
+            .get(&DataKey::Admin)
             .ok_or(Error::NotInitialized)?;
 
-        config.client.require_auth();
+        admin.require_auth();
 
         e.deployer().update_current_contract_wasm(new_wasm_hash);
 

@@ -129,7 +129,7 @@ export default function MilestoneDetailView({
 
       // Request transaction signature via Freighter
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      const operation = client.submitWorkTx(currentWalletAddress, {
+      const operation = client.submitWorkTx(currentWalletAddress, escrow.id, {
         freelancer: currentWalletAddress,
         milestoneId: milestone.milestone_index,
         submissionRef: cid,
@@ -168,7 +168,7 @@ export default function MilestoneDetailView({
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      const operation = client.approveMilestoneTx(currentWalletAddress, {
+      const operation = client.approveMilestoneTx(currentWalletAddress, escrow.id, {
         client: currentWalletAddress,
         milestoneId: milestone.milestone_index,
       });
@@ -215,7 +215,7 @@ export default function MilestoneDetailView({
         };
       }));
 
-      const operation = client.createEscrowTx(currentWalletAddress, {
+      const operation = client.createEscrowTx(currentWalletAddress, escrow.id, {
         client: escrow.client_address,
         freelancer: escrow.freelancer_address,
         nativeToken: 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC', // Testnet native token
@@ -249,7 +249,7 @@ export default function MilestoneDetailView({
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      const operation = client.depositXlmTx(currentWalletAddress, escrow.client_address);
+      const operation = client.depositXlmTx(currentWalletAddress, escrow.id, escrow.client_address);
       const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
       // Update database status via Supabase
@@ -278,7 +278,7 @@ export default function MilestoneDetailView({
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      const operation = client.cancelAndRefundTx(currentWalletAddress, escrow.client_address);
+      const operation = client.cancelAndRefundTx(currentWalletAddress, escrow.id, escrow.client_address);
       const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
       // Update database status via Supabase
@@ -309,7 +309,7 @@ export default function MilestoneDetailView({
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
       const reasonHash = 'd3f4b50000000000000000000000000000000000000000000000000000000000'; // 32-byte hex mock
-      const operation = client.raiseDisputeTx(currentWalletAddress, {
+      const operation = client.raiseDisputeTx(currentWalletAddress, escrow.id, {
         caller: currentWalletAddress,
         milestoneId: milestone.milestone_index,
         reasonHash,
@@ -366,7 +366,7 @@ export default function MilestoneDetailView({
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      const operation = client.proposeSettlementTx(currentWalletAddress, {
+      const operation = client.proposeSettlementTx(currentWalletAddress, escrow.id, {
         proposer: currentWalletAddress,
         milestoneId: milestone.milestone_index,
         clientSplitBps: splitBps,
@@ -405,7 +405,7 @@ export default function MilestoneDetailView({
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      const operation = client.acceptSettlementTx(currentWalletAddress, {
+      const operation = client.acceptSettlementTx(currentWalletAddress, escrow.id, {
         accepter: currentWalletAddress,
         milestoneId: milestone.milestone_index,
       });

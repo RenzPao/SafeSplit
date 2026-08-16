@@ -55,5 +55,6 @@ pub struct EscrowConfig {
 
 #[contracttype]
 pub enum DataKey {
-    Config,
+    Escrow(String),
+    Admin,
 }
