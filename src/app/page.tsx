@@ -20,7 +20,7 @@ import MilestoneDetailView from '@/components/MilestoneDetailView';
 import { createEscrowMetadata, fetchEscrowMetadata } from '@/lib/stellar/supabaseBackend';
 
 // Freighter Wallet API
-import { isConnected, getAddress, isAllowed, requestAccess } from '@stellar/freighter-api';
+import { isConnected, getAddress, isAllowed, requestAccess, setAllowed } from '@stellar/freighter-api';
 import { Keypair, StrKey } from '@stellar/stellar-sdk';
 
 
@@ -116,14 +116,21 @@ export default function Home() {
         alert('Freighter wallet extension not detected. Please install it.');
         return;
       }
-      const accessRes = await requestAccess();
-      if (accessRes && accessRes.address) {
-        if (field === 'client') setFormClientAddress(accessRes.address);
-        if (field === 'freelancer') setFormFreelancerAddress(accessRes.address);
-        if (field === 'arbiter') setFormArbiterAddress(accessRes.address);
-        
-        setWalletAddress(accessRes.address);
-        setWalletConnected(true);
+      const allowedRes = await setAllowed();
+      if (allowedRes && allowedRes.isAllowed) {
+        const addressRes = await getAddress();
+        if (addressRes && addressRes.address) {
+          if (field === 'client') setFormClientAddress(addressRes.address);
+          if (field === 'freelancer') setFormFreelancerAddress(addressRes.address);
+          if (field === 'arbiter') setFormArbiterAddress(addressRes.address);
+          
+          setWalletAddress(addressRes.address);
+          setWalletConnected(true);
+        } else if (addressRes && addressRes.error) {
+          alert(`Access denied: ${addressRes.error}`);
+        }
+      } else if (allowedRes && allowedRes.error) {
+        alert(`Access denied: ${allowedRes.error}`);
       }
     } catch (err: unknown) {
       alert(`Failed to fetch Freighter address: ${err instanceof Error ? err.message : String(err)}`);
@@ -223,12 +230,17 @@ export default function Home() {
         alert('Freighter wallet extension not detected. Please install it.');
         return;
       }
-      const accessRes = await requestAccess();
-      if (accessRes && accessRes.address) {
-        setWalletAddress(accessRes.address);
-        setWalletConnected(true);
-      } else if (accessRes && accessRes.error) {
-        alert(`Access denied: ${accessRes.error}`);
+      const allowedRes = await setAllowed();
+      if (allowedRes && allowedRes.isAllowed) {
+        const addressRes = await getAddress();
+        if (addressRes && addressRes.address) {
+          setWalletAddress(addressRes.address);
+          setWalletConnected(true);
+        } else if (addressRes && addressRes.error) {
+          alert(`Access denied: ${addressRes.error}`);
+        }
+      } else if (allowedRes && allowedRes.error) {
+        alert(`Access denied: ${allowedRes.error}`);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';
