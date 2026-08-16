@@ -187,6 +187,32 @@ export default function Home() {
       }
     };
     checkFreighter();
+
+    // Set up active wallet account polling to auto-detect changes
+    const interval = setInterval(async () => {
+      try {
+        const connectedRes = await isConnected();
+        if (connectedRes && connectedRes.isConnected) {
+          const allowedRes = await isAllowed();
+          if (allowedRes && allowedRes.isAllowed) {
+            const addressRes = await getAddress();
+            if (addressRes && addressRes.address) {
+              setWalletAddress((prev) => {
+                if (prev !== addressRes.address) {
+                  return addressRes.address;
+                }
+                return prev;
+              });
+              setWalletConnected(true);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Freighter wallet poll failed:', err);
+      }
+    }, 1500);
+
+    return () => clearInterval(interval);
   }, []);
 
   const connectFreighterWallet = async () => {
@@ -1010,102 +1036,83 @@ export default function Home() {
                   Stellar Developer Sandbox
                 </h3>
                 <p className="text-[11px] text-zinc-500 mt-1 leading-normal font-medium">
-                  Generate real Stellar testnet keypairs, import them to Freighter, and fund them instantly with Friendbot to test the contract logic.
+                  Connect and use your real Freighter browser extension accounts to test the escrow workflow live.
                 </p>
               </div>
 
-              {/* 1. Account Generator */}
+              {/* 1. Freighter Connected Account info */}
               <div className="bg-zinc-950/60 border border-zinc-900 rounded-2xl p-4 space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-zinc-300">Stellar Keypair Generator</span>
+                  <span className="text-xs font-bold text-zinc-300">Freighter Active Account</span>
                   <button
                     type="button"
-                    onClick={handleGenerateKeypair}
+                    onClick={connectFreighterWallet}
                     className="text-[10px] font-bold text-purple-400 hover:text-purple-300 bg-purple-950/30 border border-purple-900/40 px-2 py-1 rounded-lg transition-all"
                   >
-                    Generate Real Keypair
+                    Refresh / Connect
                   </button>
                 </div>
 
-                {generatedKeys ? (
+                {walletAddress ? (
                   <div className="space-y-3">
                     <div className="space-y-1">
                       <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500">
-                        <span>PUBLIC ADDRESS</span>
-                        <div className="flex gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(generatedKeys.publicKey, 'pubkey')}
-                            className="text-purple-400 hover:text-purple-300"
-                          >
-                            {copiedText === 'pubkey' ? 'Copied!' : 'Copy'}
-                          </button>
-                        </div>
+                        <span>ACTIVE ADDRESS</span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(walletAddress, 'walletAddress')}
+                          className="text-purple-400 hover:text-purple-300"
+                        >
+                          {copiedText === 'walletAddress' ? 'Copied!' : 'Copy'}
+                        </button>
                       </div>
                       <div className="bg-zinc-950 border border-zinc-900 p-2 rounded-xl text-[10px] font-mono text-zinc-300 truncate">
-                        {generatedKeys.publicKey}
+                        {walletAddress}
                       </div>
                       <div className="grid grid-cols-3 gap-1 mt-1.5">
                         <button
                           type="button"
-                          onClick={() => setFormClientAddress(generatedKeys.publicKey)}
+                          onClick={() => setFormClientAddress(walletAddress)}
                           className="py-1 px-1.5 bg-zinc-900 hover:bg-zinc-850 rounded text-[9px] font-bold text-zinc-400 text-center transition-all border border-zinc-800"
                         >
                           As Client
                         </button>
                         <button
                           type="button"
-                          onClick={() => setFormFreelancerAddress(generatedKeys.publicKey)}
+                          onClick={() => setFormFreelancerAddress(walletAddress)}
                           className="py-1 px-1.5 bg-zinc-900 hover:bg-zinc-850 rounded text-[9px] font-bold text-zinc-400 text-center transition-all border border-zinc-800"
                         >
                           As Worker
                         </button>
                         <button
                           type="button"
-                          onClick={() => setFormArbiterAddress(generatedKeys.publicKey)}
+                          onClick={() => setFormArbiterAddress(walletAddress)}
                           className="py-1 px-1.5 bg-zinc-900 hover:bg-zinc-850 rounded text-[9px] font-bold text-zinc-400 text-center transition-all border border-zinc-800"
                         >
                           As Mediator
                         </button>
                       </div>
                     </div>
-
-                    <div className="space-y-1 border-t border-zinc-900 pt-2.5">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500">
-                        <span>SECRET KEY (PRIVATE)</span>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setShowSecretKey(!showSecretKey)}
-                            className="text-zinc-400 hover:text-zinc-300"
-                          >
-                            {showSecretKey ? 'Hide' : 'Show'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(generatedKeys.secretKey, 'seckey')}
-                            className="text-purple-400 hover:text-purple-300"
-                          >
-                            {copiedText === 'seckey' ? 'Copied!' : 'Copy'}
-                          </button>
-                        </div>
-                      </div>
-                      <div className="bg-zinc-950 border border-zinc-900 p-2 rounded-xl text-[10px] font-mono text-zinc-300 truncate">
-                        {showSecretKey ? generatedKeys.secretKey : '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'}
-                      </div>
-                      <p className="text-[9px] text-amber-500/80 leading-normal mt-1 leading-normal font-semibold">
-                        ⚠️ Never use mock secret keys on Mainnet. Safe to import to Freighter for Testnet testing.
-                      </p>
-                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-6 border border-dashed border-zinc-900 rounded-xl text-[10px] text-zinc-500 font-medium">
-                    No keys generated yet. Click above to generate.
+                    Wallet not connected. Click above to connect Freighter.
                   </div>
                 )}
               </div>
 
-              {/* 2. Friendbot Faucet */}
+              {/* 2. testing helper tips */}
+              <div className="bg-purple-950/10 border border-purple-900/30 rounded-2xl p-4 text-[10px] text-purple-300 leading-relaxed space-y-1">
+                <span className="font-bold text-xs text-purple-200 block">💡 Testing Guide</span>
+                <p>
+                  To set up a complete agreement, open your Freighter extension, switch to a different wallet account, and assign it to the next role. 
+                </p>
+                <p className="mt-1">
+                  The dashboard polls and **auto-detects** account switches in real-time, making it simple to map the Client, Freelancer, and Mediator inputs without copying private keys!
+                </p>
+              </div>
+
+              {/* 3. Friendbot Faucet */}
               <div className="bg-zinc-950/60 border border-zinc-900 rounded-2xl p-4 space-y-4">
                 <span className="text-xs font-bold text-zinc-300 block">Friendbot Testnet Faucet</span>
                 
@@ -1124,7 +1131,7 @@ export default function Home() {
                       onClick={() => setFaucetAddress(walletAddress)}
                       className="text-[9px] font-semibold text-purple-400 hover:underline block"
                     >
-                      Use connected Freighter wallet ({walletAddress.substring(0, 6)}...{walletAddress.slice(-4)})
+                      Use active Freighter wallet ({walletAddress.substring(0, 6)}...{walletAddress.slice(-4)})
                     </button>
                   )}
                 </div>
