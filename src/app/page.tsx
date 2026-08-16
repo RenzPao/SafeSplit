@@ -544,15 +544,15 @@ export default function Home() {
             {/* Recents escrows shortcut */}
             {!loadedEscrow && recentEscrows.length > 0 && (
               <div className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-6">
-                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Recently Viewed Contracts</h3>
+                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Recently Viewed Escrows</h3>
                 <div className="flex flex-col gap-2">
-                  {recentEscrows.map((addr) => (
+                  {recentEscrows.map((id) => (
                     <button
-                      key={addr}
-                      onClick={() => handleLoadEscrow(addr)}
+                      key={id}
+                      onClick={() => handleLoadEscrow(id)}
                       className="flex items-center justify-between text-left p-3 rounded-xl bg-zinc-950 border border-zinc-900 hover:border-zinc-800 hover:bg-zinc-900/20 transition-all group"
                     >
-                      <span className="text-xs font-mono text-zinc-300 truncate pr-4">{addr}</span>
+                      <span className="text-xs font-mono text-zinc-300 truncate pr-4">{id}</span>
                       <span className="text-[10px] font-semibold text-purple-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
                         Load Escrow →
                       </span>
@@ -588,7 +588,7 @@ export default function Home() {
                           {loadedEscrow.status}
                         </span>
                         <button
-                          onClick={() => handleLoadEscrow(loadedEscrow.contract_address)}
+                          onClick={() => handleLoadEscrow(loadedEscrow.id)}
                           disabled={isLoading}
                           className="p-2 hover:bg-zinc-800 rounded-xl text-zinc-400 hover:text-zinc-200 transition-colors"
                         >
@@ -722,7 +722,7 @@ export default function Home() {
                     escrow={loadedEscrow}
                     milestoneIndex={selectedMilestoneIndex}
                     currentWalletAddress={walletAddress}
-                    onActionSuccess={() => handleLoadEscrow(loadedEscrow.contract_address)}
+                    onActionSuccess={() => handleLoadEscrow(loadedEscrow.id)}
                   />
                 </div>
 
@@ -984,7 +984,7 @@ export default function Home() {
                       type="button"
                       onClick={async (e) => {
                         e.preventDefault();
-                        await handleLoadEscrow(creationResult.escrow.contract_address);
+                        await handleLoadEscrow(creationResult.escrow.id);
                         setActiveTab('manage');
                         setCreationResult(null);
                       }}
