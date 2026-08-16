@@ -35,31 +35,32 @@ fn test_escrow_happy_path() {
     });
 
     // Initialize escrow
-    client_escrow.initialize(&client, &freelancer, &token_address, &milestones);
+    let escrow_id = String::from_str(&e, "test_escrow_1");
+    client_escrow.initialize(&escrow_id, &client, &freelancer, &token_address, &milestones);
 
     // Mint tokens to client
     token_admin_client.mint(&client, &300_000_000);
     assert_eq!(token_client.balance(&client), 300_000_000);
 
     // Deposit
-    client_escrow.deposit_xlm(&client);
+    client_escrow.deposit_xlm(&escrow_id, &client);
     assert_eq!(token_client.balance(&client), 0);
     assert_eq!(token_client.balance(&contract_id), 300_000_000);
 
     // Submit milestone 0
     let submission_ref = String::from_str(&e, "ipfs://QmbWqxBEKC3P8t8us47oSgw7iZui187tiRwcE9ZCo1G3iE");
-    client_escrow.submit_milestone(&freelancer, &0, &submission_ref);
+    client_escrow.submit_milestone(&escrow_id, &freelancer, &0, &submission_ref);
 
     // Approve milestone 0
-    client_escrow.approve_milestone(&client, &0);
+    client_escrow.approve_milestone(&escrow_id, &client, &0);
     assert_eq!(token_client.balance(&freelancer), 100_000_000);
     assert_eq!(token_client.balance(&contract_id), 200_000_000);
 
     // Submit milestone 1
-    client_escrow.submit_milestone(&freelancer, &1, &submission_ref);
+    client_escrow.submit_milestone(&escrow_id, &freelancer, &1, &submission_ref);
 
     // Approve milestone 1
-    client_escrow.approve_milestone(&client, &1);
+    client_escrow.approve_milestone(&escrow_id, &client, &1);
     assert_eq!(token_client.balance(&freelancer), 300_000_000);
     assert_eq!(token_client.balance(&contract_id), 0);
 }
@@ -91,23 +92,24 @@ fn test_escrow_dispute_and_resolution() {
     });
 
     // Initialize, mint, and deposit
-    client_escrow.initialize(&client, &freelancer, &token_address, &milestones);
+    let escrow_id = String::from_str(&e, "test_escrow_2");
+    client_escrow.initialize(&escrow_id, &client, &freelancer, &token_address, &milestones);
     token_admin_client.mint(&client, &100_000_000);
-    client_escrow.deposit_xlm(&client);
+    client_escrow.deposit_xlm(&escrow_id, &client);
 
     // Submit milestone 0
     let submission_ref = String::from_str(&e, "ipfs://QmbWqxBEKC3P8t8us47oSgw7iZui187tiRwcE9ZCo1G3iE");
-    client_escrow.submit_milestone(&freelancer, &0, &submission_ref);
+    client_escrow.submit_milestone(&escrow_id, &freelancer, &0, &submission_ref);
 
     // Raise dispute
     let reason_hash = BytesN::from_array(&e, &[9; 32]);
-    client_escrow.raise_dispute(&client, &0, &reason_hash);
+    client_escrow.raise_dispute(&escrow_id, &client, &0, &reason_hash);
 
     // Propose split (60% to client)
-    client_escrow.propose_settlement(&client, &0, &6000);
+    client_escrow.propose_settlement(&escrow_id, &client, &0, &6000);
 
     // Accept split (by freelancer)
-    client_escrow.accept_settlement(&freelancer, &0);
+    client_escrow.accept_settlement(&escrow_id, &freelancer, &0);
 
     assert_eq!(token_client.balance(&client), 60_000_000);
     assert_eq!(token_client.balance(&freelancer), 40_000_000);
@@ -140,12 +142,13 @@ fn test_escrow_cancel_and_refund() {
         amount_stroops: 100_000_000, // 10 XLM
     });
 
-    client_escrow.initialize(&client, &freelancer, &token_address, &milestones);
+    let escrow_id = String::from_str(&e, "test_escrow_3");
+    client_escrow.initialize(&escrow_id, &client, &freelancer, &token_address, &milestones);
     token_admin_client.mint(&client, &100_000_000);
-    client_escrow.deposit_xlm(&client);
+    client_escrow.deposit_xlm(&escrow_id, &client);
 
     // Cancel before submission
-    client_escrow.cancel_and_refund(&client);
+    client_escrow.cancel_and_refund(&escrow_id, &client);
 
     assert_eq!(token_client.balance(&client), 100_000_000);
     assert_eq!(token_client.balance(&contract_id), 0);
@@ -176,13 +179,17 @@ fn test_escrow_upgrade() {
         amount_stroops: 100_000_000,
     });
 
-    client_escrow.initialize(&client, &freelancer, &token_address, &milestones);
+    let admin = Address::generate(&e);
+    client_escrow.init_admin(&admin);
+
+    let escrow_id = String::from_str(&e, "test_escrow_4");
+    client_escrow.initialize(&escrow_id, &client, &freelancer, &token_address, &milestones);
 
     // Upload actual compiled wasm bytes to environment to register a valid hash
     const WASM: &[u8] = include_bytes!("../target/wasm32-unknown-unknown/release/safesplit.wasm");
     let dummy_wasm = soroban_sdk::Bytes::from_slice(&e, WASM);
     let new_wasm_hash = e.deployer().upload_contract_wasm(dummy_wasm);
 
-    // Try upgrading with client auth
+    // Try upgrading with admin auth
     client_escrow.upgrade(&new_wasm_hash);
 }
