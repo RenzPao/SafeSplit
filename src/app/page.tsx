@@ -19,6 +19,8 @@ import {
   Bell
 } from 'lucide-react';
 import MilestoneDetailView from '@/components/MilestoneDetailView';
+import RegistrationModal from '@/components/RegistrationModal';
+import ProfileDashboardModal from '@/components/ProfileDashboardModal';
 import { createEscrowMetadata, fetchEscrowMetadata } from '@/lib/stellar/supabaseBackend';
 
 // Freighter Wallet API
@@ -78,6 +80,11 @@ export default function Home() {
   const [isFetchingInvitations, setIsFetchingInvitations] = useState(false);
 
   // Fetch invitations when wallet connects
+  const [walletUser, setWalletUser] = useState<any>(null);
+  const [walletBalance, setWalletBalance] = useState('0.00');
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [showProfileDashboard, setShowProfileDashboard] = useState(false);
+  
   useEffect(() => {
     const fetchInvitations = async () => {
       if (!walletAddress) {
@@ -97,6 +104,49 @@ export default function Home() {
       }
     };
     fetchInvitations();
+  }, [walletAddress]);
+
+  // Fetch User Profile & Balance
+  useEffect(() => {
+    const fetchUserAndBalance = async () => {
+      if (!walletAddress) {
+        setWalletUser(null);
+        setWalletBalance('0.00');
+        return;
+      }
+
+      // Fetch Stellar Balance
+      try {
+        const res = await fetch(`https://horizon-testnet.stellar.org/accounts/${walletAddress}`);
+        if (res.ok) {
+          const data = await res.json();
+          const nativeBal = data.balances?.find((b: any) => b.asset_type === 'native');
+          if (nativeBal) {
+            setWalletBalance(parseFloat(nativeBal.balance).toFixed(2));
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch balance', err);
+      }
+
+      // Fetch User Profile
+      try {
+        const res = await fetch(`/api/users/${encodeURIComponent(walletAddress)}`);
+        const data = await res.json();
+        
+        if (res.status === 404 || data.error === 'User not found') {
+          // New User
+          setShowRegistrationModal(true);
+        } else if (res.ok && data.user) {
+          setWalletUser(data.user);
+          setShowRegistrationModal(false);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user profile:', err);
+      }
+    };
+
+    fetchUserAndBalance();
   }, [walletAddress]);
 
   // Create Escrow form states
@@ -434,14 +484,27 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
-
-
-            <button
-              onClick={connectFreighterWallet}
-              className="h-10 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-2"
-            >
-              Freighter
-            </button>
+            {walletConnected && walletUser ? (
+              <button
+                onClick={() => setShowProfileDashboard(true)}
+                className="h-10 px-4 rounded-xl bg-purple-900/20 hover:bg-purple-900/40 border border-purple-500/30 text-xs font-bold text-purple-100 hover:text-white transition-all flex items-center gap-3 shadow-sm"
+              >
+                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-[10px] font-black text-white shadow-inner">
+                  {walletUser.name.charAt(0).toUpperCase()}
+                </div>
+                <span>{walletUser.name}</span>
+                <span className="w-px h-4 bg-purple-500/30" />
+                <span className="text-purple-300">{walletBalance} XLM</span>
+              </button>
+            ) : (
+              <button
+                onClick={connectFreighterWallet}
+                className="h-10 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-2"
+              >
+                <Wallet className="w-4 h-4" />
+                Connect Freighter
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -1223,6 +1286,25 @@ export default function Home() {
           <p>© 2026 SafeSplit Protocol. Powered by Soroban & Stellar Net.</p>
         </div>
       </footer>
+
+      {/* Profile Modals */}
+      {showRegistrationModal && walletAddress && !walletUser && (
+        <RegistrationModal 
+          walletAddress={walletAddress} 
+          onComplete={(user) => {
+            setWalletUser(user);
+            setShowRegistrationModal(false);
+          }} 
+        />
+      )}
+
+      {showProfileDashboard && walletUser && (
+        <ProfileDashboardModal 
+          user={walletUser} 
+          balance={walletBalance} 
+          onClose={() => setShowProfileDashboard(false)} 
+        />
+      )}
 
     </div>
   );

@@ -47,3 +47,18 @@ model ActivityLog {
   timestamp  DateTime @default(now())
   details    String?  // JSON string or description text
 }
+
+model User {
+  wallet_address    String    @id
+  name              String
+  birthday          DateTime?
+  email             String?
+  social_link       String?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  
+  completed_jobs    Int       @default(0)
+  total_earned_xlm  Decimal   @default(0)
+  total_spent_xlm   Decimal   @default(0)
+  reliability_score Float     @default(100.0)
+}

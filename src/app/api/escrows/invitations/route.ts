@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabaseClient';
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,18 +10,16 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Freelancer address is required' }, { status: 400 });
     }
 
-    const invitations = await prisma.escrow.findMany({
-      where: { 
-        freelancer_address: freelancerAddress,
-        status: 'Initialized'
-      },
-      include: {
-        milestones: true
-      },
-      orderBy: {
-        created_at: 'desc'
-      }
-    });
+    const { data: invitations, error } = await supabase
+      .from('Escrow')
+      .select('*, milestones(*)')
+      .eq('freelancer_address', freelancerAddress)
+      .eq('status', 'Initialized')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
 
     return NextResponse.json({ success: true, invitations });
   } catch (error: unknown) {
