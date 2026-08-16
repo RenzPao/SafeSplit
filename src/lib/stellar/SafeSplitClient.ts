@@ -106,11 +106,20 @@ export class SafeSplitClient {
       if (hashBuffer.length !== 32) {
         throw new Error('Description hash must be exactly 32 bytes (64 hex characters)');
       }
-      return nativeToScVal({
-        id: m.id,
-        description_hash: xdr.ScVal.scvBytes(hashBuffer),
-        amount_stroops: m.amountStroops
-      });
+      return xdr.ScVal.scvMap([
+        new xdr.ScMapEntry({
+          key: xdr.ScVal.scvSymbol('amount_stroops'),
+          val: nativeToScVal(m.amountStroops, { type: 'i128' })
+        }),
+        new xdr.ScMapEntry({
+          key: xdr.ScVal.scvSymbol('description_hash'),
+          val: xdr.ScVal.scvBytes(hashBuffer)
+        }),
+        new xdr.ScMapEntry({
+          key: xdr.ScVal.scvSymbol('id'),
+          val: nativeToScVal(m.id, { type: 'u32' })
+        })
+      ]);
     });
 
     const args = [
