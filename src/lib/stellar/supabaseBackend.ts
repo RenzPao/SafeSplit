@@ -93,7 +93,7 @@ export async function createEscrowMetadata(input: EscrowMetadataInput) {
   };
 }
 
-export async function fetchEscrowMetadata(contractAddress: string) {
+export async function fetchEscrowMetadata(escrowId: string) {
   // 1. Get from Supabase
   const { data: escrow, error: escrowError } = await supabase
     .from('Escrow')
@@ -102,7 +102,7 @@ export async function fetchEscrowMetadata(contractAddress: string) {
       milestones:Milestone(*),
       activity_logs:ActivityLog(*)
     `)
-    .eq('contract_address', contractAddress)
+    .eq('id', escrowId)
     .single();
 
   if (escrowError || !escrow) {

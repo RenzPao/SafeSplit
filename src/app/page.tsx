@@ -247,31 +247,30 @@ export default function Home() {
       alert(`Connection failed: ${message}`);
     }
   };
-
-  // Add a contract address to recent local storage list
-  const addRecentEscrow = (address: string) => {
-    if (!address) return;
-    const updated = [address, ...recentEscrows.filter(a => a !== address)].slice(0, 5);
+  // Add an escrow ID to recent local storage list
+  const addRecentEscrow = (id: string) => {
+    if (!id) return;
+    const updated = [id, ...recentEscrows.filter(a => a !== id)].slice(0, 5);
     setRecentEscrows(updated);
     localStorage.setItem('safesplit_recent_escrows', JSON.stringify(updated));
   };
 
   // Fetch Escrow
-  const handleLoadEscrow = async (addressToLoad?: string) => {
-    const targetAddress = addressToLoad || searchAddress;
-    if (!targetAddress) {
-      setErrorMsg('Please enter or select a contract address');
+  const handleLoadEscrow = async (idToLoad?: string) => {
+    const targetId = idToLoad || searchAddress;
+    if (!targetId) {
+      setErrorMsg('Please enter or select an Escrow ID');
       return;
     }
 
     setIsLoading(true);
     setErrorMsg('');
     try {
-      const data = await fetchEscrowMetadata(targetAddress);
+      const data = await fetchEscrowMetadata(targetId);
       setLoadedEscrow(data.escrow);
       setSelectedMilestoneIndex(0);
-      addRecentEscrow(targetAddress);
-      if (!addressToLoad) {
+      addRecentEscrow(targetId);
+      if (!idToLoad) {
         setSearchAddress('');
       }
     } catch (err: unknown) {
@@ -513,7 +512,7 @@ export default function Home() {
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                 <input
                   type="text"
-                  placeholder="Enter contract address to load..."
+                  placeholder="Enter Escrow ID..."
                   value={searchAddress}
                   onChange={(e) => setSearchAddress(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLoadEscrow()}

@@ -12,7 +12,7 @@ datasource db {
 
 model Escrow {
   id                 String        @id @default(uuid())
-  contract_address   String        @unique
+  contract_address   String
   client_address     String
   freelancer_address String
   arbiter_address    String
