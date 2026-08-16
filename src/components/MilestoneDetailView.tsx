@@ -7,10 +7,11 @@ import {
   Clock, 
   Upload, 
   ExternalLink, 
-  Coins, 
-  Scale, 
-  ShieldAlert, 
+  Coins,
+  Scale,
+  ShieldAlert,
   FileText,
+  Settings,
   Loader2,
   Check,
   AlertOctagon
@@ -21,27 +22,9 @@ import { uploadDeliverableFile, updateMilestoneStatus, updateEscrowStatus } from
 
 
 
-interface Milestone {
-  id: string;
-  milestone_index: number;
-  title: string;
-  description: string;
-  amount_xlm: number | string;
-  status: string; // Pending, Submitted, Approved, Disputed, Refunded
-  deliverable_url?: string | null;
-  submission_cid?: string | null;
-}
+import type { Escrow, Milestone, ActivityLog } from '@/app/page';
 
-interface Escrow {
-  id: string;
-  contract_address: string;
-  client_address: string;
-  freelancer_address: string;
-  arbiter_address: string;
-  total_xlm: number | string;
-  status: string; // Initialized, Funded, InProgress, Disputed, Completed, Cancelled
-  milestones: Milestone[];
-}
+
 
 interface MilestoneDetailViewProps {
   escrow: Escrow;
@@ -65,7 +48,7 @@ export default function MilestoneDetailView({
   const [statusMessage, setStatusMessage] = useState<{ type: 'info' | 'success' | 'error'; text: string } | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [splitBps, setSplitBps] = useState(5000); // 50% split default (5000 bps)
-
+  const [wasmHash, setWasmHash] = useState('');
   if (!milestone) {
     return (
       <div className="flex flex-col items-center justify-center p-8 bg-slate-900 border border-slate-800 rounded-2xl text-slate-400">
@@ -304,33 +287,120 @@ export default function MilestoneDetailView({
     }
   };
 
-  // 4. Resolve Dispute (Arbiter)
-  const handleResolveDispute = async () => {
+  // Find active settlement proposal from logs
+  const getActiveProposal = () => {
+    if (!escrow.activity_logs) return null;
+    const sortedLogs = [...escrow.activity_logs].sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    for (const log of sortedLogs) {
+      if (log.event_name === 'SettlementAccepted' || log.event_name === 'ApproveMilestone' || log.event_name === 'DisputeResolved') {
+        return null;
+      }
+      if (log.event_name === 'SettlementProposed' && log.details) {
+        const match = log.details.match(/PROPOSAL:\s*proposer:([^\s]+)\s*split:(\d+)/i);
+        if (match) {
+          return {
+            proposer: match[1],
+            clientSplitBps: parseInt(match[2], 10),
+          };
+        }
+      }
+    }
+    return null;
+  };
+
+  // 4. Propose Settlement Split (2-Party)
+  const handleProposeSettlement = async () => {
     setIsSigning(true);
-    setStatusMessage({ type: 'info', text: 'Resolving dispute... Please sign split transaction in Freighter.' });
+    setStatusMessage({ type: 'info', text: 'Submitting split proposal... Please sign in Freighter.' });
 
     try {
       const client = new SafeSplitClient(escrow.contract_address, 'testnet');
-      const operation = client.resolveDisputeTx(currentWalletAddress, {
-        arbiter: currentWalletAddress,
+      const operation = client.proposeSettlementTx(currentWalletAddress, {
+        proposer: currentWalletAddress,
         milestoneId: milestone.milestone_index,
         clientSplitBps: splitBps,
       });
       const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
-      // Update status via Supabase
+      // Update status via Supabase (keep in Disputed but log proposal)
       await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
-        status: splitBps === 10000 ? 'Refunded' : 'Approved',
+        status: 'Disputed',
         txHash: txHash,
-        eventName: 'DisputeResolved',
-        details: `Arbiter resolved dispute on milestone ${milestone.milestone_index + 1} with client split of ${splitBps / 100}%. Tx: ${txHash}`,
+        eventName: 'SettlementProposed',
+        details: `PROPOSAL: proposer:${currentWalletAddress} split:${splitBps}`,
       });
 
-      setStatusMessage({ type: 'success', text: `Dispute resolved successfully! Client split: ${splitBps / 100}%, Freelancer split: ${(10000 - splitBps) / 100}%` });
+      setStatusMessage({ type: 'success', text: `Proposal submitted successfully! Client split: ${splitBps / 100}%, Worker split: ${(10000 - splitBps) / 100}%. Awaiting acceptance.` });
       onActionSuccess();
     } catch (err: unknown) {
       console.error(err);
-      const message = err instanceof Error ? err.message : 'Resolution execution failed.';
+      const message = err instanceof Error ? err.message : 'Proposal submission failed.';
+      setStatusMessage({ type: 'error', text: message });
+    } finally {
+      setIsSigning(false);
+    }
+  };
+
+  // 5. Accept Settlement Split (2-Party)
+  const handleAcceptSettlement = async () => {
+    const activeProposal = getActiveProposal();
+    if (!activeProposal) {
+      setStatusMessage({ type: 'error', text: 'No active settlement proposal found to accept.' });
+      return;
+    }
+
+    setIsSigning(true);
+    setStatusMessage({ type: 'info', text: 'Accepting split settlement... Please sign in Freighter.' });
+
+    try {
+      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const operation = client.acceptSettlementTx(currentWalletAddress, {
+        accepter: currentWalletAddress,
+        milestoneId: milestone.milestone_index,
+      });
+      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+
+      // Finalize status via Supabase
+      await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
+        status: activeProposal.clientSplitBps === 10000 ? 'Refunded' : 'Approved',
+        txHash: txHash,
+        eventName: 'SettlementAccepted',
+        details: `Settlement proposal accepted by ${currentWalletAddress}. Client split: ${activeProposal.clientSplitBps / 100}%, Worker split: ${(10000 - activeProposal.clientSplitBps) / 100}%. Tx: ${txHash}`,
+      });
+
+      setStatusMessage({ type: 'success', text: 'Settlement split finalized and funds successfully distributed!' });
+      onActionSuccess();
+    } catch (err: unknown) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : 'Accepting settlement failed.';
+      setStatusMessage({ type: 'error', text: message });
+    } finally {
+      setIsSigning(false);
+    }
+  };
+
+  const handleUpgradeContract = async () => {
+    if (!wasmHash) return;
+
+    setIsSigning(true);
+    setStatusMessage({ type: 'info', text: 'Upgrading contract logic WASM... Please sign in Freighter.' });
+
+    try {
+      const client = new SafeSplitClient(escrow.contract_address, 'testnet');
+      const operation = client.upgradeTx(currentWalletAddress, {
+        newWasmHash: wasmHash.trim(),
+      });
+      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+
+      setStatusMessage({ type: 'success', text: `Contract logic successfully upgraded to WASM Hash: ${wasmHash.trim()}! Tx: ${txHash}` });
+      setWasmHash('');
+      onActionSuccess();
+    } catch (err: unknown) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : 'Contract upgrade failed.';
       setStatusMessage({ type: 'error', text: message });
     } finally {
       setIsSigning(false);
@@ -592,60 +662,121 @@ export default function MilestoneDetailView({
             )}
 
 
-            {/* 3. ARBITER ACTIONS */}
-            {isArbiter && (
+            {/* 3. DISPUTE NEGOTIATION (2-Party Propose/Accept Split) */}
+            {(isClient || isFreelancer) && milestone.status === 'Disputed' && (
               <div className="space-y-5">
                 <h3 className="text-base font-bold text-slate-200 flex items-center gap-2">
                   <Scale className="w-5 h-5 text-amber-400" />
-                  Arbiter Courtroom
+                  Dispute Negotiation Panel
                 </h3>
 
-                {milestone.status === 'Disputed' ? (
-                  <div className="space-y-4">
-                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-slate-300">Client Split: {splitBps / 100}%</span>
-                        <span className="text-purple-300">Freelancer: {(10000 - splitBps) / 100}%</span>
-                      </div>
-                      
-                      <input
-                        type="range"
-                        min="0"
-                        max="10000"
-                        step="100"
-                        value={splitBps}
-                        onChange={(e) => setSplitBps(Number(e.target.value))}
-                        className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
-                      />
+                {(() => {
+                  const activeProposal = getActiveProposal();
+                  const currentAddressLower = currentWalletAddress.toLowerCase();
 
-                      <div className="text-[10px] text-slate-400 leading-relaxed">
-                        Arbiter fee of {escrow.status === 'Disputed' ? '5.0%' : 'Fee configured'} is automatically subtracted and sent directly to you upon resolution.
-                      </div>
+                  return (
+                    <div className="space-y-4">
+                      {activeProposal ? (
+                        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                          <span className="text-xs font-bold text-zinc-300 block">Pending Split Proposal</span>
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span className="text-slate-300">Client Split: {activeProposal.clientSplitBps / 100}%</span>
+                            <span className="text-purple-300">Worker Split: {(10000 - activeProposal.clientSplitBps) / 100}%</span>
+                          </div>
+                          <p className="text-[10px] text-zinc-400">
+                            Proposed by: <span className="font-mono text-zinc-300">{activeProposal.proposer.substring(0, 8)}...{activeProposal.proposer.slice(-4)}</span>
+                          </p>
+
+                          {activeProposal.proposer.toLowerCase() === currentAddressLower ? (
+                            <div className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl font-semibold">
+                              Waiting for the opposing party to accept your proposal.
+                            </div>
+                          ) : (
+                            <button
+                              onClick={handleAcceptSettlement}
+                              disabled={isSigning}
+                              className="w-full py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-slate-100 text-xs font-bold transition-all shadow-lg hover:shadow-purple-500/20 flex items-center justify-center gap-2"
+                            >
+                              {isSigning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                              Accept Settlement Proposal
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                          <span className="text-xs font-bold text-zinc-300 block">Submit Split Proposal</span>
+                          <p className="text-[10px] text-zinc-400 leading-normal">
+                            Propose a percentage split. If the other party accepts, the contract will execute and distribute the funds immediately.
+                          </p>
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span className="text-slate-300">Client: {splitBps / 100}%</span>
+                            <span className="text-purple-300">Worker: {(10000 - splitBps) / 100}%</span>
+                          </div>
+                          
+                          <input
+                            type="range"
+                            min="0"
+                            max="10000"
+                            step="100"
+                            value={splitBps}
+                            onChange={(e) => setSplitBps(Number(e.target.value))}
+                            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                          />
+
+                          <button
+                            onClick={handleProposeSettlement}
+                            disabled={isSigning}
+                            className="w-full py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-900 text-xs font-bold transition-all flex items-center justify-center gap-2"
+                          >
+                            {isSigning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                            Submit Settlement Proposal
+                          </button>
+                        </div>
+                      )}
                     </div>
-
-                    <button
-                      onClick={handleResolveDispute}
-                      disabled={isSigning}
-                      className="w-full py-3 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-900 text-xs font-bold transition-all shadow-lg hover:shadow-amber-500/20 flex items-center justify-center gap-2"
-                    >
-                      {isSigning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                      Execute Split Settlement
-                    </button>
-                  </div>
-                ) : (
-                  <div className="text-center py-6 text-slate-400 text-xs font-medium">
-                    Contract is healthy. Resolution option is unlocked only if dispute is raised.
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             )}
 
             {/* 4. OTHER / DISCONNECTED WALLET VIEW */}
-            {!isClient && !isFreelancer && !isArbiter && (
-              <div className="text-center py-6">
-                <p className="text-xs text-slate-400 mb-3">Connect wallet belonging to freelancer, client, or arbiter to manage this milestone.</p>
-                <div className="text-xs font-semibold text-purple-400 bg-purple-950/20 border border-purple-900/30 px-3 py-2 rounded-xl inline-block max-w-full truncate">
+            {!isClient && !isFreelancer && (
+              <div className="text-center py-6 border-t border-slate-800/60 pt-6">
+                <p className="text-xs text-slate-400 mb-3">Connect wallet belonging to freelancer or client to manage this milestone.</p>
+                <div className="text-xs font-semibold text-purple-400 bg-purple-950/20 border border-purple-900/30 px-3 py-2 rounded-xl inline-block max-w-full truncate font-mono">
                   Escrow Address: {escrow.contract_address}
+                </div>
+              </div>
+            )}
+
+            {/* 5. Client Admin Settings - Upgrades */}
+            {isClient && (
+              <div className="mt-8 pt-8 border-t border-slate-800 space-y-4">
+                <div className="bg-purple-950/5 border border-purple-900/20 rounded-2xl p-5 space-y-4">
+                  <h3 className="text-sm font-bold text-purple-200 flex items-center gap-2">
+                    <Settings className="w-4 h-4 text-purple-400" />
+                    Contract Settings (Client Admin Only)
+                  </h3>
+                  <p className="text-[11px] text-slate-400 leading-relaxed max-w-xl">
+                    Upgrade the smart contract WASM logic bytecode in-place. The contract address stays exactly the same, but all functions will use the updated logic binary.
+                  </p>
+                  <div className="flex flex-col md:flex-row gap-3">
+                    <input
+                      type="text"
+                      placeholder="Enter 32-byte hex WASM Hash (64 characters)"
+                      value={wasmHash}
+                      onChange={(e) => setWasmHash(e.target.value)}
+                      className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500/80 font-mono transition-colors"
+                    />
+                    <button
+                      onClick={handleUpgradeContract}
+                      disabled={isSigning || !wasmHash}
+                      className="py-2 px-5 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-slate-100 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2"
+                    >
+                      {isSigning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                      Upgrade Contract
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

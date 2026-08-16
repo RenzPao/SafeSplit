@@ -25,7 +25,7 @@ import { Keypair, StrKey } from '@stellar/stellar-sdk';
 
 
 
-interface Milestone {
+export interface Milestone {
   id: string;
   milestone_index: number;
   title: string;
@@ -36,7 +36,7 @@ interface Milestone {
   submission_cid?: string | null;
 }
 
-interface ActivityLog {
+export interface ActivityLog {
   id: string;
   tx_hash: string;
   event_name: string;
@@ -44,7 +44,7 @@ interface ActivityLog {
   details?: string | null;
 }
 
-interface Escrow {
+export interface Escrow {
   id: string;
   contract_address: string;
   client_address: string;

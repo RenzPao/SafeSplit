@@ -44,13 +44,13 @@ pub struct MilestoneInput {
 pub struct EscrowConfig {
     pub client: Address,
     pub freelancer: Address,
-    pub arbiter: Address,
     pub native_token_address: Address,
     pub total_xlm_stroops: i128,
-    pub arbiter_fee_bps: u32,
     pub milestones: Vec<Milestone>,
     pub current_milestone_index: u32,
     pub state: EscrowState,
+    pub proposal_split_bps: Option<u32>,
+    pub proposal_proposer: Option<Address>,
 }
 
 #[contracttype]

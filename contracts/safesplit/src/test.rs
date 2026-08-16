@@ -10,7 +10,6 @@ fn test_escrow_happy_path() {
 
     let client = Address::generate(&e);
     let freelancer = Address::generate(&e);
-    let arbiter = Address::generate(&e);
 
     // Register Native Token (using testutils token)
     let token_admin = Address::generate(&e);
@@ -35,10 +34,8 @@ fn test_escrow_happy_path() {
         amount_stroops: 200_000_000, // 20 XLM
     });
 
-    let arbiter_fee_bps = 250; // 2.5%
-
     // Initialize escrow
-    client_escrow.initialize(&client, &freelancer, &arbiter, &token_address, &milestones, &arbiter_fee_bps);
+    client_escrow.initialize(&client, &freelancer, &token_address, &milestones);
 
     // Mint tokens to client
     token_admin_client.mint(&client, &300_000_000);
@@ -74,7 +71,6 @@ fn test_escrow_dispute_and_resolution() {
 
     let client = Address::generate(&e);
     let freelancer = Address::generate(&e);
-    let arbiter = Address::generate(&e);
 
     // Register Native Token (using testutils token)
     let token_admin = Address::generate(&e);
@@ -94,10 +90,8 @@ fn test_escrow_dispute_and_resolution() {
         amount_stroops: 100_000_000, // 10 XLM
     });
 
-    let arbiter_fee_bps = 500; // 5%
-
     // Initialize, mint, and deposit
-    client_escrow.initialize(&client, &freelancer, &arbiter, &token_address, &milestones, &arbiter_fee_bps);
+    client_escrow.initialize(&client, &freelancer, &token_address, &milestones);
     token_admin_client.mint(&client, &100_000_000);
     client_escrow.deposit_xlm(&client);
 
@@ -109,12 +103,14 @@ fn test_escrow_dispute_and_resolution() {
     let reason_hash = BytesN::from_array(&e, &[9; 32]);
     client_escrow.raise_dispute(&client, &0, &reason_hash);
 
-    // Resolve dispute with a 60/40 client/freelancer split (6000 bps)
-    client_escrow.resolve_dispute(&arbiter, &0, &6000);
+    // Propose split (60% to client)
+    client_escrow.propose_settlement(&client, &0, &6000);
 
-    assert_eq!(token_client.balance(&arbiter), 5_000_000);
-    assert_eq!(token_client.balance(&client), 57_000_000);
-    assert_eq!(token_client.balance(&freelancer), 38_000_000);
+    // Accept split (by freelancer)
+    client_escrow.accept_settlement(&freelancer, &0);
+
+    assert_eq!(token_client.balance(&client), 60_000_000);
+    assert_eq!(token_client.balance(&freelancer), 40_000_000);
     assert_eq!(token_client.balance(&contract_id), 0);
 }
 
@@ -125,7 +121,6 @@ fn test_escrow_cancel_and_refund() {
 
     let client = Address::generate(&e);
     let freelancer = Address::generate(&e);
-    let arbiter = Address::generate(&e);
 
     // Register Native Token
     let token_admin = Address::generate(&e);
@@ -145,7 +140,7 @@ fn test_escrow_cancel_and_refund() {
         amount_stroops: 100_000_000, // 10 XLM
     });
 
-    client_escrow.initialize(&client, &freelancer, &arbiter, &token_address, &milestones, &250);
+    client_escrow.initialize(&client, &freelancer, &token_address, &milestones);
     token_admin_client.mint(&client, &100_000_000);
     client_escrow.deposit_xlm(&client);
 
@@ -154,4 +149,40 @@ fn test_escrow_cancel_and_refund() {
 
     assert_eq!(token_client.balance(&client), 100_000_000);
     assert_eq!(token_client.balance(&contract_id), 0);
+}
+
+
+#[test]
+fn test_escrow_upgrade() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let client = Address::generate(&e);
+    let freelancer = Address::generate(&e);
+
+    // Register Native Token
+    let token_admin = Address::generate(&e);
+    let token_address = e.register_stellar_asset_contract(token_admin.clone());
+
+    // Register SafeSplit contract
+    let contract_id = e.register(SafeSplitContract, ());
+    let client_escrow = SafeSplitContractClient::new(&e, &contract_id);
+
+    // Create Milestone inputs
+    let mut milestones = Vec::new(&e);
+    milestones.push_back(MilestoneInput {
+        id: 0,
+        description_hash: BytesN::from_array(&e, &[1; 32]),
+        amount_stroops: 100_000_000,
+    });
+
+    client_escrow.initialize(&client, &freelancer, &token_address, &milestones);
+
+    // Upload actual compiled wasm bytes to environment to register a valid hash
+    const WASM: &[u8] = include_bytes!("../target/wasm32-unknown-unknown/release/safesplit.wasm");
+    let dummy_wasm = soroban_sdk::Bytes::from_slice(&e, WASM);
+    let new_wasm_hash = e.deployer().upload_contract_wasm(dummy_wasm);
+
+    // Try upgrading with client auth
+    client_escrow.upgrade(&new_wasm_hash);
 }

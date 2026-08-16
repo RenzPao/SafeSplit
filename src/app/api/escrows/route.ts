@@ -13,12 +13,10 @@ export async function POST(req: NextRequest) {
       totalXlm,
       milestones,
     } = body;
-
     if (
       !contractAddress ||
       !clientAddress ||
       !freelancerAddress ||
-      !arbiterAddress ||
       !totalXlm ||
       !milestones ||
       !Array.isArray(milestones)
@@ -29,6 +27,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const resolvedArbiter = arbiterAddress || 'G0000000000000000000000000000000000000000000000000000000';
     // Map and generate SHA-256 description hashes for on-chain parameter parity
     const processedMilestones = milestones.map((m: { title: string; description: string; amountXlm: number | string }, index: number) => {
       const { title, description, amountXlm } = m;
@@ -56,7 +55,7 @@ export async function POST(req: NextRequest) {
         contract_address: contractAddress,
         client_address: clientAddress,
         freelancer_address: freelancerAddress,
-        arbiter_address: arbiterAddress,
+        arbiter_address: resolvedArbiter,
         total_xlm: Number(totalXlm),
         status: 'Initialized',
         milestones: {

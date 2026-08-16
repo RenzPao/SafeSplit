@@ -19,21 +19,15 @@ impl SafeSplitContract {
         e: Env,
         client: Address,
         freelancer: Address,
-        arbiter: Address,
         native_token: Address,
         milestones: Vec<MilestoneInput>,
-        arbiter_fee_bps: u32,
     ) -> Result<(), Error> {
         if e.storage().instance().has(&DataKey::Config) {
             return Err(Error::AlreadyInitialized);
         }
 
-        if client == freelancer || client == arbiter || freelancer == arbiter {
+        if client == freelancer {
             return Err(Error::DuplicateAddresses);
-        }
-
-        if arbiter_fee_bps > 10000 {
-            return Err(Error::BpsLimitExceeded);
         }
 
         let mut total_xlm_stroops: i128 = 0;
@@ -60,13 +54,13 @@ impl SafeSplitContract {
         let config = EscrowConfig {
             client,
             freelancer,
-            arbiter,
             native_token_address: native_token,
             total_xlm_stroops,
-            arbiter_fee_bps,
             milestones: milestone_vec,
             current_milestone_index: 0,
             state: EscrowState::Initialized,
+            proposal_split_bps: None,
+            proposal_proposer: None,
         };
 
         e.storage().instance().set(&DataKey::Config, &config);
@@ -261,13 +255,13 @@ impl SafeSplitContract {
         Ok(())
     }
 
-    pub fn resolve_dispute(
+    pub fn propose_settlement(
         e: Env,
-        arbiter: Address,
+        proposer: Address,
         milestone_id: u32,
         client_split_bps: u32,
     ) -> Result<(), Error> {
-        arbiter.require_auth();
+        proposer.require_auth();
 
         let mut config: EscrowConfig = e
             .storage()
@@ -275,7 +269,7 @@ impl SafeSplitContract {
             .get(&DataKey::Config)
             .ok_or(Error::NotInitialized)?;
 
-        if arbiter != config.arbiter {
+        if proposer != config.client && proposer != config.freelancer {
             return Err(Error::NotAuthorized);
         }
 
@@ -291,6 +285,57 @@ impl SafeSplitContract {
             return Err(Error::InvalidMilestoneSplit);
         }
 
+        let milestones = config.milestones.clone();
+        let milestone = milestones.get(milestone_id).ok_or(Error::MilestoneNotFound)?;
+
+        if milestone.status != MilestoneStatus::Disputed {
+            return Err(Error::MilestoneNotDisputed);
+        }
+
+        config.proposal_split_bps = Some(client_split_bps);
+        config.proposal_proposer = Some(proposer.clone());
+        e.storage().instance().set(&DataKey::Config, &config);
+
+        e.events().publish(
+            (Symbol::new(&e, "propose_settlement"), proposer, milestone_id),
+            client_split_bps,
+        );
+
+        Ok(())
+    }
+
+    pub fn accept_settlement(
+        e: Env,
+        accepter: Address,
+        milestone_id: u32,
+    ) -> Result<(), Error> {
+        accepter.require_auth();
+
+        let mut config: EscrowConfig = e
+            .storage()
+            .instance()
+            .get(&DataKey::Config)
+            .ok_or(Error::NotInitialized)?;
+
+        if accepter != config.client && accepter != config.freelancer {
+            return Err(Error::NotAuthorized);
+        }
+
+        if config.state != EscrowState::Disputed {
+            return Err(Error::InvalidState);
+        }
+
+        if milestone_id != config.current_milestone_index {
+            return Err(Error::InvalidMilestoneSequence);
+        }
+
+        let proposal_proposer = config.proposal_proposer.clone().ok_or(Error::NotAuthorized)?;
+        if accepter == proposal_proposer {
+            return Err(Error::NotAuthorized);
+        }
+
+        let client_split_bps = config.proposal_split_bps.ok_or(Error::NotAuthorized)?;
+
         let mut milestones = config.milestones;
         let mut milestone = milestones.get(milestone_id).ok_or(Error::MilestoneNotFound)?;
 
@@ -300,32 +345,19 @@ impl SafeSplitContract {
 
         let total_amount = milestone.amount_stroops;
 
-        let arbiter_fee = total_amount
-            .checked_mul(config.arbiter_fee_bps as i128)
-            .ok_or(Error::Overflow)?
-            .checked_div(10000)
-            .ok_or(Error::Overflow)?;
-
-        let remaining_amount = total_amount
-            .checked_sub(arbiter_fee)
-            .ok_or(Error::Overflow)?;
-
-        let client_amount = remaining_amount
+        let client_amount = total_amount
             .checked_mul(client_split_bps as i128)
             .ok_or(Error::Overflow)?
             .checked_div(10000)
             .ok_or(Error::Overflow)?;
 
-        let freelancer_amount = remaining_amount
+        let freelancer_amount = total_amount
             .checked_sub(client_amount)
             .ok_or(Error::Overflow)?;
 
         let token_client = token::Client::new(&e, &config.native_token_address);
         let contract_address = e.current_contract_address();
 
-        if arbiter_fee > 0 {
-            token_client.transfer(&contract_address, &config.arbiter, &arbiter_fee);
-        }
         if client_amount > 0 {
             token_client.transfer(&contract_address, &config.client, &client_amount);
         }
@@ -347,11 +379,13 @@ impl SafeSplitContract {
             config.state = EscrowState::InProgress;
         }
 
+        config.proposal_split_bps = None;
+        config.proposal_proposer = None;
         config.milestones = milestones;
         e.storage().instance().set(&DataKey::Config, &config);
 
         e.events().publish(
-            (Symbol::new(&e, "resolve_dispute"), arbiter, milestone_id),
+            (Symbol::new(&e, "accept_settlement"), accepter, milestone_id),
             (client_amount, freelancer_amount),
         );
 
@@ -394,6 +428,20 @@ impl SafeSplitContract {
             (Symbol::new(&e, "cancel_and_refund"), client),
             config.total_xlm_stroops,
         );
+
+        Ok(())
+    }
+
+    pub fn upgrade(e: Env, new_wasm_hash: BytesN<32>) -> Result<(), Error> {
+        let config: EscrowConfig = e
+            .storage()
+            .instance()
+            .get(&DataKey::Config)
+            .ok_or(Error::NotInitialized)?;
+
+        config.client.require_auth();
+
+        e.deployer().update_current_contract_wasm(new_wasm_hash);
 
         Ok(())
     }

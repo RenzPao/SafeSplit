@@ -91,18 +91,13 @@ export class SafeSplitClient {
     });
   }
 
-  /**
-   * 1. initialize
-   */
   public createEscrowTx(
     sourceAddress: string,
     params: {
       client: string;
       freelancer: string;
-      arbiter: string;
       nativeToken: string;
       milestones: MilestoneInput[];
-      arbiterFeeBps: number;
     }
   ): Operation {
     const scMilestones = params.milestones.map((m) => {
@@ -120,10 +115,8 @@ export class SafeSplitClient {
     const args = [
       new Address(params.client).toScVal(),
       new Address(params.freelancer).toScVal(),
-      new Address(params.arbiter).toScVal(),
       new Address(params.nativeToken).toScVal(),
-      xdr.ScVal.scvVec(scMilestones),
-      nativeToScVal(params.arbiterFeeBps, { type: 'u32' })
+      xdr.ScVal.scvVec(scMilestones)
     ];
 
     return this.buildInvokeOp(sourceAddress, 'initialize', args);
@@ -198,22 +191,36 @@ export class SafeSplitClient {
   }
 
   /**
-   * 6. resolve_dispute
+   * 6. propose_settlement & accept_settlement
    */
-  public resolveDisputeTx(
+  public proposeSettlementTx(
     sourceAddress: string,
     params: {
-      arbiter: string;
+      proposer: string;
       milestoneId: number;
       clientSplitBps: number; // 0 to 10000
     }
   ): Operation {
     const args = [
-      new Address(params.arbiter).toScVal(),
+      new Address(params.proposer).toScVal(),
       nativeToScVal(params.milestoneId, { type: 'u32' }),
       nativeToScVal(params.clientSplitBps, { type: 'u32' })
     ];
-    return this.buildInvokeOp(sourceAddress, 'resolve_dispute', args);
+    return this.buildInvokeOp(sourceAddress, 'propose_settlement', args);
+  }
+
+  public acceptSettlementTx(
+    sourceAddress: string,
+    params: {
+      accepter: string;
+      milestoneId: number;
+    }
+  ): Operation {
+    const args = [
+      new Address(params.accepter).toScVal(),
+      nativeToScVal(params.milestoneId, { type: 'u32' })
+    ];
+    return this.buildInvokeOp(sourceAddress, 'accept_settlement', args);
   }
 
   /**
@@ -222,5 +229,25 @@ export class SafeSplitClient {
   public cancelAndRefundTx(sourceAddress: string, clientAddress: string): Operation {
     const args = [new Address(clientAddress).toScVal()];
     return this.buildInvokeOp(sourceAddress, 'cancel_and_refund', args);
+  }
+
+  /**
+   * 8. upgrade contract WASM
+   */
+  public upgradeTx(
+    sourceAddress: string,
+    params: {
+      newWasmHash: string; // 32-byte hex string
+    }
+  ): Operation {
+    const hashBuffer = Buffer.from(params.newWasmHash.replace(/^0x/i, ''), 'hex');
+    if (hashBuffer.length !== 32) {
+      throw new Error('WASM hash must be exactly 32 bytes (64 hex characters)');
+    }
+
+    const args = [
+      xdr.ScVal.scvBytes(hashBuffer)
+    ];
+    return this.buildInvokeOp(sourceAddress, 'upgrade', args);
   }
 }
