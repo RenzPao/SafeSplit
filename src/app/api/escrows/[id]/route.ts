@@ -6,18 +6,18 @@ const TESTNET_RPC_URL = 'https://soroban-testnet.stellar.org';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ address: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { address } = await params;
+    const { id } = await params;
 
-    if (!address) {
-      return NextResponse.json({ error: 'Contract address is required' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: 'Escrow ID is required' }, { status: 400 });
     }
 
     // Query database for off-chain metadata (title, description, activity logs)
     const escrow = await prisma.escrow.findUnique({
-      where: { contract_address: address },
+      where: { id: id },
       include: {
         milestones: {
           orderBy: { milestone_index: 'asc' },
@@ -37,14 +37,13 @@ export async function GET(
     try {
       const server = new rpc.Server(TESTNET_RPC_URL);
       
-      // DataKey::Config is represented in XDR as DataKey enum which maps to custom types.
-      // We can construct the XDR ledger key for instance storage
-      const contract = new Contract(address);
+      const contract = new Contract(escrow.contract_address);
       const ledgerKey = xdr.LedgerKey.contractData(
         new xdr.LedgerKeyContractData({
           contract: contract.address().toScAddress(),
           key: xdr.ScVal.scvVec([
-            xdr.ScVal.scvSymbol('Config') // DataKey::Config
+            xdr.ScVal.scvSymbol('Escrow'),
+            xdr.ScVal.scvString(escrow.id)
           ]),
           durability: xdr.ContractDataDurability.persistent()
         })

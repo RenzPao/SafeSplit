@@ -120,11 +120,14 @@ export async function fetchEscrowMetadata(escrowId: string) {
   let onChainState = null;
   try {
     const server = new rpc.Server('https://soroban-testnet.stellar.org');
-    const contract = new Contract(contractAddress);
+    const contract = new Contract(escrow.contract_address);
     const ledgerKey = xdr.LedgerKey.contractData(
       new xdr.LedgerKeyContractData({
         contract: contract.address().toScAddress(),
-        key: xdr.ScVal.scvVec([xdr.ScVal.scvSymbol('Config')]),
+        key: xdr.ScVal.scvVec([
+          xdr.ScVal.scvSymbol('Escrow'),
+          xdr.ScVal.scvString(escrow.id)
+        ]),
         durability: xdr.ContractDataDurability.persistent(),
       })
     );
