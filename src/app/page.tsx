@@ -14,7 +14,9 @@ import {
   CheckCircle,
   HelpCircle,
   Copy,
-  Check
+  Check,
+  Lock,
+  Bell
 } from 'lucide-react';
 import MilestoneDetailView from '@/components/MilestoneDetailView';
 import { createEscrowMetadata, fetchEscrowMetadata } from '@/lib/stellar/supabaseBackend';
@@ -72,6 +74,30 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [recentEscrows, setRecentEscrows] = useState<string[]>([]);
+  const [invitations, setInvitations] = useState<Escrow[]>([]);
+  const [isFetchingInvitations, setIsFetchingInvitations] = useState(false);
+
+  // Fetch invitations when wallet connects
+  useEffect(() => {
+    const fetchInvitations = async () => {
+      if (!walletAddress) {
+        setInvitations([]);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/escrows/invitations?freelancer=${encodeURIComponent(walletAddress)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            setInvitations(data.invitations);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch invitations:', err);
+      }
+    };
+    fetchInvitations();
+  }, [walletAddress]);
 
   // Create Escrow form states
   const [formContractAddress, setFormContractAddress] = useState('');
@@ -379,6 +405,12 @@ export default function Home() {
     setTimeout(() => setCopiedText(null), 2000);
   };
 
+  const hasPermission = loadedEscrow && walletAddress && (
+    walletAddress === loadedEscrow.client_address ||
+    walletAddress === loadedEscrow.freelancer_address ||
+    walletAddress === loadedEscrow.arbiter_address
+  );
+
   return (
     <div className="flex-1 min-h-screen flex flex-col bg-zinc-950 text-zinc-100 selection:bg-purple-500/30 selection:text-purple-200">
       
@@ -548,6 +580,35 @@ export default function Home() {
               </div>
             )}
 
+            {/* Invitations shortcut */}
+            {!loadedEscrow && invitations.length > 0 && (
+              <div className="bg-purple-900/10 border border-purple-500/20 rounded-2xl p-6">
+                <h3 className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Bell className="w-4 h-4" />
+                  Pending Invitations ({invitations.length})
+                </h3>
+                <div className="flex flex-col gap-2">
+                  {invitations.map((inv) => (
+                    <button
+                      key={inv.id}
+                      onClick={() => handleLoadEscrow(inv.id)}
+                      className="flex items-center justify-between text-left p-3 rounded-xl bg-purple-950/20 border border-purple-500/20 hover:border-purple-500/40 hover:bg-purple-900/20 transition-all group"
+                    >
+                      <div>
+                        <div className="text-sm font-semibold text-zinc-200">Escrow Invitation</div>
+                        <div className="text-[10px] text-zinc-500 mt-1 uppercase font-bold tracking-wide">
+                          ID: {inv.id.substring(0, 8)} • From: {inv.client_address.substring(0, 6)}...{inv.client_address.slice(-4)}
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-semibold text-purple-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 bg-purple-500/10 px-3 py-1.5 rounded-full">
+                        View Details →
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Recents escrows shortcut */}
             {!loadedEscrow && recentEscrows.length > 0 && (
               <div className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-6">
@@ -569,7 +630,20 @@ export default function Home() {
               </div>
             )}
 
-            {loadedEscrow ? (
+            {loadedEscrow && !hasPermission && (
+              <div className="bg-zinc-900/30 border border-red-500/30 rounded-2xl p-6 text-center py-20 flex flex-col items-center justify-center">
+                <Lock className="w-12 h-12 text-red-500/50 mb-3" />
+                <div className="text-red-400 mb-2 font-semibold text-base">Access Denied</div>
+                <div className="text-zinc-400 text-sm max-w-md">
+                  You do not have permission to view this escrow. Connect with the correct wallet assigned as the Client, Freelancer, or Arbiter.
+                </div>
+                <button onClick={() => setLoadedEscrow(null)} className="mt-6 px-4 py-2 bg-zinc-800 rounded-lg text-xs hover:bg-zinc-700 transition-colors">
+                  Close Dashboard
+                </button>
+              </div>
+            )}
+
+            {loadedEscrow && hasPermission && (
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
                 
                 {/* Left: Escrow detail & Milestones list (Col 5) */}
@@ -734,7 +808,9 @@ export default function Home() {
                 </div>
 
               </div>
-            ) : (
+            )}
+
+            {!loadedEscrow && (
               <div className="text-center py-20 bg-zinc-900/20 border border-dashed border-zinc-800 rounded-3xl p-8 flex flex-col items-center justify-center">
                 <Layers className="w-12 h-12 text-zinc-600 mb-3" />
                 <h3 className="text-base font-bold text-zinc-300">No Escrow Contract Loaded</h3>
