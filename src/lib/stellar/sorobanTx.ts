@@ -59,8 +59,8 @@ export async function buildAndSubmitSorobanTx(
   // 7. Poll status until final result
   let statusResponse = await server.getTransaction(sendResponse.hash);
   let attempts = 0;
-  while ((statusResponse.status as string) === 'PENDING' && attempts < 10) {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+  while ((statusResponse.status as string) === 'NOT_FOUND' && attempts < 15) {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     statusResponse = await server.getTransaction(sendResponse.hash);
     attempts++;
   }
