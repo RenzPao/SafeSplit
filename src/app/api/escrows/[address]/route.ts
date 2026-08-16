@@ -60,10 +60,8 @@ export async function GET(
         interface NativeEscrowConfig {
           client: string;
           freelancer: string;
-          arbiter: string;
           total_xlm_stroops: { toString: () => string };
           current_milestone_index: number;
-          arbiter_fee_bps: number;
           state: string;
         }
         const nativeConfig = scValToNative(val.contractData().val()) as NativeEscrowConfig;
@@ -72,10 +70,8 @@ export async function GET(
         onChainState = {
           client: nativeConfig.client,
           freelancer: nativeConfig.freelancer,
-          arbiter: nativeConfig.arbiter,
           totalXlmStroops: nativeConfig.total_xlm_stroops.toString(),
           currentMilestoneIndex: nativeConfig.current_milestone_index,
-          arbiterFeeBps: nativeConfig.arbiter_fee_bps,
           state: nativeConfig.state, // e.g. "Initialized" | "Funded" | "InProgress" | "Disputed" | "Completed" | "Cancelled"
         };
 

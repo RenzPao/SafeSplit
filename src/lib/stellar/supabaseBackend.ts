@@ -18,7 +18,7 @@ export interface EscrowMetadataInput {
   contractAddress: string;
   clientAddress: string;
   freelancerAddress: string;
-  arbiterAddress: string;
+  arbiterAddress?: string;
   totalXlm: number;
   milestones: MilestoneMetadataInput[];
 }
@@ -47,7 +47,7 @@ export async function createEscrowMetadata(input: EscrowMetadataInput) {
       contract_address: input.contractAddress,
       client_address: input.clientAddress,
       freelancer_address: input.freelancerAddress,
-      arbiter_address: input.arbiterAddress,
+      arbiter_address: input.arbiterAddress || 'G0000000000000000000000000000000000000000000000000000000',
       total_xlm: input.totalXlm,
       status: 'Initialized',
     })
@@ -138,10 +138,8 @@ export async function fetchEscrowMetadata(contractAddress: string) {
       interface NativeEscrowConfig {
         client: string;
         freelancer: string;
-        arbiter: string;
         total_xlm_stroops: { toString: () => string };
         current_milestone_index: number;
-        arbiter_fee_bps: number;
         state: string;
       }
       const nativeConfig = scValToNative(val.contractData().val()) as NativeEscrowConfig;
@@ -149,10 +147,8 @@ export async function fetchEscrowMetadata(contractAddress: string) {
       onChainState = {
         client: nativeConfig.client,
         freelancer: nativeConfig.freelancer,
-        arbiter: nativeConfig.arbiter,
         totalXlmStroops: nativeConfig.total_xlm_stroops.toString(),
         currentMilestoneIndex: nativeConfig.current_milestone_index,
-        arbiterFeeBps: nativeConfig.arbiter_fee_bps,
         state: nativeConfig.state,
       };
 
