@@ -16,7 +16,9 @@ import {
   Copy,
   Check,
   Lock,
-  Bell
+  Bell,
+  X,
+  CheckCircle2
 } from 'lucide-react';
 import MilestoneDetailView from '@/components/MilestoneDetailView';
 import RegistrationModal from '@/components/RegistrationModal';
@@ -431,7 +433,8 @@ export default function Home() {
       await updateEscrowStatus(loadedEscrow.id, {
         status: 'Completed',
         eventName: 'EscrowCompleted',
-        details: 'Client has manually completed and finalized the escrow.'
+        details: 'Client has manually completed and finalized the escrow.',
+        txHash: 'N/A'
       });
       alert('Escrow finalized successfully.');
       handleLoadEscrow(loadedEscrow.id);
