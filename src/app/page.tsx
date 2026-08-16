@@ -108,6 +108,27 @@ export default function Home() {
     setFaucetMessage(null);
   };
 
+  const fetchAddressForField = async (field: 'client' | 'freelancer' | 'arbiter') => {
+    try {
+      const connectedRes = await isConnected();
+      if (!connectedRes || !connectedRes.isConnected) {
+        alert('Freighter wallet extension not detected. Please install it.');
+        return;
+      }
+      const accessRes = await requestAccess();
+      if (accessRes && accessRes.address) {
+        if (field === 'client') setFormClientAddress(accessRes.address);
+        if (field === 'freelancer') setFormFreelancerAddress(accessRes.address);
+        if (field === 'arbiter') setFormArbiterAddress(accessRes.address);
+        
+        setWalletAddress(accessRes.address);
+        setWalletConnected(true);
+      }
+    } catch (err: unknown) {
+      alert(`Failed to fetch Freighter address: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
   const handleFundWithFriendbot = async (targetAddr?: string) => {
     const addressToFund = targetAddr || faucetAddress;
     if (!addressToFund) {
@@ -779,15 +800,13 @@ export default function Home() {
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
                         <label className="text-xs text-zinc-400 font-semibold">Client Wallet (Funder)</label>
-                        {walletAddress && (
-                          <button
-                            type="button"
-                            onClick={() => setFormClientAddress(walletAddress)}
-                            className="text-[9px] font-bold text-purple-400 hover:underline hover:text-purple-300 transition-all"
-                          >
-                            Use Connected Wallet
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => fetchAddressForField('client')}
+                          className="text-[9px] font-bold text-purple-400 hover:underline hover:text-purple-300 transition-all"
+                        >
+                          Import from Freighter
+                        </button>
                       </div>
                       <input
                         type="text"
@@ -801,15 +820,13 @@ export default function Home() {
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
                         <label className="text-xs text-zinc-400 font-semibold">Freelancer Wallet (Worker)</label>
-                        {walletAddress && (
-                          <button
-                            type="button"
-                            onClick={() => setFormFreelancerAddress(walletAddress)}
-                            className="text-[9px] font-bold text-purple-400 hover:underline hover:text-purple-300 transition-all"
-                          >
-                            Use Connected Wallet
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => fetchAddressForField('freelancer')}
+                          className="text-[9px] font-bold text-purple-400 hover:underline hover:text-purple-300 transition-all"
+                        >
+                          Import from Freighter
+                        </button>
                       </div>
                       <input
                         type="text"
@@ -823,15 +840,13 @@ export default function Home() {
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
                         <label className="text-xs text-zinc-400 font-semibold">Mediator Wallet (Neutral Third-Party)</label>
-                        {walletAddress && (
-                          <button
-                            type="button"
-                            onClick={() => setFormArbiterAddress(walletAddress)}
-                            className="text-[9px] font-bold text-purple-400 hover:underline hover:text-purple-300 transition-all"
-                          >
-                            Use Connected Wallet
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => fetchAddressForField('arbiter')}
+                          className="text-[9px] font-bold text-purple-400 hover:underline hover:text-purple-300 transition-all"
+                        >
+                          Import from Freighter
+                        </button>
                       </div>
                       <input
                         type="text"
