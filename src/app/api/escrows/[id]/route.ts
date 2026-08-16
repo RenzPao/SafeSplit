@@ -84,7 +84,7 @@ export async function GET(
         }
       }
     } catch (rpcErr) {
-      console.warn(`Could not sync on-chain state for contract ${address}:`, rpcErr);
+      console.warn(`Could not sync on-chain state for escrow ${id}:`, rpcErr);
     }
 
     return NextResponse.json({
