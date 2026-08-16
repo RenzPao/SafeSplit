@@ -50,6 +50,7 @@ export interface ActivityLog {
 
 export interface Escrow {
   id: string;
+  title?: string;
   contract_address: string;
   client_address: string;
   freelancer_address: string;
@@ -75,7 +76,7 @@ export default function Home() {
   const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [recentEscrows, setRecentEscrows] = useState<string[]>([]);
+  const [recentEscrows, setRecentEscrows] = useState<{id: string, title: string}[]>([]);
   const [invitations, setInvitations] = useState<Escrow[]>([]);
   const [isFetchingInvitations, setIsFetchingInvitations] = useState(false);
 
@@ -150,6 +151,7 @@ export default function Home() {
   }, [walletAddress]);
 
   // Create Escrow form states
+  const [formTitle, setFormTitle] = useState('');
   const [formContractAddress, setFormContractAddress] = useState('');
   const [formClientAddress, setFormClientAddress] = useState('');
   const [formFreelancerAddress, setFormFreelancerAddress] = useState('');
@@ -247,14 +249,19 @@ export default function Home() {
     const saved = localStorage.getItem('safesplit_recent_escrows');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved) as string[];
+        const parsed = JSON.parse(saved);
+        // Normalize array elements to { id, title }
+        const normalized = parsed.map((item: any) => {
+          if (typeof item === 'string') {
+            return { id: item, title: 'Unknown Escrow' };
+          }
+          return item;
+        });
         // Filter out Stellar Contract Addresses (which start with C and are 56 chars) 
         // to only keep UUIDs
-        const validUuids = parsed.filter(item => !item.startsWith('C') || item.length < 50);
-        setRecentEscrows(validUuids);
-        if (validUuids.length !== parsed.length) {
-          localStorage.setItem('safesplit_recent_escrows', JSON.stringify(validUuids));
-        }
+        const validItems = normalized.filter((item: any) => !item.id.startsWith('C') || item.id.length < 50);
+        setRecentEscrows(validItems);
+        localStorage.setItem('safesplit_recent_escrows', JSON.stringify(validItems));
       } catch (e) {
         console.error(e);
       }
@@ -331,9 +338,10 @@ export default function Home() {
     }
   };
   // Add an escrow ID to recent local storage list
-  const addRecentEscrow = (id: string) => {
+  const addRecentEscrow = (id: string, title?: string) => {
     if (!id) return;
-    const updated = [id, ...recentEscrows.filter(a => a !== id)].slice(0, 5);
+    const newItem = { id, title: title || 'Unknown Escrow' };
+    const updated = [newItem, ...recentEscrows.filter(a => a.id !== id)].slice(0, 5);
     setRecentEscrows(updated);
     localStorage.setItem('safesplit_recent_escrows', JSON.stringify(updated));
   };
@@ -352,7 +360,7 @@ export default function Home() {
       const data = await fetchEscrowMetadata(targetId);
       setLoadedEscrow(data.escrow);
       setSelectedMilestoneIndex(0);
-      addRecentEscrow(targetId);
+      addRecentEscrow(targetId, data.escrow.title);
       if (!idToLoad) {
         setSearchAddress('');
       }
@@ -420,6 +428,7 @@ export default function Home() {
 
     try {
       const data = await createEscrowMetadata({
+        title: formTitle.trim() || 'Untitled Escrow',
         contractAddress: contractAddress.trim(),
         clientAddress: formClientAddress.trim(),
         freelancerAddress: formFreelancerAddress.trim(),
@@ -433,8 +442,8 @@ export default function Home() {
         descriptionHashes: data.descriptionHashes
       });
 
-      // Add to recents
-      addRecentEscrow(contractAddress.trim());
+      // Add to recents using the DB ID (UUID), not contract address!
+      addRecentEscrow(data.escrow.id, data.escrow.title);
 
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';
@@ -701,14 +710,17 @@ export default function Home() {
               <div className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-6">
                 <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Recently Viewed Escrows</h3>
                 <div className="flex flex-col gap-2">
-                  {recentEscrows.map((id) => (
+                  {recentEscrows.map((item) => (
                     <button
-                      key={id}
-                      onClick={() => handleLoadEscrow(id)}
+                      key={item.id}
+                      onClick={() => handleLoadEscrow(item.id)}
                       className="flex items-center justify-between text-left p-3 rounded-xl bg-zinc-950 border border-zinc-900 hover:border-zinc-800 hover:bg-zinc-900/20 transition-all group"
                     >
-                      <span className="text-xs font-mono text-zinc-300 truncate pr-4">{id}</span>
-                      <span className="text-[10px] font-semibold text-purple-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                      <div className="flex flex-col min-w-0 pr-4">
+                        <span className="text-xs font-bold text-zinc-200 truncate">{item.title}</span>
+                        <span className="text-[10px] font-mono text-zinc-500 truncate mt-0.5">{item.id}</span>
+                      </div>
+                      <span className="text-[10px] font-semibold text-purple-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
                         Load Escrow →
                       </span>
                     </button>
@@ -981,6 +993,19 @@ export default function Home() {
                     <div className="space-y-1.5 md:col-span-2 text-xs text-zinc-400">
                       <strong>Contract Target:</strong> Environment variables will automatically route this escrow to the central SafeSplit contract address on the Soroban network.
                     </div>
+                    
+                    {/* Project Name */}
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className="text-xs text-zinc-400 font-semibold">Project Name</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Website Redesign"
+                        value={formTitle}
+                        onChange={(e) => setFormTitle(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-purple-500/80 transition-colors"
+                      />
+                    </div>
+                    
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
                         <label className="text-xs text-zinc-400 font-semibold">Client Wallet (Funder)</label>

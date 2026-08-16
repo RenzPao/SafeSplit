@@ -586,7 +586,7 @@ export default function MilestoneDetailView({
                       onDragLeave={handleDrag}
                       onDragOver={handleDrag}
                       onDrop={handleDrop}
-                      className={`border-2 border-dashed rounded-2xl p-5 flex flex-col items-center justify-center transition-all cursor-pointer ${
+                      className={`relative border-2 border-dashed rounded-2xl p-5 flex flex-col items-center justify-center transition-all cursor-pointer ${
                         dragActive ? 'border-purple-500 bg-purple-500/5' : 
                         file ? 'border-emerald-500/60 bg-emerald-500/5' : 'border-slate-800 hover:border-slate-700 bg-slate-900/30'
                       }`}

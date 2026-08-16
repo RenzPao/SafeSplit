@@ -15,6 +15,7 @@ export interface MilestoneMetadataInput {
 }
 
 export interface EscrowMetadataInput {
+  title: string;
   contractAddress: string;
   clientAddress: string;
   freelancerAddress: string;
@@ -44,6 +45,7 @@ export async function createEscrowMetadata(input: EscrowMetadataInput) {
   const { data: escrow, error: escrowError } = await supabase
     .from('Escrow')
     .insert({
+      title: input.title,
       contract_address: input.contractAddress,
       client_address: input.clientAddress,
       freelancer_address: input.freelancerAddress,
