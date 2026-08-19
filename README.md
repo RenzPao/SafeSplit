@@ -108,7 +108,7 @@ Unlike standard crypto payments or centralized escrow services (like Upwork), Sa
 ### Live Demo & Testnet Details
 * **Live Demo:** [https://safesplit.vercel.app](https://safesplit.vercel.app)
   
-- **Live Pitch Deck**: [Link placeholder]
+- **Live Pitch Deck**: [https://safesplit.vercel.app/pitchdeck](https://safesplit.vercel.app/pitchdeck)
 - **Demo Video (YouTube)**: [Link placeholder]
 * **Contract Address:** [`CC6QLF4DI7C6LKURR2V7XQOZ72BNG5BOKURQ2SYQHPTAZEHO7PLRMR5K`](https://stellar.expert/explorer/testnet/contract/CC6QLF4DI7C6LKURR2V7XQOZ72BNG5BOKURQ2SYQHPTAZEHO7PLRMR5K)
 * **Transaction Hash:** [`e2105673626ac4aade91e70f6fad328b9ff57b053c07b2f1a55c059724dbbe0d`](https://stellar.expert/explorer/testnet/tx/e2105673626ac4aade91e70f6fad328b9ff57b053c07b2f1a55c059724dbbe0d)
