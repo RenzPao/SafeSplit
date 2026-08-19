@@ -22,7 +22,7 @@ import { uploadDeliverableFile, updateMilestoneStatus, updateEscrowStatus } from
 
 
 
-import type { Escrow, Milestone, ActivityLog } from '@/app/page';
+import type { Escrow, Milestone, ActivityLog } from '@/app/dashboard/page';
 
 
 
