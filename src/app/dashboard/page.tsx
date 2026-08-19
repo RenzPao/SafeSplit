@@ -583,7 +583,7 @@ export default function Home() {
 
   const copyInviteLink = (id: string) => {
     if (typeof window !== 'undefined') {
-      const url = `${window.location.origin}/?join=${id}`;
+      const url = `${window.location.origin}/dashboard?join=${id}`;
       navigator.clipboard.writeText(url);
       setCopiedText('invite');
       setTimeout(() => setCopiedText(null), 2000);
