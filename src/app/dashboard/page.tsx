@@ -618,6 +618,15 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Center nav links */}
+          <div className="hidden md:flex items-center gap-1">
+            <a href="/" className="px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-500 hover:text-white hover:bg-zinc-900 transition-all">Home</a>
+            <a href="/history" className="px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-500 hover:text-white hover:bg-zinc-900 transition-all flex items-center gap-1.5">
+              <Activity className="w-3 h-3" /> History
+            </a>
+            <a href="/pitchdeck" className="px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-500 hover:text-white hover:bg-zinc-900 transition-all">Pitch Deck</a>
+          </div>
+
           <div className="flex items-center gap-3">
             {walletConnected && (
               <div className="relative">

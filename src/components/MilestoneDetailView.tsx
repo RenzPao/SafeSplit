@@ -19,6 +19,7 @@ import {
 import { SafeSplitClient } from '@/lib/stellar/SafeSplitClient';
 import { buildAndSubmitSorobanTx } from '@/lib/stellar/sorobanTx';
 import { uploadDeliverableFile, updateMilestoneStatus, updateEscrowStatus } from '@/lib/stellar/supabaseBackend';
+import StellarExpertButton from '@/components/StellarExpertButton';
 
 
 
@@ -46,6 +47,7 @@ export default function MilestoneDetailView({
   const [isUploading, setIsUploading] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'info' | 'success' | 'error'; text: string } | null>(null);
+  const [lastTxHash, setLastTxHash] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [splitBps, setSplitBps] = useState(5000); // 50% split default (5000 bps)
   const [wasmHash, setWasmHash] = useState('');
@@ -150,6 +152,7 @@ export default function MilestoneDetailView({
         details: `Freelancer submitted work for milestone ${milestone.milestone_index + 1}. CID: ${cid}. Tx: ${txHash}`,
       });
 
+      setLastTxHash(txHash);
       setStatusMessage({ type: 'success', text: 'Milestone submitted successfully on-chain!' });
       onActionSuccess();
     } catch (err: unknown) {
@@ -186,6 +189,7 @@ export default function MilestoneDetailView({
         details: `Client approved milestone ${milestone.milestone_index + 1} and funds were released. Tx: ${txHash}`,
       });
 
+      setLastTxHash(txHash);
       setStatusMessage({ type: 'success', text: 'Milestone approved and XLM released to freelancer!' });
       onActionSuccess();
     } catch (err: unknown) {
@@ -234,6 +238,7 @@ export default function MilestoneDetailView({
         details: `Client initialized the escrow contract on-chain. Tx: ${txHash}`,
       });
 
+      setLastTxHash(txHash);
       setStatusMessage({ type: 'success', text: 'Escrow contract initialized successfully on-chain!' });
       onActionSuccess();
     } catch (err: unknown) {
@@ -264,6 +269,7 @@ export default function MilestoneDetailView({
         details: `Client funded the escrow with ${escrow.total_xlm} XLM on-chain. Tx: ${txHash}`,
       });
 
+      setLastTxHash(txHash);
       setStatusMessage({ type: 'success', text: 'Escrow contract funded successfully on-chain!' });
       onActionSuccess();
     } catch (err: unknown) {
@@ -294,6 +300,7 @@ export default function MilestoneDetailView({
         details: `Client cancelled the escrow agreement and refunded all remaining funds. Tx: ${txHash}`,
       });
 
+      setLastTxHash(txHash);
       setStatusMessage({ type: 'success', text: 'Escrow cancelled and funds refunded to your wallet!' });
       onActionSuccess();
     } catch (err: unknown) {
@@ -330,6 +337,7 @@ export default function MilestoneDetailView({
         details: `Dispute raised on milestone ${milestone.milestone_index + 1} by caller ${currentWalletAddress}. Tx: ${txHash}`,
       });
 
+      setLastTxHash(txHash);
       setStatusMessage({ type: 'success', text: 'Dispute raised successfully. Contract locked pending arbiter resolution.' });
       onActionSuccess();
     } catch (err: unknown) {
@@ -388,6 +396,7 @@ export default function MilestoneDetailView({
         details: `PROPOSAL: proposer:${currentWalletAddress} split:${splitBps}`,
       });
 
+      setLastTxHash(txHash);
       setStatusMessage({ type: 'success', text: `Proposal submitted successfully! Client split: ${splitBps / 100}%, Worker split: ${(10000 - splitBps) / 100}%. Awaiting acceptance.` });
       onActionSuccess();
     } catch (err: unknown) {
@@ -427,6 +436,7 @@ export default function MilestoneDetailView({
         details: `Settlement proposal accepted by ${currentWalletAddress}. Client split: ${activeProposal.clientSplitBps / 100}%, Worker split: ${(10000 - activeProposal.clientSplitBps) / 100}%. Tx: ${txHash}`,
       });
 
+      setLastTxHash(txHash);
       setStatusMessage({ type: 'success', text: 'Settlement split finalized and funds successfully distributed!' });
       onActionSuccess();
     } catch (err: unknown) {
@@ -506,8 +516,13 @@ export default function MilestoneDetailView({
         }`}>
           {statusMessage.type === 'info' && <Loader2 className="w-4 h-4 animate-spin text-purple-400 mt-0.5" />}
           {statusMessage.type === 'error' && <AlertTriangle className="w-4 h-4 text-rose-400 mt-0.5" />}
-          {statusMessage.type === 'success' && <Check className="w-4 h-4 text-emerald-400 mt-0.5" />}
-          <div className="flex-1 font-medium">{statusMessage.text}</div>
+          {statusMessage.type === 'success' && <Check className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />}
+          <div className="flex-1 flex flex-col gap-2 font-medium">
+            <span>{statusMessage.text}</span>
+            {statusMessage.type === 'success' && lastTxHash && (
+              <StellarExpertButton txHash={lastTxHash} size="md" />
+            )}
+          </div>
         </div>
       )}
 
