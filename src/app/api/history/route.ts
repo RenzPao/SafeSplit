@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabaseClient';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -10,23 +10,35 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Fetch all escrows where the wallet is a participant in any role
-    const escrows = await prisma.escrow.findMany({
-      where: {
-        OR: [
-          { client_address: wallet },
-          { freelancer_address: wallet },
-          { arbiter_address: wallet },
-        ],
-      },
-      include: {
-        milestones: { orderBy: { milestone_index: 'asc' } },
-        activity_logs: { orderBy: { timestamp: 'desc' } },
-      },
-      orderBy: { created_at: 'desc' },
-    });
+    // Fetch all escrows where the wallet is a participant (client, freelancer, or arbiter)
+    // We join milestones and activity_logs directly via Supabase select
+    const { data: escrows, error: escrowsError } = await supabase
+      .from('Escrow')
+      .select(`
+        *,
+        milestones:Milestone(*),
+        activity_logs:ActivityLog(*)
+      `)
+      .or(`client_address.eq.${wallet},freelancer_address.eq.${wallet},arbiter_address.eq.${wallet}`)
+      .order('created_at', { ascending: false });
 
-    // Collect all unique participant addresses to batch-resolve names
+    if (escrowsError) {
+      throw new Error(escrowsError.message);
+    }
+
+    if (!escrows) {
+      return NextResponse.json({
+        escrows: [],
+        summary: {
+          totalEscrows: 0,
+          totalVolume: 0,
+          totalTransactions: 0,
+          completedEscrows: 0,
+        },
+      });
+    }
+
+    // Collect all unique participant addresses to batch-resolve display names
     const addressSet = new Set<string>();
     for (const e of escrows) {
       addressSet.add(e.client_address);
@@ -35,26 +47,41 @@ export async function GET(req: NextRequest) {
     }
     const addresses = Array.from(addressSet).filter(Boolean);
 
-    const users = await prisma.user.findMany({
-      where: { wallet_address: { in: addresses } },
-      select: { wallet_address: true, name: true },
-    });
-    const nameMap = new Map(users.map((u) => [u.wallet_address, u.name]));
+    // Fetch user display names in one query
+    const { data: users, error: usersError } = await supabase
+      .from('User')
+      .select('wallet_address, name')
+      .in('wallet_address', addresses);
 
-    const enrichedEscrows = escrows.map((escrow) => {
-      const milestoneMap = new Map(
-        escrow.milestones.map((m) => [m.milestone_index, m.title])
+    if (usersError) {
+      console.warn('Could not resolve display names:', usersError.message);
+    }
+
+    const nameMap = new Map((users || []).map((u: any) => [u.wallet_address, u.name]));
+
+    const enrichedEscrows = escrows.map((escrow: any) => {
+      // Sort milestones by milestone_index ascending
+      const sortedMilestones = (escrow.milestones || []).sort(
+        (a: any, b: any) => a.milestone_index - b.milestone_index
       );
 
-      // Determine the caller's role in this escrow
-      let userRole: 'client' | 'freelancer' | 'arbiter' | 'observer' = 'observer';
-      if (escrow.client_address === wallet) userRole = 'client';
-      else if (escrow.freelancer_address === wallet) userRole = 'freelancer';
-      else if (escrow.arbiter_address === wallet) userRole = 'arbiter';
+      // Sort activity logs by timestamp descending
+      const sortedLogs = (escrow.activity_logs || []).sort(
+        (a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
 
-      // Enrich each activity log entry
-      const transactions = escrow.activity_logs.map((log) => {
-        // Extract milestone index from details string (1-based in logs)
+      const milestoneMap = new Map<number, string>(
+        sortedMilestones.map((m: any) => [Number(m.milestone_index), String(m.title)])
+      );
+
+      // Determine caller's role
+      let userRole: 'client' | 'freelancer' | 'arbiter' | 'observer' = 'observer';
+      if (escrow.client_address.toLowerCase() === wallet.toLowerCase()) userRole = 'client';
+      else if (escrow.freelancer_address.toLowerCase() === wallet.toLowerCase()) userRole = 'freelancer';
+      else if (escrow.arbiter_address && escrow.arbiter_address.toLowerCase() === wallet.toLowerCase()) userRole = 'arbiter';
+
+      // Enrich logs
+      const transactions = sortedLogs.map((log: any) => {
         let milestoneTitle: string | null = null;
         const milestoneMatch = log.details?.match(/milestone\s+(\d+)/i);
         if (milestoneMatch) {
@@ -62,7 +89,6 @@ export async function GET(req: NextRequest) {
           milestoneTitle = milestoneMap.get(idx) ?? null;
         }
 
-        // Extract XLM amount from details string
         let amountXlm: number | null = null;
         const xlmMatch = log.details?.match(/([\d.]+)\s*XLM/i);
         if (xlmMatch) amountXlm = parseFloat(xlmMatch[1]);
@@ -106,7 +132,7 @@ export async function GET(req: NextRequest) {
                 name: nameMap.get(escrow.arbiter_address!) ?? 'Unknown',
               },
         },
-        milestones: escrow.milestones.map((m) => ({
+        milestones: sortedMilestones.map((m: any) => ({
           index: m.milestone_index,
           title: m.title,
           status: m.status,
@@ -116,14 +142,13 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    // Compute summary
     const totalTransactions = enrichedEscrows.reduce(
       (sum, e) => sum + e.transactions.length,
       0
     );
     const totalVolume = enrichedEscrows.reduce((sum, e) => sum + e.total_xlm, 0);
     const completedEscrows = enrichedEscrows.filter(
-      (e) => e.status === 'Completed'
+      (e: any) => e.status === 'Completed'
     ).length;
 
     return NextResponse.json({
@@ -140,3 +165,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
