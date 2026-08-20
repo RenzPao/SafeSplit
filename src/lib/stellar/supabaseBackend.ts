@@ -22,6 +22,7 @@ export interface EscrowMetadataInput {
   arbiterAddress?: string;
   totalXlm: number;
   milestones: MilestoneMetadataInput[];
+  webhookUrl?: string;
 }
 
 export async function createEscrowMetadata(input: EscrowMetadataInput) {
