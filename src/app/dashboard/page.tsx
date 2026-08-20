@@ -1447,6 +1447,49 @@ export default function Home() {
                               />
                             </div>
                           </div>
+
+                            {/* Subtasks */}
+                            <div className="mt-3 space-y-2">
+                              <label className="text-xs font-semibold text-zinc-400">Sub-Tasks (Optional Checklists)</label>
+                              {m.subTasks?.map((st, stIndex) => (
+                                <div key={stIndex} className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={st}
+                                    onChange={(e) => {
+                                      const updated = [...formMilestones];
+                                      updated[index].subTasks[stIndex] = e.target.value;
+                                      setFormMilestones(updated);
+                                    }}
+                                    className="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white"
+                                    placeholder="Sub-task requirement..."
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = [...formMilestones];
+                                      updated[index].subTasks.splice(stIndex, 1);
+                                      setFormMilestones(updated);
+                                    }}
+                                    className="text-red-400 hover:bg-red-500/20 px-2 py-1.5 rounded-lg border border-red-500/20 text-xs transition-colors"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = [...formMilestones];
+                                  if (!updated[index].subTasks) updated[index].subTasks = [];
+                                  updated[index].subTasks.push('');
+                                  setFormMilestones(updated);
+                                }}
+                                className="text-xs text-purple-400 font-semibold hover:text-purple-300 w-full text-left py-1"
+                              >
+                                + Add Sub-Task
+                              </button>
+                            </div>
                         </div>
                       ))}
                     </div>
