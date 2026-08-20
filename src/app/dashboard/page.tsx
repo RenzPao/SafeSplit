@@ -18,7 +18,10 @@ import {
   Lock,
   Bell,
   X,
-  CheckCircle2
+  CheckCircle2,
+  AlertTriangle,
+  Zap,
+  Loader2
 } from 'lucide-react';
 import MilestoneDetailView from '@/components/MilestoneDetailView';
 import RegistrationModal from '@/components/RegistrationModal';
@@ -90,6 +93,7 @@ export default function Home() {
   // Fetch invitations when wallet connects
   const [walletUser, setWalletUser] = useState<any>(null);
   const [walletBalance, setWalletBalance] = useState('0.00');
+  const [walletFunded, setWalletFunded] = useState<boolean | null>(null); // null = unknown, false = not funded
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [showProfileDashboard, setShowProfileDashboard] = useState(false);
   
@@ -120,10 +124,11 @@ export default function Home() {
       if (!walletAddress) {
         setWalletUser(null);
         setWalletBalance('0.00');
+        setWalletFunded(null);
         return;
       }
 
-      // Fetch Stellar Balance
+      // Fetch Stellar Balance — also tells us whether the account exists on testnet
       try {
         const res = await fetch(`https://horizon-testnet.stellar.org/accounts/${walletAddress}`);
         if (res.ok) {
@@ -132,6 +137,11 @@ export default function Home() {
           if (nativeBal) {
             setWalletBalance(parseFloat(nativeBal.balance).toFixed(2));
           }
+          setWalletFunded(true);
+        } else if (res.status === 404) {
+          // Account has never been funded — no ledger entry
+          setWalletFunded(false);
+          setWalletBalance('0.00');
         }
       } catch (err) {
         console.warn('Failed to fetch balance', err);
@@ -282,6 +292,14 @@ export default function Home() {
       const response = await fetch(`https://friendbot.stellar.org/?addr=${encodeURIComponent(addressToFund)}`);
       if (response.ok) {
         setFaucetMessage({ type: 'success', text: `Successfully funded 10,000 XLM into account: ${addressToFund.substring(0, 8)}...` });
+        // Refresh balance and dismiss the unfunded banner
+        setWalletFunded(true);
+        const balRes = await fetch(`https://horizon-testnet.stellar.org/accounts/${addressToFund}`);
+        if (balRes.ok) {
+          const data = await balRes.json();
+          const nativeBal = data.balances?.find((b: any) => b.asset_type === 'native');
+          if (nativeBal) setWalletBalance(parseFloat(nativeBal.balance).toFixed(2));
+        }
       } else {
         const errorText = await response.text();
         throw new Error(errorText || 'Friendbot error');
@@ -693,7 +711,33 @@ export default function Home() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
-        
+
+        {/* ── Unfunded Wallet Banner ─────────────────────────────────────── */}
+        {walletConnected && walletFunded === false && (
+          <div className="flex items-start gap-4 bg-amber-950/30 border border-amber-500/30 rounded-2xl px-5 py-4 shadow-lg shadow-amber-900/10">
+            <div className="mt-0.5 shrink-0 w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-amber-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-amber-300">Wallet not funded on Stellar Testnet</p>
+              <p className="text-xs text-amber-400/80 mt-0.5 leading-relaxed">
+                <span className="font-mono">{walletAddress.slice(0, 8)}…{walletAddress.slice(-6)}</span> has no XLM balance and cannot sign transactions. Fund it with Friendbot before using any on-chain features.
+              </p>
+            </div>
+            <button
+              onClick={() => handleFundWithFriendbot(walletAddress)}
+              disabled={isFunding}
+              className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-black text-xs font-black transition-all shadow shadow-amber-500/30"
+            >
+              {isFunding ? (
+                <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Funding…</>
+              ) : (
+                <><Zap className="w-3.5 h-3.5" /> Fund via Friendbot</>
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Step-by-Step Chronological Progress */}
         <div className="bg-zinc-900/20 border border-zinc-900 rounded-3xl p-6 shadow-md">
           <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 text-center md:text-left">Project Progress Timeline</h3>

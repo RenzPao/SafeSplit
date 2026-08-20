@@ -22,8 +22,27 @@ export async function buildAndSubmitSorobanTx(
   const networkPassphrase = network === 'testnet' ? Networks.TESTNET : Networks.PUBLIC;
   const server = new rpc.Server(rpcUrl);
 
-  // 1. Fetch latest source account sequence number
-  const account = await server.getAccount(sourceAddress);
+  // 1. Fetch latest source account sequence number.
+  //    getAccount() throws if the account has never been funded — i.e. it has no
+  //    ledger entry on testnet. We catch that specific case and surface a friendly
+  //    message instead of the raw SDK error.
+  let account;
+  try {
+    account = await server.getAccount(sourceAddress);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const isNotFound =
+      msg.toLowerCase().includes('account not found') ||
+      msg.toLowerCase().includes('not found') ||
+      (err as any)?.response?.status === 404;
+    if (isNotFound) {
+      throw new Error(
+        `Your wallet (${sourceAddress.slice(0, 8)}…) has not been funded on Stellar Testnet yet. ` +
+        `Please use the Friendbot faucet in the Dev Sandbox section to add 10,000 XLM before attempting any on-chain transactions.`
+      );
+    }
+    throw err;
+  }
 
   // 2. Build initial transaction envelope
   let tx = new TransactionBuilder(account, {
