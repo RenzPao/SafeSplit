@@ -221,10 +221,10 @@ export default function Home() {
   const [formArbiterAddress, setFormArbiterAddress] = useState('');
   const [formArbiterFeeBps, setFormArbiterFeeBps] = useState(500); // 5.0%
   const [includeArbiter, setIncludeArbiter] = useState(false);
-  const [formMilestones, setFormMilestones] = useState<{ title: string; description: string; amountXlm: number }[]>([
-    { title: 'Initial Draft & Wireframes', description: 'Complete UI/UX design mockups and wireframes', amountXlm: 20 },
-    { title: 'Core Frontend & Integration', description: 'Complete Next.js implementation with Soroban integration', amountXlm: 40 },
-    { title: 'Testing & Production Deploy', description: 'Successful smart contract testing and live net deploy', amountXlm: 40 }
+  const [formMilestones, setFormMilestones] = useState<{ title: string; description: string; amountXlm: number, subTasks: string[] }[]>([
+    { title: 'Initial Draft & Wireframes', description: 'Complete UI/UX design mockups and wireframes', amountXlm: 20, subTasks: ['Provide Figma Source'] },
+    { title: 'Core Frontend & Integration', description: 'Complete Next.js implementation with Soroban integration', amountXlm: 40, subTasks: [] },
+    { title: 'Testing & Production Deploy', description: 'Successful smart contract testing and live net deploy', amountXlm: 40, subTasks: ['Deploy Staging', 'Transfer GitHub Repo'] }
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [usdAmount, setUsdAmount] = useState<number | ''>('');
@@ -255,10 +255,10 @@ export default function Home() {
   
   const applySoftwarePreset = () => {
     setFormMilestones([
-      { title: 'Project Kickoff & Alignment', description: 'Requirements gathered and approved', amountXlm: 250 },
-      { title: 'Frontend UI Delivery', description: 'Components finalized and styled', amountXlm: 1000 },
-      { title: 'Backend Integration', description: 'APIs connected and tested', amountXlm: 1000 },
-      { title: 'Final Handover', description: 'Code merged to main branch', amountXlm: 750 }
+      { title: 'Project Kickoff & Alignment', description: 'Requirements gathered and approved', amountXlm: 250, subTasks: ['Requirements Doc', 'Architecture Diagram'] },
+      { title: 'Frontend UI Delivery', description: 'Components finalized and styled', amountXlm: 1000, subTasks: ['Home Page', 'Dashboard'] },
+      { title: 'Backend Integration', description: 'APIs connected and tested', amountXlm: 1000, subTasks: ['Database Schema', 'API Endpoints'] },
+      { title: 'Final Handover', description: 'Code merged to main branch', amountXlm: 750, subTasks: ['Documentation', 'Production Deploy'] }
     ]);
   };
 
@@ -545,7 +545,7 @@ export default function Home() {
 
   // Create Escrow Form functions
   const handleAddMilestone = () => {
-    setFormMilestones([...formMilestones, { title: '', description: '', amountXlm: 10 }]);
+    setFormMilestones([...formMilestones, { title: '', description: '', amountXlm: 10, subTasks: [] }]);
   };
 
   const handleRemoveMilestone = (index: number) => {

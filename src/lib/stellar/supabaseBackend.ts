@@ -9,6 +9,7 @@ async function sha256(message: string): Promise<string> {
 }
 
 export interface MilestoneMetadataInput {
+  subTasks?: string[];
   title: string;
   description: string;
   amountXlm: number;
@@ -27,7 +28,7 @@ export interface EscrowMetadataInput {
 
 export async function createEscrowMetadata(input: EscrowMetadataInput) {
   // 1. Process milestones and generate hashes
-  const processedMilestones = [];
+  const processedMilestones: any[] = [];
   for (let i = 0; i < input.milestones.length; i++) {
     const m = input.milestones[i];
     const textToHash = `${m.title.trim()}:${m.description.trim()}:${m.amountXlm}`;
@@ -39,6 +40,7 @@ export async function createEscrowMetadata(input: EscrowMetadataInput) {
       amount_xlm: m.amountXlm,
       status: 'Pending',
       descriptionHash,
+      subTasks: m.subTasks || [],
     });
   }
 
@@ -63,7 +65,7 @@ export async function createEscrowMetadata(input: EscrowMetadataInput) {
   }
 
   // 3. Insert Milestones to Supabase
-  const { error: milestoneError } = await supabase
+  const { data: insertedMilestones, error: milestoneError } = await supabase
     .from('Milestone')
     .insert(
       processedMilestones.map((pm) => ({
@@ -78,6 +80,28 @@ export async function createEscrowMetadata(input: EscrowMetadataInput) {
 
   if (milestoneError) {
     throw new Error(milestoneError.message || 'Failed to create milestones');
+  }
+
+  // 3.5 Insert SubTasks
+  if (insertedMilestones && (insertedMilestones as any[]).length > 0) {
+    const allSubtasks: any[] = [];
+    (insertedMilestones as any[]).forEach((insertedM: any) => {
+      // Find original pm
+      const pm = processedMilestones.find(p => p.milestone_index === insertedM.milestone_index);
+      if (pm && pm.subTasks && pm.subTasks.length > 0) {
+        pm.subTasks.forEach((stTitle: string) => {
+          allSubtasks.push({
+            milestone_id: insertedM.id,
+            title: stTitle,
+            is_completed: false
+          });
+        });
+      }
+    });
+
+    if (allSubtasks.length > 0) {
+      await supabase.from('SubTask').insert(allSubtasks);
+    }
   }
 
   // 4. Create initial activity log
