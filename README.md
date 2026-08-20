@@ -238,7 +238,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## User Feedback
 
-[View full feedback form responses (XLSX)](./public/SafeSplit%20Feedback%20Form%20(Responses).xlsx)
+[View full feedback form responses (Google Sheets)](https://docs.google.com/spreadsheets/d/1aEPzRNK5pOxgQvq1hk5sHRguh86Z2VnSYog7oQkaI-M/edit?usp=sharing)
 
 
 ### User Feedback Summary & Next Steps
