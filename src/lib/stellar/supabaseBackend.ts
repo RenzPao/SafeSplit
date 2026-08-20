@@ -252,6 +252,20 @@ export async function updateMilestoneStatus(
   if (logErr) {
     throw new Error(logErr.message);
   }
+
+  // Fire Webhook if available
+  if (params.status === 'Submitted' || params.status === 'Approved' || params.status === 'Disputed') {
+    const { data: escrow } = await supabase.from('Escrow').select('webhook_url, title').eq('id', escrowId).single();
+    if (escrow?.webhook_url) {
+      fetch(escrow.webhook_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `🔔 **SafeSplit Update**: Milestone ${milestoneIndex + 1} for "${escrow.title}" has moved to **${params.status}**!`
+        }),
+      }).catch(err => console.error('Webhook dispatch failed', err));
+    }
+  }
 }
 
 export async function updateEscrowStatus(
@@ -298,6 +312,20 @@ export async function updateEscrowStatus(
 
   if (logErr) {
     throw new Error(logErr.message);
+  }
+
+  // Fire Webhook if available
+  if (params.status === 'Funded' || params.status === 'Completed' || params.status === 'Cancelled') {
+    const { data: escrow } = await supabase.from('Escrow').select('webhook_url, title').eq('id', escrowId).single();
+    if (escrow?.webhook_url) {
+      fetch(escrow.webhook_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `🔔 **SafeSplit Update**: Escrow contract "${escrow.title}" is now **${params.status}**!`
+        }),
+      }).catch(err => console.error('Webhook dispatch failed', err));
+    }
   }
 }
 

@@ -10,7 +10,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const events: ics.EventAttributes[] = milestones.map((m: any) => {
     const createdAt = new Date();
-    const deadline = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000); 
+    const deadline = new Date(m.deadline || (createdAt.getTime() + 7 * 24 * 60 * 60 * 1000)); 
     
     return {
       title: `Milestone: ${m.title}`,

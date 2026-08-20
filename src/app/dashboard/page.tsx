@@ -228,9 +228,28 @@ export default function Home() {
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [usdAmount, setUsdAmount] = useState<number | ''>('');
+  const [liveXlmPrice, setLiveXlmPrice] = useState<number>(0.10);
+  const [isFetchingPrice, setIsFetchingPrice] = useState(true);
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=stellar&vs_currencies=usd');
+        const data = await res.json();
+        if (data.stellar && data.stellar.usd) {
+          setLiveXlmPrice(data.stellar.usd);
+        }
+      } catch (err) {
+        console.error('Failed to fetch XLM price', err);
+      } finally {
+        setIsFetchingPrice(false);
+      }
+    };
+    fetchPrice();
+  }, []);
   const [webhookUrl, setWebhookUrl] = useState('');
   
-  const XLM_PRICE = 0.10;
+  const XLM_PRICE = liveXlmPrice;
   const calculatedXlm = typeof usdAmount === 'number' ? usdAmount / XLM_PRICE : 0;
   const xlmWithBuffer = calculatedXlm * 1.05;
   

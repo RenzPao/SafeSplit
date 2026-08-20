@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, 
   AlertTriangle, 
@@ -79,17 +80,57 @@ export default function MilestoneDetailView({
   const [splitBps, setSplitBps] = useState(5000); // 50% split default (5000 bps)
   const [wasmHash, setWasmHash] = useState('');
 
-  // Mock State for Sub-Tasks
-  const [subTasks, setSubTasks] = useState<SubTask[]>([
-    { id: '1', title: 'Design Database Schema', is_completed: true },
-    { id: '2', title: 'Implement API Endpoints', is_completed: false },
-    { id: '3', title: 'Write Unit Tests', is_completed: false },
-  ]);
+    // Real State for Sub-Tasks and Revisions
+  const [subTasks, setSubTasks] = useState<any[]>([]);
+  const [revisions, setRevisions] = useState<any[]>([]);
+  const [newSubTaskTitle, setNewSubTaskTitle] = useState('');
 
-  // Mock State for Deliverable Revisions
-  const [revisions, setRevisions] = useState<DeliverableRevision[]>([
-    { id: 'rev1', revision_number: 1, url: 'https://example.com/mock-design.png', cid: 'QmMock1', timestamp: new Date(Date.now() - 86400000).toISOString() },
-  ]);
+  useEffect(() => {
+    if (!milestone) return;
+
+    const fetchData = async () => {
+      // Fetch SubTasks
+      const { data: stData } = await supabase
+        .from('SubTask')
+        .select('*')
+        .eq('milestone_id', milestone?.id)
+        .order('created_at', { ascending: true });
+      
+      if (stData) setSubTasks(stData);
+
+      // Fetch Revisions
+      const { data: revData } = await supabase
+        .from('DeliverableRevision')
+        .select('*')
+        .eq('milestone_id', milestone?.id)
+        .order('version', { ascending: true });
+      
+      if (revData) setRevisions(revData);
+    };
+
+    fetchData();
+  }, [milestone]);
+
+  const toggleSubTask = async (id: string, currentStatus: boolean) => {
+    setSubTasks(prev => prev.map(st => st.id === id ? { ...st, is_completed: !currentStatus } : st));
+    await supabase.from('SubTask').update({ is_completed: !currentStatus }).eq('id', id);
+  };
+
+  const addSubTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSubTaskTitle.trim()) return;
+    
+    const { data } = await supabase.from('SubTask').insert({
+      milestone_id: milestone?.id,
+      title: newSubTaskTitle.trim(),
+      is_completed: false
+    }).select().single();
+
+    if (data) {
+      setSubTasks(prev => [...prev, data]);
+      setNewSubTaskTitle('');
+    }
+  };
 
   if (!milestone) {
     return (
@@ -145,9 +186,7 @@ export default function MilestoneDetailView({
     }
   };
 
-  const toggleSubTask = (id: string) => {
-    setSubTasks(prev => prev.map(t => t.id === id ? { ...t, is_completed: !t.is_completed } : t));
-  };
+  
 
   // 1. Submit Deliverable (Freelancer)
   const handleSubmitDeliverable = async () => {
@@ -178,7 +217,7 @@ export default function MilestoneDetailView({
       const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.submitWorkTx(currentWalletAddress, escrow.id, {
         freelancer: currentWalletAddress,
-        milestoneId: milestone.milestone_index,
+        milestoneId: milestone?.milestone_index,
         submissionRef: cid,
       });
 
@@ -187,13 +226,13 @@ export default function MilestoneDetailView({
       const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
       
       // Update off-chain database via Supabase
-      await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
+      await updateMilestoneStatus(escrow.id, milestone?.milestone_index, {
         status: 'Submitted',
         deliverableUrl: url,
         submissionCid: cid,
         txHash: txHash,
         eventName: 'WorkSubmitted',
-        details: `Freelancer submitted work for milestone ${milestone.milestone_index + 1}. CID: ${cid}. Tx: ${txHash}`,
+        details: `Freelancer submitted work for milestone ${milestone?.milestone_index + 1}. CID: ${cid}. Tx: ${txHash}`,
       });
 
       // Mock update to revisions list
@@ -233,18 +272,18 @@ export default function MilestoneDetailView({
       const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.approveMilestoneTx(currentWalletAddress, escrow.id, {
         client: currentWalletAddress,
-        milestoneId: milestone.milestone_index,
+        milestoneId: milestone?.milestone_index,
       });
 
       setStatusMessage({ type: 'info', text: 'Signing & submitting approval to Testnet...' });
       const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
       // Update database status via Supabase
-      await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
+      await updateMilestoneStatus(escrow.id, milestone?.milestone_index, {
         status: 'Approved',
         txHash: txHash,
         eventName: 'MilestoneApproved',
-        details: `Client approved milestone ${milestone.milestone_index + 1} and funds were released. Tx: ${txHash}`,
+        details: `Client approved milestone ${milestone?.milestone_index + 1} and funds were released. Tx: ${txHash}`,
       });
 
       setLastTxHash(txHash);
@@ -382,17 +421,17 @@ export default function MilestoneDetailView({
       const reasonHash = 'd3f4b50000000000000000000000000000000000000000000000000000000000'; // 32-byte hex mock
       const operation = client.raiseDisputeTx(currentWalletAddress, escrow.id, {
         caller: currentWalletAddress,
-        milestoneId: milestone.milestone_index,
+        milestoneId: milestone?.milestone_index,
         reasonHash,
       });
       const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
       // Update status via Supabase
-      await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
+      await updateMilestoneStatus(escrow.id, milestone?.milestone_index, {
         status: 'Disputed',
         txHash: txHash,
         eventName: 'DisputeRaised',
-        details: `Dispute raised on milestone ${milestone.milestone_index + 1} by caller ${currentWalletAddress}. Tx: ${txHash}`,
+        details: `Dispute raised on milestone ${milestone?.milestone_index + 1} by caller ${currentWalletAddress}. Tx: ${txHash}`,
       });
 
       setLastTxHash(txHash);
@@ -441,13 +480,13 @@ export default function MilestoneDetailView({
       const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.proposeSettlementTx(currentWalletAddress, escrow.id, {
         proposer: currentWalletAddress,
-        milestoneId: milestone.milestone_index,
+        milestoneId: milestone?.milestone_index,
         clientSplitBps: splitBps,
       });
       const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
       // Update status via Supabase (keep in Disputed but log proposal)
-      await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
+      await updateMilestoneStatus(escrow.id, milestone?.milestone_index, {
         status: 'Disputed',
         txHash: txHash,
         eventName: 'SettlementProposed',
@@ -482,12 +521,12 @@ export default function MilestoneDetailView({
       const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.acceptSettlementTx(currentWalletAddress, escrow.id, {
         accepter: currentWalletAddress,
-        milestoneId: milestone.milestone_index,
+        milestoneId: milestone?.milestone_index,
       });
       const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
 
       // Finalize status via Supabase
-      await updateMilestoneStatus(escrow.id, milestone.milestone_index, {
+      await updateMilestoneStatus(escrow.id, milestone?.milestone_index, {
         status: activeProposal.clientSplitBps === 10000 ? 'Refunded' : 'Approved',
         txHash: txHash,
         eventName: 'SettlementAccepted',
@@ -543,7 +582,7 @@ export default function MilestoneDetailView({
         <div>
           <div className="flex items-center gap-3">
             <span className="text-xs font-semibold uppercase tracking-wider text-purple-400 bg-purple-950/40 border border-purple-800/40 px-2.5 py-1 rounded-full">
-              Milestone {milestone.milestone_index + 1}
+              Milestone {milestone?.milestone_index + 1}
             </span>
             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-medium ${statusConfig.color}`}>
               <StatusIcon className="w-3.5 h-3.5" />
@@ -600,7 +639,7 @@ export default function MilestoneDetailView({
               {subTasks.map(task => (
                 <div key={task.id} className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-800/80 rounded-xl transition-all">
                   <button
-                    onClick={() => toggleSubTask(task.id)}
+                    onClick={() => toggleSubTask(task.id, task.is_completed)}
                     className={`flex-shrink-0 w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
                       task.is_completed 
                         ? 'bg-purple-500 border-purple-500 text-white' 
@@ -695,8 +734,8 @@ export default function MilestoneDetailView({
                            {revisions.map((rev) => (
                              <div key={rev.id} className="flex justify-between items-center p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs">
                                <div className="flex flex-col">
-                                 <span className="font-semibold text-purple-300">Revision {rev.revision_number}</span>
-                                 <span className="text-slate-500 mt-0.5">{new Date(rev.timestamp).toLocaleString()}</span>
+                                 <span className="font-semibold text-purple-300">Revision {rev.version}</span>
+                                 <span className="text-slate-500 mt-0.5">{new Date(rev.created_at).toLocaleString()}</span>
                                </div>
                                <a href={rev.url} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-purple-400 transition-colors">
                                  <ExternalLink className="w-4 h-4" />
