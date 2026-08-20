@@ -227,6 +227,22 @@ export default function Home() {
     { title: 'Testing & Production Deploy', description: 'Successful smart contract testing and live net deploy', amountXlm: 40 }
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [usdAmount, setUsdAmount] = useState<number | ''>('');
+  const [webhookUrl, setWebhookUrl] = useState('');
+  
+  const XLM_PRICE = 0.10;
+  const calculatedXlm = typeof usdAmount === 'number' ? usdAmount / XLM_PRICE : 0;
+  const xlmWithBuffer = calculatedXlm * 1.05;
+  
+  const applySoftwarePreset = () => {
+    setFormMilestones([
+      { title: 'Project Kickoff & Alignment', description: 'Requirements gathered and approved', amountXlm: 250 },
+      { title: 'Frontend UI Delivery', description: 'Components finalized and styled', amountXlm: 1000 },
+      { title: 'Backend Integration', description: 'APIs connected and tested', amountXlm: 1000 },
+      { title: 'Final Handover', description: 'Code merged to main branch', amountXlm: 750 }
+    ]);
+  };
+
   const [creationResult, setCreationResult] = useState<{
     escrow: Escrow;
     descriptionHashes: { index: number; descriptionHash: string }[];
@@ -549,6 +565,7 @@ export default function Home() {
     try {
       const data = await createEscrowMetadata({
         title: formTitle.trim() || 'Untitled Escrow',
+          webhookUrl: webhookUrl.trim(),
         contractAddress: contractAddress.trim(),
         clientAddress: formClientAddress.trim(),
         freelancerAddress: formFreelancerAddress.trim(),

@@ -14,18 +14,45 @@ import {
   Settings,
   Loader2,
   Check,
-  AlertOctagon
+  AlertOctagon,
+  ListTodo,
+  History
 } from 'lucide-react';
 import { SafeSplitClient } from '@/lib/stellar/SafeSplitClient';
 import { buildAndSubmitSorobanTx } from '@/lib/stellar/sorobanTx';
 import { uploadDeliverableFile, updateMilestoneStatus, updateEscrowStatus } from '@/lib/stellar/supabaseBackend';
 import StellarExpertButton from '@/components/StellarExpertButton';
 
-
-
 import type { Escrow, Milestone, ActivityLog } from '@/app/dashboard/page';
 
+interface SubTask {
+  id: string;
+  title: string;
+  is_completed: boolean;
+}
 
+interface DeliverableRevision {
+  id: string;
+  revision_number: number;
+  url: string;
+  cid: string;
+  timestamp: string;
+}
+
+const NativePreviewer = ({ url }: { url: string }) => {
+  if (!url) return null;
+  if (url.endsWith('.png') || url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.gif')) {
+    return <img src={url} alt="Deliverable Preview" className="w-full h-auto rounded-lg border border-slate-700/50" />;
+  }
+  if (url.includes('figma.com')) {
+    return <iframe src={`https://www.figma.com/embed?embed_host=share&url=${encodeURIComponent(url)}`} className="w-full h-[400px] rounded-lg border border-slate-700/50" allowFullScreen />;
+  }
+  return (
+    <div className="p-4 bg-slate-900 rounded-lg text-slate-400 text-xs text-center border border-slate-700/50">
+      Preview not available. <a href={url} target="_blank" rel="noreferrer" className="text-purple-400 hover:underline">Open Link</a>
+    </div>
+  );
+};
 
 interface MilestoneDetailViewProps {
   escrow: Escrow;
@@ -51,6 +78,19 @@ export default function MilestoneDetailView({
   const [dragActive, setDragActive] = useState(false);
   const [splitBps, setSplitBps] = useState(5000); // 50% split default (5000 bps)
   const [wasmHash, setWasmHash] = useState('');
+
+  // Mock State for Sub-Tasks
+  const [subTasks, setSubTasks] = useState<SubTask[]>([
+    { id: '1', title: 'Design Database Schema', is_completed: true },
+    { id: '2', title: 'Implement API Endpoints', is_completed: false },
+    { id: '3', title: 'Write Unit Tests', is_completed: false },
+  ]);
+
+  // Mock State for Deliverable Revisions
+  const [revisions, setRevisions] = useState<DeliverableRevision[]>([
+    { id: 'rev1', revision_number: 1, url: 'https://example.com/mock-design.png', cid: 'QmMock1', timestamp: new Date(Date.now() - 86400000).toISOString() },
+  ]);
+
   if (!milestone) {
     return (
       <div className="flex flex-col items-center justify-center p-8 bg-slate-900 border border-slate-800 rounded-2xl text-slate-400">
@@ -105,6 +145,10 @@ export default function MilestoneDetailView({
     }
   };
 
+  const toggleSubTask = (id: string) => {
+    setSubTasks(prev => prev.map(t => t.id === id ? { ...t, is_completed: !t.is_completed } : t));
+  };
+
   // 1. Submit Deliverable (Freelancer)
   const handleSubmitDeliverable = async () => {
     if (!file && !githubPr) {
@@ -116,7 +160,7 @@ export default function MilestoneDetailView({
     setStatusMessage({ type: 'info', text: 'Uploading deliverable artifact to IPFS...' });
 
     let cid = 'mock-cid-' + Date.now();
-    let url = githubPr;
+    let url = githubPr || 'https://example.com/mock-new-revision.png'; // mock for testing previews
 
     try {
       if (file) {
@@ -152,6 +196,18 @@ export default function MilestoneDetailView({
         details: `Freelancer submitted work for milestone ${milestone.milestone_index + 1}. CID: ${cid}. Tx: ${txHash}`,
       });
 
+      // Mock update to revisions list
+      setRevisions(prev => [
+        ...prev, 
+        { 
+          id: `rev${prev.length + 1}`, 
+          revision_number: prev.length + 1, 
+          url, 
+          cid, 
+          timestamp: new Date().toISOString() 
+        }
+      ]);
+
       setLastTxHash(txHash);
       setStatusMessage({ type: 'success', text: 'Milestone submitted successfully on-chain!' });
       onActionSuccess();
@@ -162,6 +218,8 @@ export default function MilestoneDetailView({
     } finally {
       setIsUploading(false);
       setIsSigning(false);
+      setFile(null);
+      setGithubPr('');
     }
   };
 
@@ -520,7 +578,7 @@ export default function MilestoneDetailView({
           <div className="flex-1 flex flex-col gap-2 font-medium">
             <span>{statusMessage.text}</span>
             {statusMessage.type === 'success' && lastTxHash && (
-              <StellarExpertButton txHash={lastTxHash} size="md" />
+               <StellarExpertButton txHash={lastTxHash} size="md" />
             )}
           </div>
         </div>
@@ -531,32 +589,62 @@ export default function MilestoneDetailView({
         
         {/* Left Column: Submission Details / Previews */}
         <div className="lg:col-span-7 space-y-6">
+          
+          {/* Sub-Tasks Section */}
+          <div className="bg-slate-950/40 border border-slate-800/60 rounded-2xl p-5 space-y-4">
+            <h3 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+              <ListTodo className="w-4 h-4 text-purple-400" />
+              Sub-Tasks
+            </h3>
+            <div className="space-y-2">
+              {subTasks.map(task => (
+                <div key={task.id} className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-800/80 rounded-xl transition-all">
+                  <button
+                    onClick={() => toggleSubTask(task.id)}
+                    className={`flex-shrink-0 w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
+                      task.is_completed 
+                        ? 'bg-purple-500 border-purple-500 text-white' 
+                        : 'border-slate-600 bg-slate-800 hover:border-purple-400'
+                    }`}
+                  >
+                    {task.is_completed && <Check className="w-3.5 h-3.5" />}
+                  </button>
+                  <span className={`text-sm ${task.is_completed ? 'text-slate-500 line-through' : 'text-slate-300'}`}>
+                    {task.title}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="bg-slate-950/40 border border-slate-800/60 rounded-2xl p-5 space-y-4">
             <h3 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
               <FileText className="w-4 h-4 text-purple-400" />
               Deliverables Preview
             </h3>
 
-            {milestone.submission_cid ? (
-              <div className="space-y-3">
+            {(milestone.submission_cid || revisions.length > 0) ? (
+              <div className="space-y-4">
+                <NativePreviewer url={revisions.length > 0 ? revisions[revisions.length - 1].url : milestone.deliverable_url || ''} />
+                
                 <div className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-800/80 rounded-xl">
                   <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
                     <Check className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xs text-slate-400 font-medium">IPFS Content CID</div>
-                    <div className="text-sm font-semibold text-slate-200 truncate font-mono">{milestone.submission_cid}</div>
+                    <div className="text-sm font-semibold text-slate-200 truncate font-mono">{revisions.length > 0 ? revisions[revisions.length - 1].cid : milestone.submission_cid}</div>
                   </div>
                 </div>
 
-                {milestone.deliverable_url && (
+                {(milestone.deliverable_url || (revisions.length > 0 && revisions[revisions.length - 1].url)) && (
                   <a
-                    href={milestone.deliverable_url}
+                    href={revisions.length > 0 ? revisions[revisions.length - 1].url : milestone.deliverable_url || ''}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center justify-between p-3 bg-purple-950/20 border border-purple-900/30 hover:border-purple-800/50 rounded-xl text-purple-400 hover:text-purple-300 transition-all text-xs font-semibold group"
                   >
-                    <span>View Deliverable Link / Document</span>
+                    <span>View External Deliverable Link</span>
                     <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </a>
                 )}
@@ -593,10 +681,33 @@ export default function MilestoneDetailView({
                   </div>
                 )}
 
-                {milestone.status === 'Pending' && escrow.status !== 'Initialized' && (
+                {escrow.status !== 'Initialized' && (milestone.status === 'Pending' || milestone.status === 'Submitted') && (
                   <>
-                    <div 
+                    <div className="mb-4">
+                       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
+                         <History className="w-4 h-4 text-slate-400" />
+                         Deliverable Revisions
+                       </h4>
+                       {revisions.length === 0 ? (
+                         <div className="text-xs text-slate-500 italic">No revisions submitted yet.</div>
+                       ) : (
+                         <div className="space-y-2">
+                           {revisions.map((rev) => (
+                             <div key={rev.id} className="flex justify-between items-center p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs">
+                               <div className="flex flex-col">
+                                 <span className="font-semibold text-purple-300">Revision {rev.revision_number}</span>
+                                 <span className="text-slate-500 mt-0.5">{new Date(rev.timestamp).toLocaleString()}</span>
+                               </div>
+                               <a href={rev.url} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-purple-400 transition-colors">
+                                 <ExternalLink className="w-4 h-4" />
+                               </a>
+                             </div>
+                           ))}
+                         </div>
+                       )}
+                    </div>
 
+                    <div 
                       onDragEnter={handleDrag}
                       onDragLeave={handleDrag}
                       onDragOver={handleDrag}
@@ -608,7 +719,7 @@ export default function MilestoneDetailView({
                     >
                       <Upload className={`w-8 h-8 mb-2 ${file ? 'text-emerald-400' : 'text-slate-400'}`} />
                       <span className="text-xs font-semibold text-slate-300 text-center">
-                        {file ? file.name : 'Drag & drop artifact or click to upload'}
+                        {file ? file.name : 'Drag & drop artifact or click to upload new revision'}
                       </span>
                       <span className="text-[10px] text-slate-400 mt-1">Supports PDF, ZIP, Images (max 10MB)</span>
                       <input 
@@ -620,8 +731,8 @@ export default function MilestoneDetailView({
                       <label htmlFor="file-upload" className="absolute inset-0 cursor-pointer" />
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-slate-400 font-semibold">GitHub Pull Request / Link</label>
+                    <div className="space-y-1.5 mt-4">
+                      <label className="text-xs text-slate-400 font-semibold">GitHub Pull Request / Link (New Revision)</label>
                       <input
                         type="text"
                         placeholder="https://github.com/.../pull/1"
@@ -634,18 +745,12 @@ export default function MilestoneDetailView({
                     <button
                       onClick={handleSubmitDeliverable}
                       disabled={isUploading || isSigning}
-                      className="w-full py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-slate-100 text-xs font-bold transition-all shadow-lg hover:shadow-purple-500/20 flex items-center justify-center gap-2"
+                      className="w-full py-3 px-4 mt-4 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-slate-100 text-xs font-bold transition-all shadow-lg hover:shadow-purple-500/20 flex items-center justify-center gap-2"
                     >
                       {(isUploading || isSigning) && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                      Submit Milestone on-chain
+                      Submit Revision on-chain
                     </button>
                   </>
-                )}
-
-                {milestone.status === 'Submitted' && (
-                  <div className="text-center py-6 text-slate-400 text-xs font-medium">
-                    Milestone submitted. Awaiting client review and release.
-                  </div>
                 )}
 
                 {milestone.status === 'Approved' && (

@@ -5,7 +5,8 @@ import {
   Operation, 
   Networks,
   nativeToScVal,
-  StrKey
+  StrKey,
+  Asset
 } from '@stellar/stellar-sdk';
 
 export interface MilestoneInput {
@@ -55,10 +56,8 @@ export class SafeSplitClient {
    * Helper to resolve the Native XLM SAC Contract ID
    */
   public static getNativeXlmContractId(network: 'testnet' | 'mainnet'): string {
-    if (network === 'testnet') {
-      return 'CDLZFC3SYJYDZT7K67VZ75HPJGWK3S2CB4QPEXOWCH2W7Z26637QD4AO';
-    }
-    return 'CAS3J7CYN3QR457QCSH3CYMI7ZCE743IMX7SLTGD2CTWJSER733W3GKS';
+    const passphrase = network === 'testnet' ? Networks.TESTNET : Networks.PUBLIC;
+    return Asset.native().contractId(passphrase);
   }
 
   /**

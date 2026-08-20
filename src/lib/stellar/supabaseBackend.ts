@@ -51,6 +51,7 @@ export async function createEscrowMetadata(input: EscrowMetadataInput) {
       freelancer_address: input.freelancerAddress,
       arbiter_address: input.arbiterAddress || 'G0000000000000000000000000000000000000000000000000000000',
       total_xlm: input.totalXlm,
+        webhook_url: input.webhookUrl || null,
       status: 'Initialized',
     })
     .select()

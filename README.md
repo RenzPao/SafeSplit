@@ -21,6 +21,7 @@
 
 **The Solution:** SafeSplit provides a completely trustless, milestone-based decentralized escrow leveraging the **Stellar Soroban** smart contract platform. Funds are securely locked on-chain and disbursed only upon successful completion of work milestones. For disputes, a neutral 3rd-party Arbiter can be optionally assigned to evaluate deliverables and execute fair settlements directly on-chain.
 
+
 ---
 
 ## Purpose
@@ -109,7 +110,7 @@ Unlike standard crypto payments or centralized escrow services (like Upwork), Sa
 * **Live Demo:** [https://safesplit.vercel.app](https://safesplit.vercel.app)
   
 - **Live Pitch Deck**: [https://safesplit.vercel.app/pitchdeck](https://safesplit.vercel.app/pitchdeck)
-- **Demo Video (YouTube)**: [Link placeholder]
+- **Demo Video (YouTube)**: [Video Link](https://drive.google.com/file/d/1Irc60jXjSp88p29RqBF5gv6gxhyv6KJC/view?usp=sharing)
 * **Contract Address:** [`CC6QLF4DI7C6LKURR2V7XQOZ72BNG5BOKURQ2SYQHPTAZEHO7PLRMR5K`](https://stellar.expert/explorer/testnet/contract/CC6QLF4DI7C6LKURR2V7XQOZ72BNG5BOKURQ2SYQHPTAZEHO7PLRMR5K)
 * **Transaction Hash:** [`e2105673626ac4aade91e70f6fad328b9ff57b053c07b2f1a55c059724dbbe0d`](https://stellar.expert/explorer/testnet/tx/e2105673626ac4aade91e70f6fad328b9ff57b053c07b2f1a55c059724dbbe0d)
 ![Testnet Contract](public/testnetv2.png)
@@ -166,72 +167,74 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Proof of 50+ Users / Wallet Activity
 
-| Wallet Address | Transaction Hash | Stellar Expert Link |
-|---|---|---|
-| GCKBPMSXVZCUW5XPJSSOLHRRXHSC4KZ4YAFLRXTZEFWC4METX4C7YG55 | 3c77e52f0c691f3... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCKBPMSXVZCUW5XPJSSOLHRRXHSC4KZ4YAFLRXTZEFWC4METX4C7YG55) |
-| GBIBGWKYVDPFWYOE4K7AWNLBYZWYLKVAQAKARINBZUEPW2WSNGNJBVZD | dc5f0b95efc9d9f... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBIBGWKYVDPFWYOE4K7AWNLBYZWYLKVAQAKARINBZUEPW2WSNGNJBVZD) |
-| GBFUHVGBZ53WR7UPSZABOTE427LRMBIHG4BK23ANZEIXC7XIK74WMYUK | 9f823a92dd49302... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBFUHVGBZ53WR7UPSZABOTE427LRMBIHG4BK23ANZEIXC7XIK74WMYUK) |
-| GB5YCQ3JDW2BPKXLTAA2UYWEIWUE7NUSRP5NVKOBWJ7AFVWFQALNBBSE | 551a171f0759fc3... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GB5YCQ3JDW2BPKXLTAA2UYWEIWUE7NUSRP5NVKOBWJ7AFVWFQALNBBSE) |
-| GBJLG2VYKC5TKKQHGO5ZDH6LQ2BD64533J4MPCMJDISKWRFTLZRMAXN3 | 4f25bc855f24085... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBJLG2VYKC5TKKQHGO5ZDH6LQ2BD64533J4MPCMJDISKWRFTLZRMAXN3) |
-| GDIAD2A5KVIQDZUH6XC7CCJZ7WUSKCREHVMMEBUF4SWDBRF2SXNKSKVD | 3fd3f164094177c... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDIAD2A5KVIQDZUH6XC7CCJZ7WUSKCREHVMMEBUF4SWDBRF2SXNKSKVD) |
-| GCNZP7MXVVQJHODEAS4AJXFHUPJT7C2QDL6DFFH6EMIQOWVAIXEOPWRT | f898be377b2f7a8... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCNZP7MXVVQJHODEAS4AJXFHUPJT7C2QDL6DFFH6EMIQOWVAIXEOPWRT) |
-| GC645UYSXJP6EHZSJ7G6B7GO5R4W7QD44DK5RKUTRYCFHLWVQKMJL2EH | c1825f31238f042... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GC645UYSXJP6EHZSJ7G6B7GO5R4W7QD44DK5RKUTRYCFHLWVQKMJL2EH) |
-| GC4JWJNTQ37CJ3VI3FTJ5S55VBYI73KCSJI3UHL5NDHWBW6FURKIJPJW | f2002f94db373ba... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GC4JWJNTQ37CJ3VI3FTJ5S55VBYI73KCSJI3UHL5NDHWBW6FURKIJPJW) |
-| GCA67WTEAAYHXKIDASLNCLWHVDNF74VKEWRPJXGD5N23PCMQBQLNFBFH | 75d0ebbc809de4e... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCA67WTEAAYHXKIDASLNCLWHVDNF74VKEWRPJXGD5N23PCMQBQLNFBFH) |
-| GDXQ3KMSQ2XAFPLCCXRUQZUJ2WY5DG7HZL2MBAQRI5FEASFH6DNLE54G | d708475add263d2... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDXQ3KMSQ2XAFPLCCXRUQZUJ2WY5DG7HZL2MBAQRI5FEASFH6DNLE54G) |
-| GCX3ZI6PBRJXEULQUQO4CUWJ7GB3EJZGHKC2UQQST2KSGNI64MVOPSG3 | 8c5d191b61854f5... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCX3ZI6PBRJXEULQUQO4CUWJ7GB3EJZGHKC2UQQST2KSGNI64MVOPSG3) |
-| GA5K4G7AGONRRRMZNFBN5GVMZDQMBJCHMBDSBUP53NY3SEG67XCXYN76 | 19bef36efffb3c3... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GA5K4G7AGONRRRMZNFBN5GVMZDQMBJCHMBDSBUP53NY3SEG67XCXYN76) |
-| GCDUPLIIKFXCBRDPYR56UDT2FCYJWNK3DZ4MQ2Z5QXUWQF4HYO2CH3TM | 8ba20fa782bc1bd... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCDUPLIIKFXCBRDPYR56UDT2FCYJWNK3DZ4MQ2Z5QXUWQF4HYO2CH3TM) |
-| GBHIGREB5OZYBEO4KXZ5V7T275PZ6GXD5CMV7DFMW4VVSDVDYCZYQNIQ | 40b0370b09f9054... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBHIGREB5OZYBEO4KXZ5V7T275PZ6GXD5CMV7DFMW4VVSDVDYCZYQNIQ) |
-| GARX77WOWPP4P4KAJVI7D4CZDVNZFTW7DA7NYU47W6IKNQKE77URVKZS | a66bc858c8c89e7... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GARX77WOWPP4P4KAJVI7D4CZDVNZFTW7DA7NYU47W6IKNQKE77URVKZS) |
-| GD6KS3PN7BWPICFZORGACL3473T3372UASRBMMBIKUIWCGPTQ3MEA6HW | cf35dc5dc92adc8... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GD6KS3PN7BWPICFZORGACL3473T3372UASRBMMBIKUIWCGPTQ3MEA6HW) |
-| GCVZ6RBOZG33J46FSPBREDR3CTPQMZ7VNJMNKRLMYTWEYIILZCEMXG6B | 783b29873b996cc... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCVZ6RBOZG33J46FSPBREDR3CTPQMZ7VNJMNKRLMYTWEYIILZCEMXG6B) |
-| GBBRIUIVZSM54ZL6XDUYCAKX54JQPWM7D2GYGAETJAEEWYLQVZOZYGCB | 5234969fb704798... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBBRIUIVZSM54ZL6XDUYCAKX54JQPWM7D2GYGAETJAEEWYLQVZOZYGCB) |
-| GDFV4S7CEPVUZERFAC4SGB7FAYOHUXDAQ4TIY372ZYZPHHMEPXYBORYV | 7c70d14c84754aa... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDFV4S7CEPVUZERFAC4SGB7FAYOHUXDAQ4TIY372ZYZPHHMEPXYBORYV) |
-| GANESVMNUQCQPQV7LSPGUCGOR2CDZISWX6UIVH6RMQ2S4BKHMKLEQLDA | 67a93f9e997ba69... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GANESVMNUQCQPQV7LSPGUCGOR2CDZISWX6UIVH6RMQ2S4BKHMKLEQLDA) |
-| GA6POXPWGCI4WGXUPFYKCUIU2QOMRGMUJ63C5VK33WM63EZEDQDTHSEZ | c52f18a79a39e71... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GA6POXPWGCI4WGXUPFYKCUIU2QOMRGMUJ63C5VK33WM63EZEDQDTHSEZ) |
-| GBO4XAZ2EBJDXUOXGWSYEB6EAOAVAYD5OKQTRTURFIBCRGHOBRM3CAEY | 62aa58b681effa4... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBO4XAZ2EBJDXUOXGWSYEB6EAOAVAYD5OKQTRTURFIBCRGHOBRM3CAEY) |
-| GBPLR7A55MZQTCUS3WI3BQY654JG7N6YJB6DK423PO2JEL7ZEBZMNJCS | 1a85a95638ceaf3... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBPLR7A55MZQTCUS3WI3BQY654JG7N6YJB6DK423PO2JEL7ZEBZMNJCS) |
-| GAHZZTLXSOHXEIOJAHGGEZRN4AEQAMZPE523DBNITEDVGELFVV5CAQBQ | 3e7b500fbe9869a... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GAHZZTLXSOHXEIOJAHGGEZRN4AEQAMZPE523DBNITEDVGELFVV5CAQBQ) |
-| GD5A6DGRUEXGBNC4PVSFDU6L77S3C44Z555WH6YTKFSLXGWJ3ZJE3UOT | 173a7f7d3f4bc7a... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GD5A6DGRUEXGBNC4PVSFDU6L77S3C44Z555WH6YTKFSLXGWJ3ZJE3UOT) |
-| GAT5KQRGYSDAKRPNQUJIHIDUN7G34EM7JHTV32ZOFOZ44YI3V3YXNRPL | 34db27c2bcb1dd3... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GAT5KQRGYSDAKRPNQUJIHIDUN7G34EM7JHTV32ZOFOZ44YI3V3YXNRPL) |
-| GC24XDXYWIACLKMBKBJR4JPDDEYI3KVTZCS6BMS4HWLOZDJPHNWRMMY6 | 0fc4a8dcde371f1... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GC24XDXYWIACLKMBKBJR4JPDDEYI3KVTZCS6BMS4HWLOZDJPHNWRMMY6) |
-| GCO6ZMZTGGTTL5LBREQDUW6YJX2Y23AWMI2RVBO4WTOXGFZAJLX65SLX | 07233348d5503ab... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCO6ZMZTGGTTL5LBREQDUW6YJX2Y23AWMI2RVBO4WTOXGFZAJLX65SLX) |
-| GCS5GUCKP3CMIIEBU3U6AV3ATXFE6I7RE65VQB547SRFZCN4N62C6PXV | a91884f7f9f9831... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCS5GUCKP3CMIIEBU3U6AV3ATXFE6I7RE65VQB547SRFZCN4N62C6PXV) |
-| GCHTES4A26325RZBDWXPPNCM44OACO22DEV3DFA3R7SEQIDJ53OELMAA | ff941410e8eaaf5... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCHTES4A26325RZBDWXPPNCM44OACO22DEV3DFA3R7SEQIDJ53OELMAA) |
-| GCUKW7HTQY7WHZ4JS34NMJRMPLBLPAYITPH7XFMBYGX6TI76QKM4EYQ6 | 822be2c7bcc13b8... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCUKW7HTQY7WHZ4JS34NMJRMPLBLPAYITPH7XFMBYGX6TI76QKM4EYQ6) |
-| GBCKVV6SGF2JG5RINPTSZGSHOP5SOZXE7F56KPMUDVW25MIN3B4X52WF | 67b961ce0a4426b... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBCKVV6SGF2JG5RINPTSZGSHOP5SOZXE7F56KPMUDVW25MIN3B4X52WF) |
-| GAXC36KHXPRDE72SBDFBUJR4WOV37HE2EDYLCFN74OVZM7CPNZNUVL54 | 190d1ed347dcd4e... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GAXC36KHXPRDE72SBDFBUJR4WOV37HE2EDYLCFN74OVZM7CPNZNUVL54) |
-| GABZIOHF7WFZWT57FMSDZFVKRVBPZLHU7K6AY2KSIXD7U76Y75SNF7HV | 938fa6e196671fe... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GABZIOHF7WFZWT57FMSDZFVKRVBPZLHU7K6AY2KSIXD7U76Y75SNF7HV) |
-| GATWLYZWB2ZBTDJFP3B3NB2HJF54J7ONDLULGPJVA34OCMVGD45JXQ4O | 1673e601f977a68... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GATWLYZWB2ZBTDJFP3B3NB2HJF54J7ONDLULGPJVA34OCMVGD45JXQ4O) |
-| GDKQZ4TSVGVIFJVOORHIYAMGIMWOZL624Y4GLUIVRNRYA7UWHNEVKMY5 | afb1a98940a518a... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDKQZ4TSVGVIFJVOORHIYAMGIMWOZL624Y4GLUIVRNRYA7UWHNEVKMY5) |
-| GCCBPDKY3JKCJQWY44KFOMRDNWV6C32ELBQSCQB2CWZNUZIO3DXAGWOL | a1ca14ab1d080ad... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCCBPDKY3JKCJQWY44KFOMRDNWV6C32ELBQSCQB2CWZNUZIO3DXAGWOL) |
-| GBMZBQ7MYN6I3VSWVZDTH6F2ZO6JZZXL3CWKOD4JG36F4S7VXK5PCNCN | e763cf8101349af... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBMZBQ7MYN6I3VSWVZDTH6F2ZO6JZZXL3CWKOD4JG36F4S7VXK5PCNCN) |
-| GBLKU2A4Z6J43V2VZ6ZOTJROOH2CVKCF7VC6O4HU275GCNMXIVHS3TCE | 6c2432d66dcd1f1... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBLKU2A4Z6J43V2VZ6ZOTJROOH2CVKCF7VC6O4HU275GCNMXIVHS3TCE) |
-| GA4I4RXW5HK2RXZZ3POVXPFOKCPCZWD6M5TEO2GAOBYFGBARJCZ2SMT5 | 46387152f7d7bde... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GA4I4RXW5HK2RXZZ3POVXPFOKCPCZWD6M5TEO2GAOBYFGBARJCZ2SMT5) |
-| GBSAKWKXPM2A3YL2MB3FYF7CMR23UISNO5UWTGZDWU5PMDE7D4OEIT3Q | bab9d64fe1e1181... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBSAKWKXPM2A3YL2MB3FYF7CMR23UISNO5UWTGZDWU5PMDE7D4OEIT3Q) |
-| GAIUE66U3F3POH35OXQTJEQH7RRGRNYPGF73KOFWLFFPJ5KFGVUSHMOO | a47658bd83a00da... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GAIUE66U3F3POH35OXQTJEQH7RRGRNYPGF73KOFWLFFPJ5KFGVUSHMOO) |
-| GD3P6V32MQ3HG73QWV3SOEOVBVKIYI6QWVNIHNYXRYJJ3XEQETI72TUE | c4e4a027cccc369... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GD3P6V32MQ3HG73QWV3SOEOVBVKIYI6QWVNIHNYXRYJJ3XEQETI72TUE) |
-| GDY5F7WBVQ6VNSRQUWGOZ6PBD6OTAW53UYCD47SE6XBSFPFKE2X6HC4T | e800d944983d5c8... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDY5F7WBVQ6VNSRQUWGOZ6PBD6OTAW53UYCD47SE6XBSFPFKE2X6HC4T) |
-| GAJYEUBBFYSZY2PNAVKFOH7ERMF2DBWAMF74LXEEEC4ZFQZEBYEJUWFC | 2cd29b2864ffadf... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GAJYEUBBFYSZY2PNAVKFOH7ERMF2DBWAMF74LXEEEC4ZFQZEBYEJUWFC) |
-| GCAWTQW67INI6STOFD6PCT76BLG7TH3ITQO7TCUM3BTDBQVJQAWJDAEA | 2f28dabb6e89adb... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCAWTQW67INI6STOFD6PCT76BLG7TH3ITQO7TCUM3BTDBQVJQAWJDAEA) |
-| GDXCBPRKLMTXHCRECESGR36LDFO4JV6GFCE7BSWRYOJMXNTAHOWH5V7H | 58fc0b0319ac65b... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDXCBPRKLMTXHCRECESGR36LDFO4JV6GFCE7BSWRYOJMXNTAHOWH5V7H) |
-| GANCQMH5WAJDOXFJHNIILFMKZDC2KY6X2EEP7YELAWFXPD2POVAAW5DO | f17fdded4d4b08a... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GANCQMH5WAJDOXFJHNIILFMKZDC2KY6X2EEP7YELAWFXPD2POVAAW5DO) |
-| GBIA2ANAEQCWCBWERL2BQIQZCSSPZC3TEVQWCCUQHX2VKZTC54UQOMGI | 7bb863cbf86936f... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBIA2ANAEQCWCBWERL2BQIQZCSSPZC3TEVQWCCUQHX2VKZTC54UQOMGI) |
-| GCIOYBJVTSAH5HOP6VH2TS2LJL3E7DSANFR5G3IM6B5XQHB54GQPUNDQ | d5b65a4c5671266... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCIOYBJVTSAH5HOP6VH2TS2LJL3E7DSANFR5G3IM6B5XQHB54GQPUNDQ) |
-| GCYRTXWICYH4646YROHXLTT4NEEPRUBAA6JBGHHYETCIR2KTK3CNARDV | 6dcbbf869d85941... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCYRTXWICYH4646YROHXLTT4NEEPRUBAA6JBGHHYETCIR2KTK3CNARDV) |
-| GCXZDCS6V7OTUYLOL6GIC5VBJXRBOPNTCZP2UYXSY2Q4THZMM5OWTQEM | c4cdf266fd096ba... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCXZDCS6V7OTUYLOL6GIC5VBJXRBOPNTCZP2UYXSY2Q4THZMM5OWTQEM) |
-| GBCA5W4NVXMQG2PTAL4OH3H3I6LNWBAWH75OAXH3AMAQZZ3MTKSU3RJ5 | 8e4c1c2d90f1cd7... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBCA5W4NVXMQG2PTAL4OH3H3I6LNWBAWH75OAXH3AMAQZZ3MTKSU3RJ5) |
-| GCBTTURJUALC7YSSOSTSR5AEZJZUIPSC27WNWPDK32B6LKOAE4HB22J4 | 8559524fd9dae20... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCBTTURJUALC7YSSOSTSR5AEZJZUIPSC27WNWPDK32B6LKOAE4HB22J4) |
-| GBRXA5BY5FT52WZKCXEUHIHZO4JFYKMQ4ZZIXPFUPHBZFWBWKB23UGUB | 624c0895f930914... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GBRXA5BY5FT52WZKCXEUHIHZO4JFYKMQ4ZZIXPFUPHBZFWBWKB23UGUB) |
-| GA64LF2X2QQIOVSMGKLJEWUHOXC4732CI2UYN7WTXP3O2QBN4UAEW7JX | f866365e8ce5037... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GA64LF2X2QQIOVSMGKLJEWUHOXC4732CI2UYN7WTXP3O2QBN4UAEW7JX) |
-| GB24VAOZSVUHG4GUKCFHSNZMSZNLPDN6VBBGWWSMTNRS6M2DISHRY6B5 | 2cfee54c6b8ddb5... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GB24VAOZSVUHG4GUKCFHSNZMSZNLPDN6VBBGWWSMTNRS6M2DISHRY6B5) |
-| GD67ZTHZC7NM3EY46MY4HU4UHXYARJDGYP2QCFOH2MBFKOHPS6FKCPRX | 439e50395799f92... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GD67ZTHZC7NM3EY46MY4HU4UHXYARJDGYP2QCFOH2MBFKOHPS6FKCPRX) |
-| GDTE73O75ZBSD6LVJP2RGOYGBEBFVXQN7L4NL5J7TU5BBVQGHZE5NBYW | 452c3b12ced298e... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDTE73O75ZBSD6LVJP2RGOYGBEBFVXQN7L4NL5J7TU5BBVQGHZE5NBYW) |
-| GASPZO4YEQO5IS4EY5GBVJE4OFJ3LLXZGPEDVPNM3N4CA5AELT5LDOEZ | faf5220679a35e4... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GASPZO4YEQO5IS4EY5GBVJE4OFJ3LLXZGPEDVPNM3N4CA5AELT5LDOEZ) |
-| GCYHOGALMQ7XZFXOFCFHV5TIN4HR4435VTWH7C3JPJKBIBYQI2DAFI3T | c2a9140e3b559c9... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCYHOGALMQ7XZFXOFCFHV5TIN4HR4435VTWH7C3JPJKBIBYQI2DAFI3T) |
-| GDSQBG2KMSEXSFYTNNTID756QJDD2QJUVLFYMPL4XWCIOE3QSC4ZQFFL | c8c81adea97a30d... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GDSQBG2KMSEXSFYTNNTID756QJDD2QJUVLFYMPL4XWCIOE3QSC4ZQFFL) |
-| GCLM5OFKTIU2LDU6YMDAHJYM4UV3FDXA6LZV75EA233GHB5AEPL6WIRA | 4846e8a5a7e0117... | [View on Stellar Expert](https://stellar.expert/explorer/testnet/account/GCLM5OFKTIU2LDU6YMDAHJYM4UV3FDXA6LZV75EA233GHB5AEPL6WIRA) |
+### Live Testnet Interactions
+
+> **Note:** The following table serves as an immutable on-chain record of 62 distinct accounts performing end-to-end interactions (escrow initialization, funding, milestone submissions, and approvals) with the SafeSplit smart contract on the Stellar Testnet.
+
+| 👤 Wallet Address | 🔗 Transaction Hash | 🌐 Stellar Expert |
+|:---|:---|:---|
+| GBTBMWTUMNB3QU7WU6A5BZIOBQQISUFFN753Y7YQNYKRLWGX4ICF6YA6 | 774c7532...29fe5c25 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/774c7532a0a4276a455346fa3a63227e4a4b02ba6dfe48307b2fb75129fe5c25) |
+| GAXXTFONUJQBITF4EDFXABK2E7ZTDGK5IH4HL3YMZBQHUVEKYFRFLPKV | 9618520f...53ec50d3 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/9618520fc3aae5f4a155515a56b7c0f37a153df7dacdaaed5eecd5c153ec50d3) |
+| GC62UFHQFDNTTDHDSUFE334RWMF6FKVKOANXTGZ4APEEOPDDJNUICYYB | 38798247...4a3062dd | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/38798247a2acf4b89c5b314e30476ee0f73c71ffc06cc0d41bd0a4a54a3062dd) |
+| GCOW4SRDGQTKVVSKM445NZZ2X6236BUZE3GXB3A7JBPRQN6AZ3QUT2NU | 45d98912...28dd0ff1 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/45d98912e7f202db40e0bed9b0d926874775c7a06639201a7463049c28dd0ff1) |
+| GCX7ZL6GYTVKJAJBIQNL5HB2UTSJVY2UNRVS4FSBOHBYQR4C4NZD2OHB | f5c7dca4...991c46c9 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/f5c7dca497b5f354ad73efac79a8978cab0d957222d82d6d60b1a0dc991c46c9) |
+| GAJDYCF5VCMAZHZBMDUAWJ2FJGW3NJPHLUZBF4F7KZQRGWN7CLGGMXQB | 125eaf19...c3ae166a | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/125eaf193a4509f952c992b700a5cb44002c30df60541f8b269cd3afc3ae166a) |
+| GBFRRFZ4I4Q544FJ4KFAVF7U7AOIBF3U52YE3XE3RKT4BPKG5KOIF4XU | 6367b8d7...87efce29 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/6367b8d73cc63bee06f60ce19167fa4ede78b07c565c3139be5f4d6487efce29) |
+| GBYCURC6IHDIYCA2NBVU4IBME73SR73KGODH63SPQH26XBF2GIOD22RG | c37e8d4e...3697299a | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/c37e8d4eb0bd57f35c02214d04b9bf0151cb06cb20f854a07e2828513697299a) |
+| GBTEY2EAPP5H5LTVKZXYZ7GW333WUIJ2OTNO6SOUYDNYLJSYE7JXZL4K | 3fd29396...2911a140 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/3fd2939631581b5ad5a962cab18ff0d94001e7b850b2d5336f97108b2911a140) |
+| GDROB3MZEMF3C54JIWRKCGIK7VZPZRIBKW55HIMSBTH4BOXKKR2EDCG5 | 5fcab6d2...eb62499a | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/5fcab6d2773303022dc59555a3b35388bfa609860996ee9579391619eb62499a) |
+| GDD3ZGJARMKE2LG3WTH3AJ5UQL5SALTC3PCAJTHJ5WHGFPMCO67FGOE3 | 03df7318...406d5aa9 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/03df73181ac5741c35054f2846cc042d5348147278ce4319b9b4c079406d5aa9) |
+| GDWKLMPQDGYZLS2CUL42U74KTRXYHFBEFRQN7IAU5N6MA6AB2K7MU5M6 | 7e8c9585...0cedf389 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/7e8c9585091157e468273b7e10be568c8411ed55d848724ac3adddab0cedf389) |
+| GDM7RPBC64BDSEGFLXSLBV6BYODSE2IZSRLRJOECX232YMXBMHHKNURG | 2b838816...c2c1ac5b | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/2b838816321415455a3c4e3665de1a093b069d3656b3306b58c92896c2c1ac5b) |
+| GAPQG3X6LCD3VDDAO3Y4U3XP5JX3BCRSAJSQS3FLCJG7W74ZJ7NONJDA | 8b1b58cc...8b4e58b1 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/8b1b58ccd88bc54b9c4d4c7b08a916cefeb41bb195994d6d4687c5a48b4e58b1) |
+| GDD5DLA6Q7XUNP64BHLE63SV4EXMZTCCI6K3SES7BF4GZWDLKMCSZYQC | b8527b98...339180cd | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/b8527b988fdc02b8f77d6a06d3e705a615878225f256760a1f40b186339180cd) |
+| GCCNUNQLDYYYUCQFUHVQX5HZ5TTL2PT435AEGFX6I6PEWEAQQ3V6GCPA | 16fa1e05...4fc2dd2a | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/16fa1e05a184754633a89155e5ce7de9a868cbc68c9cb1862b7047994fc2dd2a) |
+| GDZRYGZIWPMJFVXQKSXRHGAUAFFWO3UAKXKD46Y6CJRTXB2OYG634JRG | fb4fb0e8...9e511bcd | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/fb4fb0e8e8673f0dcf298e95ccf1cd6dd1a2db2bcb56fbbebf9a43489e511bcd) |
+| GBTC2DKZ27WTQNH6OVD4HSDSPU3ZQDHDERVW45PEZCMTSR4VKKZRC6MN | 9098e2b4...7b7de717 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/9098e2b4142a58d9496c42b2a472ee690f34dd1f1681ada9044070187b7de717) |
+| GBIYECXBEZHEFN2PN46MH7NU66BNXMSM77F63JP3PRMCTHANAQ7DLWZL | 6b311deb...0798c0e3 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/6b311deb92b1ba7c1ff70bc9a553ae18821717efd69849942b057ef60798c0e3) |
+| GDC3JUG36XOP4CGI37PGF4XNUNRVBD5GUUULNJUJ45IJRXTPDKFCCZQS | 769bb948...120d6560 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/769bb94888526dc2e63032e9495152b5bcf44ccdc22af17468928f39120d6560) |
+| GBWRHI42KOZQ7XQWR2JX5WPIVBFHVS2UOYDBKNRZWT4DQJRCSUIOUU2M | 63449bdf...89b6a67d | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/63449bdf0e752ade9711c4d4f39102f252dfe7e3317194d8f0813b0d89b6a67d) |
+| GARBA5IY27EZD5O3MYEDPVKUQJJYJVJEFB3HEHO43HNQFCKQG2ZXJE7E | 30e6cbb1...3d241e02 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/30e6cbb148dfb680ddd39821fc2b1dbe7487ff1dd1745a0d4c8db78e3d241e02) |
+| GAJIHMEFMOSOC2YDZVSYCNJXL5YZ3IT4H5S4A7N75OYJNFVMQGGV4VQO | f1fce431...49b185ad | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/f1fce4317e0929e449f1a1a320941ca37e78aa1fcab6a07567fd769149b185ad) |
+| GBIOJNLNUGXNDIGLEUVIB2DBHLCCEZ3VPAVOXZE2NNKPLPDI5MEXLQMK | dd1fcc0d...00d45e29 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/dd1fcc0d4b852e58ae0574c5b087968d4f0a7d94950855d46c41f3aa00d45e29) |
+| GDD6TJMHA6D3CSAI2X3STEZDBALAVXF5GKEXSUIY47QKCZHK27Y42GPW | bf20a2c3...f325a9dc | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/bf20a2c32bc3d34b2dcd85b533c0a929823758d8bc1502a433c5441ef325a9dc) |
+| GBPV2G7BWWLH73WG3KCKWLDAPSESLYABTOSUIQPOP7R424UCSPJ73X5R | 943d3137...4e0c811a | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/943d313703cb1f09d726136ad975cad365f010beb6203128d8ecb0f64e0c811a) |
+| GB6ALSKSVKAQS45CSS7MBGTQFSIOZKISVB4C47VHU5CTTJPOI7SWXEJS | 0ce36145...3f0024a7 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/0ce3614521154466533b2f5d8db025882349ad140248bb670add3ad43f0024a7) |
+| GBM3SHSMRCAOTQ7F4ZXLTUNQTGQVSBGCWN6SZECNSXP6ZAXXL2IVGACR | c7fdee0c...16c0f3ea | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/c7fdee0c2ecd2d30ed0e988b3dae91717fe788093df4c6a1e89d07c016c0f3ea) |
+| GDBNUIXDLVP2R3AJAMYGNWMZT3ZO7AHCG5HGJWF63A4RSRVGPCEQXKAR | 97281730...7bb1f1c4 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/97281730e1d1615954029f99f0944cf49faca299580d6aa914e298207bb1f1c4) |
+| GCGQ5LNZJ6BBWM4K2LOXZ2D6PACZ7IM7IGTDBUIMCH4GDDGEC4QFC5JE | 38a58f8c...fd8b1e7f | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/38a58f8c585045a20dc7e0e4856d73784dd45cb2d10689996578228ffd8b1e7f) |
+| GC7B5QJ2VZBDTDRWF6TGF3MMRRTKSOSPVRO4I5L5M6U6ZJ5KQQPBM5TE | ecca2052...105366ec | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/ecca2052010ff6d8b029c50ec4aedbc1004736b0936ea5d1d8ed5b8e105366ec) |
+| GCPQ2SHYGJCCKCMAX5L6AP2EAUXKJXN4TGKWH2YMR2SLA6MFUT2EN4KZ | 62b1babc...83a1eb9e | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/62b1babc43d9c471629f24c3e069ee1faa2c04b197f4d8a8119c232c83a1eb9e) |
+| GAWTGBIXPUA3HITNO6NP7KU2E5TXA2F7GQMYSY6O7OLKCBUI72ITUEHS | 6d955699...0b3a3894 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/6d955699644558a324bf4dcd0e6babd3455ae312ac7ddf946a1d35960b3a3894) |
+| GCEOWLSE3FLMMYEK7MNLDBPVZDVKO2S3EWP7JWX5NBJYQI2M7O2TJZMB | 6c4bf288...f46aa13a | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/6c4bf288602e194fdc760a32782451265dcbecb197297d2ca5bafb42f46aa13a) |
+| GBJTQHG76MUUGT5L7ARXRTAVRSYHOPURURSF7P35TBSO2LZLFRVPKJFB | e12c9d16...0bb2f796 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/e12c9d163988ee64a86731815fdd87e8029377ae22a21c0067230d090bb2f796) |
+| GB75T6Y5NHM26ZCUTST3S2PO4CKUEEZO23S6V7IHOM4ABSZHPXY55BZX | 45f0bc0c...7b055d83 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/45f0bc0c9fa77ed6f7a5ff09637a75080b73feda2739a3a39e11878f7b055d83) |
+| GABYSAE6PQEFD7MCNZFKO6LB5S25C56M2UCYFXWIJIWW6BKYMEYOFVM5 | 4bd0233b...a63b25fc | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/4bd0233b9edb3b629eba3b8ba5e473917bf9edb22a7b0c8d62e5d7cea63b25fc) |
+| GDG7SNMAQ5KRHTWHO7CTXX44NCD4SZEYLWRBHABPPMEVOD7B4OBLNDVK | 5df5121c...5dd89ea1 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/5df5121cd16598db0bd46cc38e0e9b9caeb73067ce3a74fe1d2c06335dd89ea1) |
+| GBKN3DSDFQPCP57SPKZLBWYIE5AKPZLKMP2NTDMFCWICAKWUV4AXHOMC | 722a031b...cba54102 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/722a031b683d6086ac76763d59132408ed129d1af6573796a78fa0fecba54102) |
+| GC2GR62UP7WMTLV3IWC4O3F6ULFIW747JWY2RDEDBIKP572JQZY6QYLK | 4ee8186e...a5b43b6b | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/4ee8186ede287c4709ed2a668bc40bca3affc915cde4f42f16e45662a5b43b6b) |
+| GBPEFYGPWXZSVO3OTCQESGHCGCD3PMGXW3SVYDWB7JRS4EY4Q6UZGMOL | ec3a2f2a...6b736cf3 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/ec3a2f2a87a42afc755b4dc1df97cd5ea2d8e98f2c91220a1e202cf96b736cf3) |
+| GAVYQWEJJKXNE5IRW2DF2NVNB5F3O6S5MIEGIR5WXWDYPF3LJYCNONUV | 67e830e7...595cb04d | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/67e830e7a335b7c31a77f84f5ac26190b456b30714d073c202d91f94595cb04d) |
+| GCL7DKFVZMFWD2CZECTEWMKZZME2GGZZ5RHUHLCWNTKD7WJHEFUGVW46 | 813eb8d5...ee48e0ad | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/813eb8d57fd1bc1d80da7a4bbd1982685253bb3d9ce1562218d7630eee48e0ad) |
+| GDPAFMV5WC3KJYXYPF4KMFVCUEBRBDM4AMSD5TPJ2PK22X53AOJCFN5V | c16d212d...b353018a | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/c16d212d7cf0d73e6b78c7cdf1a7c580a2efbd68fa28a17c0e4635d0b353018a) |
+| GC76HABY3CJENZYD2V6ISQFYNQ3TY5JI537WWRF3OL2JX3NB3WQJPPI7 | 0d4d96df...4dfb849d | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/0d4d96dfe6931c7c25dd491272d0c7ab00dbca3203a6743eafce5dc44dfb849d) |
+| GDE5F4FIBNYEOXJ2OCRFCQRH5WDHFX64XKTHMVGK46OAMIVP6SAMSZV4 | 8f80e62b...85100952 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/8f80e62b3d14b102937614cba4b8bced1079a301a9207236092f238885100952) |
+| GAVLIZP2VKBYMFIJFODXHLZDPUECQZV6JBZ54YQX5OKFPATNIDZ2TQLA | fd602c05...351cf35b | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/fd602c0569dfa069b1d2756ae745663a49187cf51d07a460007c705f351cf35b) |
+| GCMNFNMBX55PSAQJI5QQSQBQUBVL75EPD2KIIDLOZP6SARP3GNFXQ4FH | 26dd52c7...c77a842d | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/26dd52c7ecc851b6ffd18400f1d14fb4abdd3fdfa0ad6687dc17d254c77a842d) |
+| GCAVCOWGAYVD6BSAEFYOQZJCAR5EE4O3CCAIVC3HBQHHBVVFF2YISRC3 | f285525d...0b0149ea | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/f285525dc450ff86b3437f4dc46a2b2fdce5d4a8d29ae72f04f87a200b0149ea) |
+| GCYIPL52J3Q4XKGEFTXSYH4Q5NLPOKHNI54APLBWL7Y3GV4HVC4FDUFC | 50293882...077e3f10 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/50293882ce5938c9630ef287133b01f964d6ba41b37ff54ae179e319077e3f10) |
+| GAMGT35QJS7SPENESVJK7GHGU2JHICRHTZZF3W722SYBH4OPDB7RALGX | c8aa2699...281bc46b | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/c8aa269985f1066a626d81965aaff11da6b37ae88c0565a8c14ee30f281bc46b) |
+| GD3XOBMR2O4LQB5ANRCX5OOQQKSIIF4XTIKALY46XEODLZ3YHTLH3J46 | 107e072c...2681220c | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/107e072ce1c077cf1ee998331497b88555d665158c3b8c37bdc4c0162681220c) |
+| GBN37JVY3MQ3X4HESMTIVU3C5UAJD7RPX245GS2ZQNEQX53RLCYVH2EO | f15aedcd...75498e30 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/f15aedcd550e98aa493d4e196512e9d9c48d28d737723bf2b13438d175498e30) |
+| GDEGLYBU4VXFS4QOEU2WOISIDKPBQO3GVIG4PD7RQ32JT25NQU4ICAPF | d49f95e6...a202cff5 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/d49f95e6bda651de2844d071cee264b3f279a1fed8b396c102598e51a202cff5) |
+| GCNPQJIONNETETL3DBBYT6ZS6WIZZKDFJJVSQDZ36IUGC6Z6NWADLRRO | 4f315411...c4dc10de | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/4f3154118e4b14f5b664c99b1f5e53fbc7bfbe9b8c4c49211a901444c4dc10de) |
+| GBRZGZFB7RFRNF5J63E5DHKZ452NF5FYDQIQIS47A7H46NZZSMYU26QS | d827d0d4...39694b61 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/d827d0d44249438b60ba1b3e5bb0be375997d1e2b7b926b5f02b7f5a39694b61) |
+| GA6B3D6FSLWX2B6QBFN5BEXFQP5ZL3I5XIWIWGIKIFP5G5AHICTCJDKW | af36000d...bfd70688 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/af36000d0f3858db7c4c97f3f38b64a7e37508ee1671731ddd52e1a2bfd70688) |
+| GCT2MATLLBNWNQ7O7G4C42PBSANXLDVSY5W3HIE2XZLZU253JK6IVKXZ | 859efef1...dbc8c5e3 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/859efef161949b843fd7845819d4d71775f738c0d683a76ab09e0544dbc8c5e3) |
+| GDQZVWI26KXDU2TV5OVWPMQWWTP5EPLATYGARPIYM2D3HN7Z7ZOSZQZ2 | 81597cf4...caaf7028 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/81597cf4367f13cc09959de286377c28669636e1781ab9cd7545c08fcaaf7028) |
+| GAAYWTHCBZHYXMX5OZCW77USTH7PE2YBJPZSDLZKYIOUU2EOXPLFMTM7 | 5f7a02f3...b57eac6f | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/5f7a02f37921b8d6d5bb4803370272c1ceb6902cbfa1d3a73cbee19eb57eac6f) |
+| GANHY4FZB7WOC5HORN4XWNJBW6TR7PRMJGI77WU5ZFGGAOTAVZYOV4RO | 53dafaff...32996d9b | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/53dafaffe2b2deb0d0aa802a26d208ec7a1d0d0fec821d75383de98132996d9b) |
+| GCBDYIUHYMOMKCP55KISRKNOH2A5RHURUP4MO6XPI7CBSZIQVNJBX25C | 10d722cf...9266bbc3 | [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/10d722cf00c9bef99519c027bf48199a6008c366e51141910a0c76ea9266bbc3) |
 
 ## User Feedback
 
@@ -252,6 +255,27 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Request:** Freelancers needed a clear way to link their work (GitHub PRs, IPFS links) when submitting a milestone for approval.
 - **Actionable Item:** Add a dedicated "Submit Work" modal that accepts a URL and logs it immutably on-chain for the client and arbiter to review.
 
+
+**4. Automated Invoicing & Accounting**
+- **Request:** Businesses need formal settlement receipts for tax and accounting purposes upon escrow completion, rather than just raw on-chain hashes.
+- **Actionable Item:** Automatically generate PDF invoices pushed to Supabase Storage, and email secure download links to both parties upon escrow closure.
+
+**5. Granular Deliverable Tracking & Revision History**
+- **Request:** Clients wanted to break down milestones into specific sub-tasks (e.g., "Deploy staging preview", "Figma source") and see revision histories of submitted work without overwriting past versions.
+- **Actionable Item:** Add interactive sub-task checklists for milestones, a versioned revision history for submissions, and embedded in-browser previews for PDFs/Figma/Markdown directly in the milestone viewer.
+
+**6. External Integrations & Notifications**
+- **Request:** Users missed milestone deadlines because they didn't check the web app. They also wanted their teams to be notified on Slack/Discord.
+- **Actionable Item:** Introduce Custom Webhooks for Slack/Discord alerts, dynamic `.ics` calendar subscriptions, and 48h/24h automated deadline alerts.
+
+**7. Reputation & Trust Metrics**
+- **Request:** Freelancers wanted a way to prove their track record to new clients without exposing sensitive contract details.
+- **Actionable Item:** Generate Shareable Public Profiles (`/p/[username]`) displaying aggregated trust metrics like total volume handled, completed deal counts, and on-time rates.
+
+**8. Advanced Negotiation & Templates**
+- **Request:** Users struggled to calculate token amounts based on fiat agreements and wanted faster ways to create common escrow contracts.
+- **Actionable Item:** Build a Pre-Funding Calculator for Fiat-to-XLM conversions with volatility buffers, add Pre-Built Milestone Presets (SOWs, retainers), and introduce an exportable Chronological Event Feed for full deal audits.
+
 ### User Feedback Iterations (Implemented)
 
 Following the feedback received, we successfully deployed the following upgrades to the platform:
@@ -267,6 +291,29 @@ Following the feedback received, we successfully deployed the following upgrades
 **3. Streamlined Milestone Deliverables**
 - Deployed a highly interactive UI for freelancers to submit deliverables.
 - Links (e.g. GitHub PRs or IPFS CIDs) are stored in the database and explicitly bound to the milestone transaction for an immutable audit trail.
+
+---
+
+**4. Automated Invoice Generation**
+- Integrated `jspdf` to automatically compile milestone data into a formal PDF invoice upon contract closure.
+- Receipts are securely stored in Supabase Storage (`invoices` bucket) with authenticated, time-limited download links for accounting departments.
+
+**5. Sub-Tasks, Revisions & Previews**
+- Expanded the milestone data model to support interactive, granular checklists (`SubTask`) that both parties can monitor.
+- Built a robust revision control system (`DeliverableRevision`) for deliverables, ensuring past work isn't overwritten.
+- Embedded a `<NativePreviewer />` component supporting Markdown, image diffs, PDFs, and Figma links inside the milestone dashboard for seamless review.
+
+**6. Webhooks & Calendar Sync**
+- Added a "Deal Settings" panel allowing users to plug in Discord/Slack webhooks for real-time team alerts on deliverable uploads and fund releases.
+- Implemented one-click Google Calendar integration and dynamic `.ics` feeds using the `ics` package that track milestone deadlines.
+
+**7. Public Vanity Profiles**
+- Deployed `/p/[wallet]` vanity routes showcasing a freelancer's verified track record.
+- Public profiles highlight key trust metrics (deals completed, total volume) dynamically queried from Supabase while keeping client identities completely private.
+
+**8. Negotiation Tools & Presets**
+- Shipped a Pre-Funding Calculator that anchors contract values to fiat (USD) and automatically suggests a 5% XLM volatility buffer before locking funds.
+- Added a 1-click template library for common workflows (Software Development, Retainers) on the Create Escrow page, alongside an exportable Chronological Event Feed (`.md`) that tracks every off-chain and on-chain event.
 
 ---
 

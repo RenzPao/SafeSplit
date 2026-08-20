@@ -11,6 +11,9 @@ datasource db {
 }
 
 model Escrow {
+  invoice_url        String?       // Automatically generated PDF invoice
+  webhook_url        String?       // Discord/Slack webhook
+
   id                 String        @id @default(uuid())
   title              String?       @default("Untitled Escrow")
   contract_address   String
@@ -26,6 +29,8 @@ model Escrow {
 }
 
 model Milestone {
+  sub_tasks            SubTask[]
+  deliverable_revisions DeliverableRevision[]
   id              String   @id @default(uuid())
   escrow_id       String
   escrow          Escrow   @relation(fields: [escrow_id], references: [id], onDelete: Cascade)
@@ -72,4 +77,23 @@ model User {
   total_earned_xlm  Decimal   @default(0)
   total_spent_xlm   Decimal   @default(0)
   reliability_score Float     @default(100.0)
+}
+
+model SubTask {
+  id              String   @id @default(uuid())
+  milestone_id    String
+  milestone       Milestone @relation(fields: [milestone_id], references: [id], onDelete: Cascade)
+  title           String
+  is_completed    Boolean  @default(false)
+  created_at      DateTime @default(now())
+}
+
+model DeliverableRevision {
+  id              String   @id @default(uuid())
+  milestone_id    String
+  milestone       Milestone @relation(fields: [milestone_id], references: [id], onDelete: Cascade)
+  url             String
+  notes           String?
+  version         Int
+  created_at      DateTime @default(now())
 }
