@@ -75,7 +75,7 @@ Unlike standard crypto payments or centralized escrow services (like Upwork), Sa
 * **Wallet Connected State:**
 ![Wallet Connected State](public/walletconnected.png)
 
-* **Dashboard & Milestones:**
+* **Balance Displayed:**
 ![Balance Displayed](public/balancedisplay.png)
 
 * **Successful Transaction Result:**
@@ -111,8 +111,8 @@ Unlike standard crypto payments or centralized escrow services (like Upwork), Sa
   
 - **Live Pitch Deck**: [https://safesplit.vercel.app/pitchdeck](https://safesplit.vercel.app/pitchdeck)
 - **Demo Video (YouTube)**: [Video Link](https://drive.google.com/file/d/1Irc60jXjSp88p29RqBF5gv6gxhyv6KJC/view?usp=sharing)
-* **Contract Address:** [`CC6QLF4DI7C6LKURR2V7XQOZ72BNG5BOKURQ2SYQHPTAZEHO7PLRMR5K`](https://stellar.expert/explorer/testnet/contract/CC6QLF4DI7C6LKURR2V7XQOZ72BNG5BOKURQ2SYQHPTAZEHO7PLRMR5K)
-* **Transaction Hash:** [`e2105673626ac4aade91e70f6fad328b9ff57b053c07b2f1a55c059724dbbe0d`](https://stellar.expert/explorer/testnet/tx/e2105673626ac4aade91e70f6fad328b9ff57b053c07b2f1a55c059724dbbe0d)
+* **Contract Address:** [`CDA4KMIYSDXEK5SC6AA2S3ISPIJBOWWW3GBETD7KMJQRJWRKFSFQYZEU`](https://stellar.expert/explorer/testnet/contract/CDA4KMIYSDXEK5SC6AA2S3ISPIJBOWWW3GBETD7KMJQRJWRKFSFQYZEU)
+* **Transaction Hash:** [`b73c0e4d3a5c0c8c9feeca0b41c1ee99f21fc2033a0ab26890bac31dbab50f5f`](https://stellar.expert/explorer/testnet/tx/b73c0e4d3a5c0c8c9feeca0b41c1ee99f21fc2033a0ab26890bac31dbab50f5f)
 ![Testnet Contract](public/testnetv2.png)
 
 ### Architecture

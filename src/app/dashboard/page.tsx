@@ -663,7 +663,7 @@ export default function Home() {
                 className="h-10 px-3 sm:px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-2"
               >
                 <Wallet className="w-4 h-4" />
-                <span className="hidden sm:inline">Connect Freighter</span>
+                <span className="hidden sm:inline">Connect Wallet</span>
                 <span className="sm:hidden">Connect</span>
               </button>
             )}
@@ -1553,7 +1553,7 @@ export default function Home() {
                   </div>
                 ) : (
                   <div className="text-center py-6 border border-dashed border-zinc-900 rounded-xl text-[10px] text-zinc-500 font-medium">
-                    Wallet not connected. Click above to connect Freighter.
+                    Wallet not connected. Click above to connect Wallet.
                   </div>
                 )}
               </div>
