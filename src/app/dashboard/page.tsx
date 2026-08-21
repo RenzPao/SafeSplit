@@ -31,7 +31,7 @@ import { createEscrowMetadata, fetchEscrowMetadata } from '@/lib/stellar/supabas
 import { supabase } from '@/lib/supabaseClient';
 
 // Freighter Wallet API
-import { isConnected, getAddress, isAllowed, requestAccess, setAllowed } from '@stellar/freighter-api';
+import { useWallet } from '@/contexts/WalletContext';
 import { Keypair, StrKey } from '@stellar/stellar-sdk';
 
 
@@ -69,11 +69,13 @@ export interface Escrow {
 }
 
 export default function Home() {
+  const { address, showWalletModal, setShowWalletModal, disconnect, signTx, walletType } = useWallet();
   // Navigation / Tabs
   const [activeTab, setActiveTab] = useState<'manage' | 'create'>('manage');
   
   // Wallet state
   const [walletAddress, setWalletAddress] = useState('');
+  useEffect(() => { if (address) setWalletAddress(address); else setWalletAddress(''); }, [address]);
   const [walletConnected, setWalletConnected] = useState(false);
   const [copiedText, setCopiedText] = useState<string | null>(null);
 
@@ -286,31 +288,13 @@ export default function Home() {
   };
 
   const fetchAddressForField = async (field: 'client' | 'freelancer' | 'arbiter') => {
-    try {
-      const connectedRes = await isConnected();
-      if (!connectedRes || !connectedRes.isConnected) {
-        alert('Freighter wallet extension not detected. Please install it.');
-        return;
-      }
-      const allowedRes = await setAllowed();
-      if (allowedRes && allowedRes.isAllowed) {
-        const addressRes = await getAddress();
-        if (addressRes && addressRes.address) {
-          if (field === 'client') setFormClientAddress(addressRes.address);
-          if (field === 'freelancer') setFormFreelancerAddress(addressRes.address);
-          if (field === 'arbiter') setFormArbiterAddress(addressRes.address);
-          
-          setWalletAddress(addressRes.address);
-          setWalletConnected(true);
-        } else if (addressRes && addressRes.error) {
-          alert(`Access denied: ${addressRes.error}`);
-        }
-      } else if (allowedRes && allowedRes.error) {
-        alert(`Access denied: ${allowedRes.error}`);
-      }
-    } catch (err: unknown) {
-      alert(`Failed to fetch Freighter address: ${err instanceof Error ? err.message : String(err)}`);
+    if (!walletAddress) {
+      setShowWalletModal(true);
+      return;
     }
+    if (field === 'client') setFormClientAddress(walletAddress);
+    if (field === 'freelancer') setFormFreelancerAddress(walletAddress);
+    if (field === 'arbiter') setFormArbiterAddress(walletAddress);
   };
 
   const handleFundWithFriendbot = async (targetAddr?: string) => {
@@ -373,75 +357,17 @@ export default function Home() {
       }
     }
 
-    const checkFreighter = async () => {
-      try {
-        const connectedRes = await isConnected();
-        if (connectedRes && connectedRes.isConnected) {
-          const allowedRes = await isAllowed();
-          if (allowedRes && allowedRes.isAllowed) {
-            const addressRes = await getAddress();
-            if (addressRes && addressRes.address) {
-              setWalletAddress(addressRes.address);
-              setWalletConnected(true);
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('Freighter wallet check failed:', err);
-      }
-    };
+    const checkFreighter = async () => {};
     checkFreighter();
 
     // Set up active wallet account polling to auto-detect changes
-    const interval = setInterval(async () => {
-      try {
-        const connectedRes = await isConnected();
-        if (connectedRes && connectedRes.isConnected) {
-          const allowedRes = await isAllowed();
-          if (allowedRes && allowedRes.isAllowed) {
-            const addressRes = await getAddress();
-            if (addressRes && addressRes.address) {
-              setWalletAddress((prev) => {
-                if (prev !== addressRes.address) {
-                  return addressRes.address;
-                }
-                return prev;
-              });
-              setWalletConnected(true);
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('Freighter wallet poll failed:', err);
-      }
-    }, 1500);
+    const interval = setInterval(async () => {}, 1500);
 
     return () => clearInterval(interval);
   }, []);
 
   const connectFreighterWallet = async () => {
-    try {
-      const connectedRes = await isConnected();
-      if (!connectedRes || !connectedRes.isConnected) {
-        alert('Freighter wallet extension not detected. Please install it.');
-        return;
-      }
-      const allowedRes = await setAllowed();
-      if (allowedRes && allowedRes.isAllowed) {
-        const addressRes = await getAddress();
-        if (addressRes && addressRes.address) {
-          setWalletAddress(addressRes.address);
-          setWalletConnected(true);
-        } else if (addressRes && addressRes.error) {
-          alert(`Access denied: ${addressRes.error}`);
-        }
-      } else if (allowedRes && allowedRes.error) {
-        alert(`Access denied: ${allowedRes.error}`);
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      alert(`Connection failed: ${message}`);
-    }
+    setShowWalletModal(true);
   };
   // Add an escrow ID to recent local storage list
   const addRecentEscrow = (id: string, title?: string) => {

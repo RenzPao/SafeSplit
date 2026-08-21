@@ -1,6 +1,7 @@
 'use client';
 
 import { supabase } from '@/lib/supabaseClient';
+import { useWallet } from '@/contexts/WalletContext';
 import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, 
@@ -68,6 +69,7 @@ export default function MilestoneDetailView({
   currentWalletAddress,
   onActionSuccess,
 }: MilestoneDetailViewProps) {
+  const { signTx } = useWallet();
   const milestone = escrow.milestones.find((m) => m.milestone_index === milestoneIndex);
   
   const [file, setFile] = useState<File | null>(null);
@@ -223,7 +225,7 @@ export default function MilestoneDetailView({
 
       // Construct transaction and request Freighter signing
       setStatusMessage({ type: 'info', text: 'Signing & submitting transaction to Testnet...' });
-      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+      const txHash = await buildAndSubmitSorobanTx(signTx, currentWalletAddress, operation, 'testnet');
       
       // Update off-chain database via Supabase
       await updateMilestoneStatus(escrow.id, milestone?.milestone_index, {
@@ -276,7 +278,7 @@ export default function MilestoneDetailView({
       });
 
       setStatusMessage({ type: 'info', text: 'Signing & submitting approval to Testnet...' });
-      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+      const txHash = await buildAndSubmitSorobanTx(signTx, currentWalletAddress, operation, 'testnet');
 
       // Update database status via Supabase
       await updateMilestoneStatus(escrow.id, milestone?.milestone_index, {
@@ -325,7 +327,7 @@ export default function MilestoneDetailView({
         nativeToken: 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC', // Testnet native token
         milestones: milestonesWithHash
       });
-      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+      const txHash = await buildAndSubmitSorobanTx(signTx, currentWalletAddress, operation, 'testnet');
 
       // Update database status via Supabase to record the init event
       await updateEscrowStatus(escrow.id, {
@@ -356,7 +358,7 @@ export default function MilestoneDetailView({
       const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || escrow.contract_address;
       const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.depositXlmTx(currentWalletAddress, escrow.id, escrow.client_address);
-      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+      const txHash = await buildAndSubmitSorobanTx(signTx, currentWalletAddress, operation, 'testnet');
 
       // Update database status via Supabase
       await updateEscrowStatus(escrow.id, {
@@ -387,7 +389,7 @@ export default function MilestoneDetailView({
       const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || escrow.contract_address;
       const client = new SafeSplitClient(contractAddress, 'testnet');
       const operation = client.cancelAndRefundTx(currentWalletAddress, escrow.id, escrow.client_address);
-      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+      const txHash = await buildAndSubmitSorobanTx(signTx, currentWalletAddress, operation, 'testnet');
 
       // Update database status via Supabase
       await updateEscrowStatus(escrow.id, {
@@ -424,7 +426,7 @@ export default function MilestoneDetailView({
         milestoneId: milestone?.milestone_index,
         reasonHash,
       });
-      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+      const txHash = await buildAndSubmitSorobanTx(signTx, currentWalletAddress, operation, 'testnet');
 
       // Update status via Supabase
       await updateMilestoneStatus(escrow.id, milestone?.milestone_index, {
@@ -483,7 +485,7 @@ export default function MilestoneDetailView({
         milestoneId: milestone?.milestone_index,
         clientSplitBps: splitBps,
       });
-      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+      const txHash = await buildAndSubmitSorobanTx(signTx, currentWalletAddress, operation, 'testnet');
 
       // Update status via Supabase (keep in Disputed but log proposal)
       await updateMilestoneStatus(escrow.id, milestone?.milestone_index, {
@@ -523,7 +525,7 @@ export default function MilestoneDetailView({
         accepter: currentWalletAddress,
         milestoneId: milestone?.milestone_index,
       });
-      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+      const txHash = await buildAndSubmitSorobanTx(signTx, currentWalletAddress, operation, 'testnet');
 
       // Finalize status via Supabase
       await updateMilestoneStatus(escrow.id, milestone?.milestone_index, {
@@ -557,7 +559,7 @@ export default function MilestoneDetailView({
       const operation = client.upgradeTx(currentWalletAddress, {
         newWasmHash: wasmHash.trim(),
       });
-      const txHash = await buildAndSubmitSorobanTx(currentWalletAddress, operation, 'testnet');
+      const txHash = await buildAndSubmitSorobanTx(signTx, currentWalletAddress, operation, 'testnet');
 
       setStatusMessage({ type: 'success', text: `Contract logic successfully upgraded to WASM Hash: ${wasmHash.trim()}! Tx: ${txHash}` });
       setWasmHash('');

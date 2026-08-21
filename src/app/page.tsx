@@ -514,7 +514,7 @@ export default function LandingPage() {
             Secure your next<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-emerald-400">project, forever.</span>
           </h2>
-          <p className="text-zinc-500 max-w-lg mx-auto mb-12 text-lg">Connect your Freighter wallet and deploy a trustless escrow in under 60 seconds.</p>
+          <p className="text-zinc-500 max-w-lg mx-auto mb-12 text-lg">Connect your Stellar wallet and deploy a trustless escrow in under 60 seconds.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/dashboard">
               <button className="group px-10 py-5 rounded-full bg-white text-black font-extrabold text-base transition-all hover:scale-105 active:scale-95 hover:shadow-[0_0_60px_rgba(255,255,255,0.2)] flex items-center gap-3">

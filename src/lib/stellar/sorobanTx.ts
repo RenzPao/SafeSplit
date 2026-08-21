@@ -14,6 +14,7 @@ const TESTNET_RPC_URL = 'https://soroban-testnet.stellar.org';
  * @returns The final transaction hash on-chain
  */
 export async function buildAndSubmitSorobanTx(
+  signTxHook: (xdr: string, network?: string) => Promise<string>,
   sourceAddress: string,
   operation: any,
   network: 'testnet' | 'mainnet' | string
