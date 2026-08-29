@@ -298,12 +298,28 @@ export default function EscrowCreator({ userWallet, onCreated, onCancel }: Escro
     </div>
   );
 
+  const TEST_FREELANCER_ADDRESS = 'GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ';
+  const TEST_ARBITER_ADDRESS = 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5';
+
   const renderStep2 = () => (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div>
-        <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider mb-4">
-          Counterparties
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider">
+            Counterparties
+          </h3>
+          <button
+            type="button"
+            onClick={() => {
+              setFreelancerAddress(TEST_FREELANCER_ADDRESS);
+              toast.info('Simulated Address Filled', 'Loaded Stellar Testnet Freelancer address.');
+            }}
+            className="text-[11px] font-mono text-cyan-300 hover:text-cyan-200 bg-cyan-500/10 hover:bg-cyan-500/20 px-2.5 py-1 rounded-lg border border-cyan-500/20 transition-all flex items-center gap-1.5 shadow-sm"
+          >
+            <Zap className="w-3 h-3 text-cyan-400" />
+            <span>Simulate Testing Keypair</span>
+          </button>
+        </div>
         <p className="text-[11px] text-zinc-400 mb-4">
           Define the participants in this agreement. You are automatically set as the Client (Depositor).
         </p>
@@ -311,10 +327,13 @@ export default function EscrowCreator({ userWallet, onCreated, onCancel }: Escro
         <div className="space-y-4">
           {/* Client */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-zinc-300 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-400"></span>
-              Client Address (Depositor)
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-semibold text-zinc-300 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                Client Address (Depositor)
+              </label>
+              <span className="text-[10px] font-mono text-zinc-500 bg-white/[0.04] px-2 py-0.5 rounded">Connected Wallet</span>
+            </div>
             <input
               type="text"
               value={userWallet}
@@ -325,16 +344,42 @@ export default function EscrowCreator({ userWallet, onCreated, onCancel }: Escro
 
           {/* Freelancer */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-zinc-300 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-purple-400"></span>
-              Freelancer Address (Payee)
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-semibold text-zinc-300 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-purple-400"></span>
+                Freelancer Address (Payee)
+              </label>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (userWallet) {
+                      setFreelancerAddress(userWallet);
+                      toast.success('Self-Escrow Selected', 'Set your own wallet as freelancer.');
+                    }
+                  }}
+                  className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/40 transition-colors"
+                >
+                  Use Own Address
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFreelancerAddress(TEST_FREELANCER_ADDRESS);
+                    toast.success('Test Address Selected', 'Filled valid Stellar testnet public key.');
+                  }}
+                  className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 hover:bg-cyan-500/20 hover:border-cyan-500/40 transition-colors"
+                >
+                  Simulate Testing Address
+                </button>
+              </div>
+            </div>
             <input
               type="text"
               placeholder="GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
               value={freelancerAddress}
               onChange={(e) => setFreelancerAddress(e.target.value)}
-              className="w-full bg-[#0d0f14] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-xs font-mono text-zinc-100 focus:outline-none focus:border-purple-500 placeholder:text-zinc-600 transition-colors"
+              className="w-full bg-[#0d0f14] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-xs font-mono text-zinc-100 focus:outline-none focus:border-purple-500 placeholder:text-zinc-600 transition-colors shadow-inner"
               autoFocus
             />
           </div>
@@ -359,16 +404,42 @@ export default function EscrowCreator({ userWallet, onCreated, onCancel }: Escro
 
         {includeArbiter && (
           <div className="space-y-1.5 pl-6 animate-in fade-in duration-200">
-            <label className="text-[11px] font-semibold text-zinc-300 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Arbiter Stellar Public Key
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-semibold text-zinc-300 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                Arbiter Stellar Public Key
+              </label>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (userWallet) {
+                      setArbiterAddress(userWallet);
+                      toast.success('Self-Arbiter Selected', 'Set your own wallet as arbiter.');
+                    }
+                  }}
+                  className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 transition-colors"
+                >
+                  Use Own Address
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setArbiterAddress(TEST_ARBITER_ADDRESS);
+                    toast.success('Test Arbiter Selected', 'Filled valid Stellar testnet arbiter key.');
+                  }}
+                  className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/20 hover:border-emerald-500/40 transition-colors"
+                >
+                  Simulate Testing Arbiter
+                </button>
+              </div>
+            </div>
             <input
               type="text"
               placeholder="GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
               value={arbiterAddress}
               onChange={(e) => setArbiterAddress(e.target.value)}
-              className="w-full bg-[#0d0f14] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-xs font-mono text-zinc-100 focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full bg-[#0d0f14] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-xs font-mono text-zinc-100 focus:outline-none focus:border-emerald-500 transition-colors shadow-inner"
             />
             <p className="text-[10px] text-zinc-500">The arbiter can resolve disputes by splitting funds between the client and freelancer.</p>
           </div>
