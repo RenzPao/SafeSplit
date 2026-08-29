@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
     const { data: invitations, error } = await supabase
       .from('Escrow')
-      .select('*, milestones(*)')
+      .select('*, milestones:Milestone(*)')
       .eq('freelancer_address', freelancerAddress)
       .eq('status', 'Initialized')
       .order('created_at', { ascending: false });
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
       throw new Error(error.message);
     }
 
-    return NextResponse.json({ success: true, invitations });
+    return NextResponse.json({ success: true, invitations: invitations || [] });
   } catch (error: unknown) {
     console.error('Error fetching invitations:', error);
     const message = error instanceof Error ? error.message : 'Internal Server Error';

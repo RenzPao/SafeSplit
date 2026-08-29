@@ -33,6 +33,7 @@ import RegistrationModal from '@/components/RegistrationModal';
 import ProfileDashboardModal from '@/components/ProfileDashboardModal';
 import { buildAndSubmitSorobanTx } from '@/lib/stellar/sorobanTx';
 import { SafeSplitClient } from '@/lib/stellar/SafeSplitClient';
+import { updateEscrowStatus } from '@/lib/stellar/supabaseBackend';
 import { supabase } from '@/lib/supabaseClient';
 import CommandPalette from '@/components/ui/CommandPalette';
 import PortfolioChart from '@/components/dashboard/Overview/PortfolioChart';
@@ -224,10 +225,11 @@ export default function DashboardPage() {
       );
 
       // Update backend status to Funded
-      await fetch(`/api/escrows/${activeEscrow.id}/fund`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tx_hash: txHash, funder: address }),
+      await updateEscrowStatus(activeEscrow.id, {
+        status: 'Funded',
+        txHash,
+        eventName: 'EscrowFunded',
+        details: `${activeEscrow.total_xlm} XLM deposited by client ${address}`,
       });
 
       toast.tx('Escrow Funded Successfully', txHash, `${activeEscrow.total_xlm} XLM locked in Soroban smart contract.`);
@@ -246,10 +248,11 @@ export default function DashboardPage() {
       setIsActionLoading(true);
       toast.loading('Finalizing Agreement', 'Closing escrow and settling accounts...');
 
-      await fetch(`/api/escrows/${activeEscrow.id}/complete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: address }),
+      await updateEscrowStatus(activeEscrow.id, {
+        status: 'Completed',
+        txHash: 'off-chain-finalize',
+        eventName: 'EscrowFinalized',
+        details: `Agreement finalized and completed by ${address}`,
       });
 
       toast.success('Escrow Completed', 'Agreement has been settled and archived.');
