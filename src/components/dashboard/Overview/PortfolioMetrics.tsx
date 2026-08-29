@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Lock, CheckCircle2, AlertCircle, TrendingUp, Layers } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Escrow } from '../types';
 
 interface PortfolioMetricsProps {
@@ -9,6 +10,21 @@ interface PortfolioMetricsProps {
   userWallet: string;
   walletBalance: string;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 25 } },
+};
 
 export default function PortfolioMetrics({ escrows, userWallet, walletBalance }: PortfolioMetricsProps) {
   // Compute portfolio metrics
@@ -38,9 +54,18 @@ export default function PortfolioMetrics({ escrows, userWallet, walletBalance }:
   const XLM_USD_ESTIMATE = 0.11; // Mock conversion rate for financial context
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+    >
       {/* Metric 1: Total Locked in Escrow */}
-      <div className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-purple-500/40 hover:shadow-[0_0_25px_rgba(147,51,234,0.15)] transition-all">
+      <motion.div
+        variants={itemVariants}
+        whileHover={{ y: -3 }}
+        className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-purple-500/40 hover:shadow-[0_0_25px_rgba(147,51,234,0.15)] transition-all"
+      >
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-500 opacity-80" />
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">Total Value in Escrow</span>
@@ -59,10 +84,14 @@ export default function PortfolioMetrics({ escrows, userWallet, walletBalance }:
             <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">Live TVL</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Metric 2: Active Deals */}
-      <div className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-cyan-500/40 hover:shadow-[0_0_25px_rgba(6,182,212,0.15)] transition-all">
+      <motion.div
+        variants={itemVariants}
+        whileHover={{ y: -3 }}
+        className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-cyan-500/40 hover:shadow-[0_0_25px_rgba(6,182,212,0.15)] transition-all"
+      >
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 via-sky-400 to-cyan-500 opacity-80" />
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">Active Deals</span>
@@ -83,10 +112,14 @@ export default function PortfolioMetrics({ escrows, userWallet, walletBalance }:
             <span>Across {escrows.length} lifetime contracts</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Metric 3: Action Required */}
-      <div className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-amber-500/40 hover:shadow-[0_0_25px_rgba(245,158,11,0.15)] transition-all">
+      <motion.div
+        variants={itemVariants}
+        whileHover={{ y: -3 }}
+        className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-amber-500/40 hover:shadow-[0_0_25px_rgba(245,158,11,0.15)] transition-all"
+      >
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 opacity-80" />
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">Action Items</span>
@@ -115,10 +148,14 @@ export default function PortfolioMetrics({ escrows, userWallet, walletBalance }:
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Metric 4: Total Settled Volume */}
-      <div className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-emerald-500/40 hover:shadow-[0_0_25px_rgba(16,185,129,0.15)] transition-all">
+      <motion.div
+        variants={itemVariants}
+        whileHover={{ y: -3 }}
+        className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-emerald-500/40 hover:shadow-[0_0_25px_rgba(16,185,129,0.15)] transition-all"
+      >
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 opacity-80" />
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">Settled & Completed</span>
@@ -134,7 +171,7 @@ export default function PortfolioMetrics({ escrows, userWallet, walletBalance }:
             <span className="text-emerald-400 font-semibold">{completedEscrows.length}</span> settled agreements
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -6,6 +6,7 @@ import {
   Clock, 
   AlertTriangle, 
   ShieldAlert, 
+  ShieldCheck,
   Check, 
   Upload, 
   ExternalLink, 
@@ -25,6 +26,8 @@ import { useWallet } from '@/contexts/WalletContext';
 import { buildAndSubmitSorobanTx } from '@/lib/stellar/sorobanTx';
 import { SafeSplitClient } from '@/lib/stellar/SafeSplitClient';
 import { supabase } from '@/lib/supabaseClient';
+import { motion, AnimatePresence } from 'framer-motion';
+import DeliverableReviewModal from './DeliverableReviewModal';
 
 interface MilestoneWorkspaceProps {
   escrow: Escrow;
@@ -37,6 +40,9 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
   const { signTx } = useWallet();
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Deliverable Review Modal State
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   // Deliverable Submission form state
   const [deliverableUrl, setDeliverableUrl] = useState('');
@@ -292,10 +298,22 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
         {/* Deliverable Review / Live Preview Section */}
         {activeMilestone.deliverable_url && (
           <div className="space-y-3">
-            <h3 className="text-xs font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-2">
-              <FileText className="w-3.5 h-3.5 text-purple-400" />
-              <span>Submitted Deliverable</span>
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5 text-purple-400" />
+                <span>Submitted Deliverable</span>
+              </h3>
+              {activeMilestone.status === 'Approved' && (
+                <motion.div
+                  initial={{ scale: 1.5, opacity: 0, rotate: -15 }}
+                  animate={{ scale: 1, opacity: 1, rotate: -3 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                  className="px-2.5 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-[10px] font-mono font-extrabold uppercase tracking-widest shadow-[0_0_15px_rgba(52,211,153,0.4)]"
+                >
+                  ✓ VERIFIED ON-CHAIN
+                </motion.div>
+              )}
+            </div>
 
             <div className="p-4 rounded-xl bg-[#0a0c14]/80 border border-purple-500/20 shadow-[0_0_15px_rgba(147,51,234,0.08)] flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
@@ -310,15 +328,15 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
                 </div>
               </div>
 
-              <a
-                href={activeMilestone.deliverable_url}
-                target="_blank"
-                rel="noreferrer"
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowReviewModal(true)}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600/30 to-indigo-600/30 hover:from-purple-600/50 hover:to-indigo-600/50 text-xs font-semibold text-purple-200 hover:text-white border border-purple-500/30 transition-all shrink-0 shadow-sm"
               >
-                <span>Inspect Work</span>
+                <span>Inspect & Review</span>
                 <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+              </motion.button>
             </div>
           </div>
         )}
@@ -338,14 +356,16 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
                   className="flex-1 bg-[#0a0c14] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500 shadow-inner"
                   required
                 />
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(147,51,234,0.3)] disabled:opacity-50 hover:scale-[1.02]"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(147,51,234,0.3)] disabled:opacity-50"
                 >
                   {isSubmitting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                   <span>Submit Work</span>
-                </button>
+                </motion.button>
               </div>
             </form>
           )}
@@ -353,36 +373,52 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
           {/* Client: Review & Approve / Dispute */}
           {isClient && activeMilestone.status === 'Submitted' && (
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <button
-                onClick={handleApproveMilestone}
-                disabled={isSubmitting}
-                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] disabled:opacity-50 hover:scale-[1.02]"
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setShowReviewModal(true)}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)]"
               >
-                {isSubmitting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                <span>Approve & Release {activeMilestone.amount_xlm} XLM</span>
-              </button>
+                <ShieldCheck className="w-4 h-4" />
+                <span>Review & Approve {activeMilestone.amount_xlm} XLM</span>
+              </motion.button>
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setShowDisputeModal(true)}
                 className="px-4 py-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold transition-all"
               >
                 Raise Dispute
-              </button>
+              </motion.button>
             </div>
           )}
 
           {/* Arbiter Settlement Drawer Trigger */}
           {isArbiter && activeMilestone.status === 'Disputed' && (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setShowDisputeModal(true)}
               className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center gap-2"
             >
               <ShieldAlert className="w-4 h-4" />
               <span>Execute Arbiter Settlement</span>
-            </button>
+            </motion.button>
           )}
         </div>
       </div>
+
+      {/* ── Deliverable Review Modal ─────────────────────────────── */}
+      <DeliverableReviewModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        milestone={activeMilestone}
+        isClient={isClient}
+        onApprove={handleApproveMilestone}
+        onDispute={() => setShowDisputeModal(true)}
+        isActionLoading={isSubmitting}
+      />
 
       {/* ── Dispute & Arbitration Settlement Modal ──────────────── */}
       {showDisputeModal && (

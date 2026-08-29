@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Search, ArrowRight, Filter, Plus, ChevronRight, User, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Escrow } from '../types';
 import Badge from '@/components/ui/Badge';
 import CopyButton from '@/components/ui/CopyButton';
@@ -147,8 +148,12 @@ export default function EscrowDataTable({
                   : parseFloat(escrow.total_xlm || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
                 return (
-                  <tr
+                  <motion.tr
                     key={escrow.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
                     onClick={() => onSelectEscrow(escrow.id)}
                     className="hover:bg-white/[0.03] cursor-pointer transition-all group hover:border-l-2 hover:border-l-purple-500"
                   >
@@ -248,7 +253,7 @@ export default function EscrowDataTable({
                         <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
                       </button>
                     </td>
-                  </tr>
+                  </motion.tr>
                 );
               })}
             </tbody>

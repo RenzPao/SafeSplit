@@ -6,6 +6,7 @@ import { Escrow } from '../types';
 import CopyButton from '@/components/ui/CopyButton';
 import Badge from '@/components/ui/Badge';
 import StellarHashLink from '@/components/ui/StellarHashLink';
+import DealFlowGraph from './DealFlowGraph';
 
 interface ContractSummaryRailProps {
   escrow: Escrow;
@@ -31,6 +32,9 @@ export default function ContractSummaryRail({
 
   return (
     <div className="space-y-4">
+      {/* ── Visual Custody Flow Diagram ──────────────────────────── */}
+      <DealFlowGraph escrow={escrow} userWallet={userWallet} />
+
       {/* ── Key Contract Actions ─────────────────────────────────── */}
       {needsDeposit && isClient && (
         <div className="card-elevation p-5 rounded-2xl border border-purple-500/40 bg-gradient-to-b from-purple-950/30 to-[#0d0f18] shadow-[0_0_30px_rgba(147,51,234,0.15)] relative overflow-hidden">

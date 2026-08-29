@@ -19,6 +19,7 @@ import {
 import { useToast } from '@/contexts/ToastContext';
 import { createEscrowMetadata } from '@/lib/stellar/supabaseBackend';
 import { useWallet } from '@/contexts/WalletContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface MilestoneDraft {
   title: string;
@@ -683,20 +684,32 @@ export default function EscrowCreator({ userWallet, onCreated, onCancel }: Escro
       </div>
 
       {/* ── Wizard Content Body ───────────────────────────────── */}
-      <div className="p-5 md:p-6 min-h-[350px]">
-        {step === 1 && renderStep1()}
-        {step === 2 && renderStep2()}
-        {step === 3 && renderStep3()}
-        {step === 4 && renderStep4()}
+      <div className="p-5 md:p-6 min-h-[350px] overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+          >
+            {step === 1 && renderStep1()}
+            {step === 2 && renderStep2()}
+            {step === 3 && renderStep3()}
+            {step === 4 && renderStep4()}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* ── Wizard Footer Navigation ──────────────────────────── */}
       <div className="border-t border-white/[0.05] p-4 md:px-6 bg-[#0d0f14] flex items-center justify-between">
-        <button
+        <motion.button
+          whileHover={{ x: -2 }}
+          whileTap={{ scale: 0.98 }}
           type="button"
           onClick={step === 1 ? onCancel : handleBack}
           disabled={isSubmitting}
-          className="px-4 py-2 rounded-lg bg-transparent hover:bg-white/[0.05] text-xs font-semibold text-zinc-400 hover:text-zinc-200 transition-colors disabled:opacity-50 flex items-center gap-2"
+          className="px-4 py-2 rounded-xl bg-transparent hover:bg-white/[0.05] text-xs font-semibold text-zinc-400 hover:text-zinc-200 transition-colors disabled:opacity-50 flex items-center gap-2"
         >
           {step === 1 ? (
             'Cancel'
@@ -705,13 +718,15 @@ export default function EscrowCreator({ userWallet, onCreated, onCancel }: Escro
               <ArrowLeft className="w-3.5 h-3.5" /> Back
             </>
           )}
-        </button>
+        </motion.button>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           type="button"
           onClick={step === totalSteps ? handleSubmit : handleNext}
           disabled={isSubmitting}
-          className="px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-md transition-all disabled:opacity-50 flex items-center gap-2"
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-[0_0_20px_rgba(147,51,234,0.35)] transition-all disabled:opacity-50 flex items-center gap-2"
         >
           {step === totalSteps ? (
             isSubmitting ? (
@@ -722,7 +737,7 @@ export default function EscrowCreator({ userWallet, onCreated, onCancel }: Escro
           ) : (
             <>Next Step <ArrowRight className="w-3.5 h-3.5" /></>
           )}
-        </button>
+        </motion.button>
       </div>
     </div>
   );

@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import { ArrowLeft, Download, Calendar, Copy, Check, Share2, ExternalLink, ShieldAlert } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Escrow } from '../types';
 import Badge from '@/components/ui/Badge';
 import CopyButton from '@/components/ui/CopyButton';
 import StellarHashLink from '@/components/ui/StellarHashLink';
+import RadialProgress from '@/components/ui/RadialProgress';
 import { useToast } from '@/contexts/ToastContext';
 
 interface EscrowHeaderProps {
@@ -21,6 +23,10 @@ export default function EscrowHeader({ escrow, userWallet, onBack }: EscrowHeade
   const formattedXlm = typeof escrow.total_xlm === 'number'
     ? escrow.total_xlm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : parseFloat(escrow.total_xlm || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const totalMilestones = escrow.milestones?.length || 0;
+  const approvedMilestones = escrow.milestones?.filter((m) => m.status === 'Approved').length || 0;
+  const completionPct = totalMilestones > 0 ? (approvedMilestones / totalMilestones) * 100 : 0;
 
   const handleCopyInvite = () => {
     const inviteUrl = `${window.location.origin}/dashboard?escrow=${escrow.id}`;
@@ -55,46 +61,54 @@ export default function EscrowHeader({ escrow, userWallet, onBack }: EscrowHeade
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-60" />
       {/* Top Row: Back button & Action Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
-        <button
+        <motion.button
+          whileHover={{ x: -2 }}
+          whileTap={{ scale: 0.98 }}
           onClick={onBack}
           className="flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-white/[0.06] px-3 py-1.5 rounded-xl transition-all border border-transparent hover:border-white/[0.08]"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to All Agreements</span>
-        </button>
+        </motion.button>
 
         <div className="flex items-center gap-2">
           {/* Share / Invite */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleCopyInvite}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 hover:text-white text-xs font-semibold border border-white/[0.08] hover:border-purple-500/40 transition-all shadow-sm"
           >
             <Share2 className="w-3.5 h-3.5 text-purple-400" />
             <span>Copy Link</span>
-          </button>
+          </motion.button>
 
           {/* Download Invoice PDF */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleDownloadInvoice}
             disabled={isExporting}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 hover:text-white text-xs font-semibold border border-white/[0.08] hover:border-purple-500/40 transition-all shadow-sm disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5 text-cyan-400" />
             <span>{isExporting ? 'Generating...' : 'PDF Invoice'}</span>
-          </button>
+          </motion.button>
 
           {/* Export Calendar */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleExportCalendar}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 hover:text-white text-xs font-semibold border border-white/[0.08] hover:border-purple-500/40 transition-all shadow-sm"
           >
             <Calendar className="w-3.5 h-3.5 text-emerald-400" />
             <span>.ICS Calendar</span>
-          </button>
+          </motion.button>
         </div>
       </div>
 
-      {/* Bottom Row: Deal Title, Total XLM, and Contract Address */}
+      {/* Bottom Row: Deal Title, Total XLM, and Radial Progress */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
@@ -127,11 +141,23 @@ export default function EscrowHeader({ escrow, userWallet, onBack }: EscrowHeade
           </div>
         </div>
 
-        {/* Financial Overview */}
-        <div className="md:text-right bg-[#0a0c14]/90 px-5 py-3 rounded-2xl border border-purple-500/20 shadow-[0_0_20px_rgba(147,51,234,0.1)]">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-purple-300">Total Escrow Value</div>
-          <div className="text-2xl font-bold font-mono text-white tabular-nums tracking-tight">
-            {formattedXlm} <span className="text-sm font-sans text-purple-400 font-semibold">XLM</span>
+        {/* Financial & Completion Metrics */}
+        <div className="flex items-center gap-4 bg-[#0a0c14]/90 p-3.5 rounded-2xl border border-purple-500/20 shadow-[0_0_20px_rgba(147,51,234,0.1)] shrink-0">
+          <RadialProgress
+            progress={completionPct}
+            size={56}
+            strokeWidth={5}
+            label={`${approvedMilestones}/${totalMilestones}`}
+            sublabel="Milestones"
+          />
+
+          <div className="h-9 w-[1px] bg-white/[0.08]" />
+
+          <div className="text-right pr-1">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-purple-300">Total Escrow Value</div>
+            <div className="text-xl font-bold font-mono text-white tabular-nums tracking-tight">
+              {formattedXlm} <span className="text-xs font-sans text-purple-400 font-semibold">XLM</span>
+            </div>
           </div>
         </div>
       </div>

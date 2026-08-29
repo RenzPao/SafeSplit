@@ -34,6 +34,14 @@ import ProfileDashboardModal from '@/components/ProfileDashboardModal';
 import { buildAndSubmitSorobanTx } from '@/lib/stellar/sorobanTx';
 import { SafeSplitClient } from '@/lib/stellar/SafeSplitClient';
 import { supabase } from '@/lib/supabaseClient';
+import CommandPalette from '@/components/ui/CommandPalette';
+import PortfolioChart from '@/components/dashboard/Overview/PortfolioChart';
+import CurrencyConverterWidget from '@/components/dashboard/Overview/CurrencyConverterWidget';
+import NetworkDiagnosticsBar from '@/components/dashboard/NetworkDiagnosticsBar';
+import NotificationDrawer from '@/components/dashboard/NotificationDrawer';
+import HotkeyCheatsheetModal from '@/components/ui/HotkeyCheatsheetModal';
+import { motion, AnimatePresence } from 'framer-motion';
+import { HelpCircle } from 'lucide-react';
 
 export default function DashboardPage() {
   const { address, connectFreighter, disconnect, signTx, walletType } = useWallet();
@@ -41,6 +49,43 @@ export default function DashboardPage() {
 
   // Navigation & View Mode: 'overview' | 'workspace' | 'create'
   const [viewMode, setViewMode] = useState<'overview' | 'workspace' | 'create'>('overview');
+
+  // Command Palette & Modals State
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
+  const [showHotkeyModal, setShowHotkeyModal] = useState(false);
+
+  // Global Keyboard Shortcuts Listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is actively typing in an input or textarea
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
+        return;
+      }
+
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowCommandPalette((prev) => !prev);
+      } else if (e.key === '?' || ((e.metaKey || e.ctrlKey) && e.key === '/')) {
+        e.preventDefault();
+        setShowHotkeyModal((prev) => !prev);
+      } else if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        setActiveEscrow(null);
+        setViewMode('create');
+      } else if (e.key === '1') {
+        e.preventDefault();
+        setActiveEscrow(null);
+        setViewMode('overview');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        setActiveEscrow(null);
+        setViewMode('create');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // User & Wallet State
   const [walletUser, setWalletUser] = useState<UserProfile | null>(null);
@@ -255,47 +300,83 @@ export default function DashboardPage() {
             </a>
           </div>
 
-          {/* Center Navigation */}
-          <div className="hidden md:flex items-center gap-1 bg-[#0d0f18]/90 p-1 rounded-xl border border-white/[0.08] shadow-inner">
+          {/* Center Navigation & Search Trigger */}
+          <div className="hidden md:flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-[#0d0f18]/90 p-1 rounded-xl border border-white/[0.08] shadow-inner">
+              <button
+                onClick={() => {
+                  setActiveEscrow(null);
+                  setViewMode('overview');
+                }}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  viewMode === 'overview'
+                    ? 'bg-white/[0.12] text-white shadow-[0_0_15px_rgba(255,255,255,0.08)] border border-white/[0.1]'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setViewMode('create')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  viewMode === 'create'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                Create Escrow
+              </button>
+              <a
+                href="/history"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-purple-300 transition-colors"
+              >
+                History
+              </a>
+              <a
+                href="/pitchdeck"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-purple-300 transition-colors"
+              >
+                Pitch Deck
+              </a>
+            </div>
+
+            {/* Quick Command Palette Spotlight Trigger */}
             <button
-              onClick={() => {
-                setActiveEscrow(null);
-                setViewMode('overview');
-              }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'overview'
-                  ? 'bg-white/[0.12] text-white shadow-[0_0_15px_rgba(255,255,255,0.08)] border border-white/[0.1]'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
+              onClick={() => setShowCommandPalette(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0d0f18] hover:bg-[#141724] border border-white/[0.08] hover:border-purple-500/40 text-xs text-zinc-400 hover:text-zinc-200 transition-all shadow-sm group"
+              title="Open Command Palette (Cmd+K)"
             >
-              Overview
+              <Search className="w-3.5 h-3.5 text-purple-400 group-hover:scale-105 transition-transform" />
+              <span className="text-[11px] font-sans">Quick Jump</span>
+              <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-zinc-400 border border-white/[0.08]">
+                ⌘K
+              </kbd>
             </button>
-            <button
-              onClick={() => setViewMode('create')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'create'
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              Create Escrow
-            </button>
-            <a
-              href="/history"
-              className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-purple-300 transition-colors"
-            >
-              History
-            </a>
-            <a
-              href="/pitchdeck"
-              className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-purple-300 transition-colors"
-            >
-              Pitch Deck
-            </a>
           </div>
 
-          {/* Right: Wallet & Account Desk */}
+          {/* Right: Wallet, Notifications & Account Desk */}
           <div className="flex items-center gap-2.5">
+            {/* Notification Center Trigger */}
+            <button
+              onClick={() => setShowNotificationDrawer(true)}
+              className="relative p-2 rounded-xl bg-[#0d0f18] hover:bg-[#141724] border border-white/[0.08] hover:border-purple-500/40 text-zinc-400 hover:text-white transition-all shadow-sm group"
+              title="Open Notification Center"
+            >
+              <Bell className="w-4 h-4 text-purple-400 group-hover:scale-105 transition-transform" />
+              {escrows.some(e => (e.client_address === address && e.status === 'Initialized') || (e.client_address === address && e.milestones?.some(m => m.status === 'Submitted'))) && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.8)] animate-pulse" />
+              )}
+            </button>
+
+            {/* Hotkey Help Button */}
+            <button
+              onClick={() => setShowHotkeyModal(true)}
+              className="hidden sm:flex p-2 rounded-xl bg-[#0d0f18] hover:bg-[#141724] border border-white/[0.08] hover:border-purple-500/40 text-zinc-400 hover:text-white transition-all shadow-sm"
+              title="Keyboard Shortcuts (?)"
+            >
+              <HelpCircle className="w-4 h-4 text-zinc-400 hover:text-purple-300" />
+            </button>
+
             {address ? (
               <>
                 {/* Unfunded warning button */}
@@ -366,99 +447,167 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* ── VIEW MODE 1: OVERVIEW & PORTFOLIO ───────────────────────── */}
-        {viewMode === 'overview' && (
-          <div className="space-y-6">
-            {/* Incoming Invitations Banner */}
-            <PendingInvitations invitations={invitations} onSelectEscrow={handleSelectEscrow} />
+        {/* ── Fluid AnimatePresence View Mode Switches ────────────────── */}
+        <AnimatePresence mode="wait">
+          {/* VIEW MODE 1: OVERVIEW & PORTFOLIO */}
+          {viewMode === 'overview' && (
+            <motion.div
+              key="overview-view"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="space-y-6"
+            >
+              {/* Incoming Invitations Banner */}
+              <PendingInvitations invitations={invitations} onSelectEscrow={handleSelectEscrow} />
 
-            {/* Portfolio Summary Metrics */}
-            <PortfolioMetrics escrows={escrows} userWallet={address || ''} walletBalance={walletBalance} />
+              {/* Portfolio Summary Metrics */}
+              <PortfolioMetrics escrows={escrows} userWallet={address || ''} walletBalance={walletBalance} />
 
-            {/* Main Escrow Data Table */}
-            <EscrowDataTable
-              escrows={escrows}
-              userWallet={address || ''}
-              onSelectEscrow={handleSelectEscrow}
-              onCreateNew={() => setViewMode('create')}
-            />
-          </div>
-        )}
-
-        {/* ── VIEW MODE 2: ACTIVE ESCROW WORKSPACE ────────────────────── */}
-        {viewMode === 'workspace' && activeEscrow && (
-          <div className="space-y-6">
-            {/* Top Workspace Context Header */}
-            <EscrowHeader
-              escrow={activeEscrow}
-              userWallet={address || ''}
-              onBack={() => {
-                setActiveEscrow(null);
-                setViewMode('overview');
-                if (address) fetchEscrows(address);
-              }}
-            />
-
-            {/* 3-Column Deal Desk Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left Rail: Contract Summary & Action Drawer (3 cols) */}
-              <div className="lg:col-span-4 space-y-4">
-                <ContractSummaryRail
-                  escrow={activeEscrow}
-                  userWallet={address || ''}
-                  onDepositFunds={handleDepositFunds}
-                  onFinalizeEscrow={handleFinalizeEscrow}
-                  isActionLoading={isActionLoading}
-                />
+              {/* 2-Column Analytics & Financial Valuation Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-7">
+                  <PortfolioChart escrows={escrows} />
+                </div>
+                <div className="lg:col-span-5">
+                  <CurrencyConverterWidget />
+                </div>
               </div>
 
-              {/* Center Canvas: Milestones, Subtasks & Deliverables (5 cols) */}
-              <div className="lg:col-span-5 space-y-4">
-                <MilestoneWorkspace
-                  escrow={activeEscrow}
-                  userWallet={address || ''}
-                  onRefresh={() => handleSelectEscrow(activeEscrow.id)}
-                />
+              {/* Main Escrow Data Table */}
+              <EscrowDataTable
+                escrows={escrows}
+                userWallet={address || ''}
+                onSelectEscrow={handleSelectEscrow}
+                onCreateNew={() => setViewMode('create')}
+              />
+            </motion.div>
+          )}
+
+          {/* VIEW MODE 2: ACTIVE ESCROW WORKSPACE */}
+          {viewMode === 'workspace' && activeEscrow && (
+            <motion.div
+              key="workspace-view"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="space-y-6"
+            >
+              {/* Top Workspace Context Header */}
+              <EscrowHeader
+                escrow={activeEscrow}
+                userWallet={address || ''}
+                onBack={() => {
+                  setActiveEscrow(null);
+                  setViewMode('overview');
+                  if (address) fetchEscrows(address);
+                }}
+              />
+
+              {/* 3-Column Deal Desk Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left Rail: Contract Summary & Action Drawer (4 cols) */}
+                <div className="lg:col-span-4 space-y-4">
+                  <ContractSummaryRail
+                    escrow={activeEscrow}
+                    userWallet={address || ''}
+                    onDepositFunds={handleDepositFunds}
+                    onFinalizeEscrow={handleFinalizeEscrow}
+                    isActionLoading={isActionLoading}
+                  />
+                </div>
+
+                {/* Center Canvas: Milestones, Subtasks & Deliverables (5 cols) */}
+                <div className="lg:col-span-5 space-y-4">
+                  <MilestoneWorkspace
+                    escrow={activeEscrow}
+                    userWallet={address || ''}
+                    onRefresh={() => handleSelectEscrow(activeEscrow.id)}
+                  />
+                </div>
+
+                {/* Right Rail: Realtime Chat & On-Chain Audit Feed (3 cols) */}
+                <div className="lg:col-span-3 space-y-4">
+                  <SidebarTabs escrow={activeEscrow} userWallet={address || ''} />
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* VIEW MODE 3: ESCROW CREATION STUDIO */}
+          {viewMode === 'create' && (
+            <motion.div
+              key="create-view"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="max-w-4xl mx-auto w-full space-y-6"
+            >
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+                <div>
+                  <h1 className="text-xl font-bold text-zinc-100">Create Escrow Agreement</h1>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Configure trustless milestone terms, budget distribution, and on-chain arbitration rules.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setViewMode('overview')}
+                  className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+                >
+                  Back to Portfolio
+                </button>
               </div>
 
-              {/* Right Rail: Realtime Chat & On-Chain Audit Feed (3 cols) */}
-              <div className="lg:col-span-3 space-y-4">
-                <SidebarTabs escrow={activeEscrow} userWallet={address || ''} />
-              </div>
-            </div>
-          </div>
-        )}
+              <EscrowCreator
+                userWallet={address || ''}
+                onCreated={(newId) => {
+                  if (address) fetchEscrows(address);
+                  handleSelectEscrow(newId);
+                }}
+                onCancel={() => setViewMode('overview')}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* ── VIEW MODE 3: ESCROW CREATION STUDIO ─────────────────────── */}
-        {viewMode === 'create' && (
-          <div className="max-w-4xl mx-auto w-full space-y-6">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
-              <div>
-                <h1 className="text-xl font-bold text-zinc-100">Create Escrow Agreement</h1>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  Configure trustless milestone terms, budget distribution, and on-chain arbitration rules.
-                </p>
-              </div>
-
-              <button
-                onClick={() => setViewMode('overview')}
-                className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
-              >
-                Back to Portfolio
-              </button>
-            </div>
-
-            <EscrowCreator
-              userWallet={address || ''}
-              onCreated={(newId) => {
-                if (address) fetchEscrows(address);
-                handleSelectEscrow(newId);
-              }}
-              onCancel={() => setViewMode('overview')}
-            />
-          </div>
-        )}
+        {/* ── Real-Time Stellar Horizon Diagnostics Bar ────────────── */}
+        <div className="mt-2">
+          <NetworkDiagnosticsBar />
+        </div>
       </main>
+
+      {/* ── Global Command Palette (Cmd+K) ─────────────────────────── */}
+      <CommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        escrows={escrows}
+        userWallet={address || ''}
+        onSelectEscrow={handleSelectEscrow}
+        onCreateNew={() => {
+          setActiveEscrow(null);
+          setViewMode('create');
+        }}
+        onFriendbotFund={handleFriendbotFund}
+      />
+
+      {/* ── Realtime Notification Drawer ───────────────────────────── */}
+      <NotificationDrawer
+        isOpen={showNotificationDrawer}
+        onClose={() => setShowNotificationDrawer(false)}
+        escrows={escrows}
+        userWallet={address || ''}
+        onSelectEscrow={handleSelectEscrow}
+      />
+
+      {/* ── Keyboard Shortcuts Cheatsheet Modal ─────────────────────── */}
+      <HotkeyCheatsheetModal
+        isOpen={showHotkeyModal}
+        onClose={() => setShowHotkeyModal(false)}
+      />
 
       {/* ── Modals & Drawers ────────────────────────────────────────── */}
       {showRegistrationModal && (
