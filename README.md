@@ -70,7 +70,49 @@ Unlike standard crypto payments or centralized escrow services (like Upwork), Sa
 
 ---
 
-## Screenshots
+## 🚀 UI/UX Update (v2 Platform Modernization)
+
+The SafeSplit platform underwent a comprehensive, enterprise-tier UI/UX redesign and architectural upgrade. Transitioning away from generic Web3 templates, the new interface is engineered as a **high-density, institutional fintech workstation** inspired by Linear, Stripe, and modern financial dashboards.
+
+### 🌟 What Was Revamped, Fixed & Upgraded
+
+| Core Upgrade | Technical & Design Details |
+| :--- | :--- |
+| **📊 Interactive Settlement Dynamics** | Custom SVG area chart tracking cumulative volume and locked TVL over time, equipped with time filters (**24H**, **7D**, **30D**, **ALL**), interactive cursor hover crosshairs, and live velocity metrics. |
+| **⚡ Live Stellar Horizon Telemetry** | Real-time diagnostics bar dynamically pinging Horizon RPC (`● Testnet: 138ms`), tracking live ledger sequences (`#1,248,390`), and verifying Soroban Protocol 20 smart contract status. |
+| **🔔 Slide-Over Notification Center** | Dedicated slide-over drawer aggregating on-chain action items chronologically (*Today*, *Yesterday*, *Older*) with smart event badges (🟢 *Deposit Needed*, 🟣 *Deliverable Submitted*, 🔴 *Dispute*) and direct 1-click deal actions. |
+| **🔍 Pro Deliverable Review Workbench** | Interactive multi-tab review console for inspecting proof-of-work submissions, tracking acceptance criteria checklist progress, and submitting structured feedback notes stored directly in immutable audit logs. |
+| **💱 Escrow Valuation & FX Desk** | Live currency converter supporting **XLM**, **USD**, **EUR**, and **USDC** with toggleable **5%–10% volatility cushion buffers** and complete protocol fee transparency. |
+| **⌨️ Command Palette & Pro Hotkeys** | Global spotlight modal (<kbd>⌘K</kbd> / <kbd>Ctrl+K</kbd>) for instant deal jumping, 1-click testnet keypair generation, Friendbot funding, and quick navigation hotkeys (<kbd>?</kbd> cheatsheet, <kbd>N</kbd> new escrow, <kbd>1</kbd>/<kbd>2</kbd> view switches). |
+| **🧭 Multi-Step Creation Wizard** | Clean 4-step agreement builder featuring quick-start SOW templates (*Software Dev*, *Design*, *Content*), address simulation autofill, and milestone breakdown calculators. |
+| **🌐 Interactive Custody Flow Graph** | Real-time smart contract visualization displaying the custody pipeline (*Client* $\to$ *Soroban Smart Vault* $\to$ *Freelancer/Arbiter*) with animated glowing particle beams. |
+| **🛠️ Backend Routing & Stability Fixes** | Unified database queries to Supabase PostgREST endpoints, fixed API route handlers (resolved 405 Method Not Allowed and 500 relation errors), and added automated on-chain state synchronization. |
+
+---
+
+### 📸 Newly Designed UI Showcase (v2)
+
+<div align="center">
+  <img src="public/v2/1.png" alt="SafeSplit UI v2 - 1" width="100%" />
+  <br /><br />
+  <img src="public/v2/2.png" alt="SafeSplit UI v2 - 2" width="100%" />
+  <br /><br />
+  <img src="public/v2/3.png" alt="SafeSplit UI v2 - 3" width="100%" />
+  <br /><br />
+  <img src="public/v2/4.png" alt="SafeSplit UI v2 - 4" width="100%" />
+  <br /><br />
+  <img src="public/v2/5.png" alt="SafeSplit UI v2 - 5" width="100%" />
+  <br /><br />
+  <img src="public/v2/6.png" alt="SafeSplit UI v2 - 6" width="100%" />
+  <br /><br />
+  <img src="public/v2/7.png" alt="SafeSplit UI v2 - 7" width="100%" />
+  <br /><br />
+  <img src="public/v2/8.png" alt="SafeSplit UI v2 - 8" width="100%" />
+</div>
+
+---
+
+## Screenshots (Classic)
 
 * **Wallet Connected State:**
 ![Wallet Connected State](public/walletconnected.png)
