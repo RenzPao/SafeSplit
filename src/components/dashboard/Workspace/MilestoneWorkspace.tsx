@@ -195,25 +195,33 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
   }
 
   return (
-    <div className="card-elevation rounded-xl overflow-hidden flex flex-col">
+    <div className="card-elevation rounded-2xl overflow-hidden flex flex-col border border-white/[0.08] bg-[#0d0f18]/90 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
       {/* ── Milestone Step Navigation Strip ─────────────────────── */}
-      <div className="flex border-b border-white/[0.08] bg-[#0d0f14] overflow-x-auto custom-scrollbar">
+      <div className="flex border-b border-white/[0.08] bg-[#0a0c14]/90 overflow-x-auto custom-scrollbar">
         {escrow.milestones.map((m, idx) => {
           const isSelected = selectedIdx === idx;
+          const isApproved = m.status === 'Approved';
+          const isSubmitted = m.status === 'Submitted';
           return (
             <button
               key={m.id || idx}
               onClick={() => setSelectedIdx(idx)}
-              className={`flex items-center gap-2.5 py-3.5 px-5 border-b-2 font-medium text-xs whitespace-nowrap transition-all ${
+              className={`flex items-center gap-2.5 py-4 px-5 border-b-2 font-semibold text-xs whitespace-nowrap transition-all ${
                 isSelected
-                  ? 'border-purple-500 text-zinc-100 bg-white/[0.02]'
-                  : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.01]'
+                  ? 'border-purple-500 text-white bg-purple-500/[0.08] shadow-[inset_0_-2px_8px_rgba(147,51,234,0.2)]'
+                  : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.02]'
               }`}
             >
-              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-bold ${
-                isSelected ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold transition-all ${
+                isApproved 
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_8px_rgba(16,185,129,0.3)]'
+                  : isSubmitted
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.3)]'
+                    : isSelected 
+                      ? 'bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-[0_0_10px_rgba(147,51,234,0.5)]' 
+                      : 'bg-zinc-800 text-zinc-400'
               }`}>
-                {idx + 1}
+                {isApproved ? <Check className="w-3.5 h-3.5" /> : idx + 1}
               </div>
               <span>{m.title || `Milestone ${idx + 1}`}</span>
               <Badge status={m.status} size="sm" showIcon={false} />
@@ -225,24 +233,24 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
       {/* ── Active Milestone Details ────────────────────────────── */}
       <div className="p-6 space-y-6">
         {/* Milestone Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-5">
           <div>
-            <div className="flex items-center gap-2.5">
-              <h2 className="text-lg font-bold text-zinc-100">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-bold text-white tracking-tight">
                 {activeMilestone.title || `Milestone #${selectedIdx + 1}`}
               </h2>
               <Badge status={activeMilestone.status} size="md" />
             </div>
             {activeMilestone.description && (
-              <p className="text-xs text-zinc-400 mt-1 leading-relaxed max-w-2xl">
+              <p className="text-xs text-zinc-400 mt-1.5 leading-relaxed max-w-2xl">
                 {activeMilestone.description}
               </p>
             )}
           </div>
 
-          <div className="sm:text-right bg-[#0d0f14] px-4 py-2 rounded-lg border border-white/[0.06]">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Milestone Payout</div>
-            <div className="text-lg font-bold font-mono text-zinc-100 tabular-nums">
+          <div className="sm:text-right bg-[#0a0c14]/90 px-4 py-2.5 rounded-xl border border-purple-500/20 shadow-[0_0_15px_rgba(147,51,234,0.1)] shrink-0">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-purple-300">Milestone Payout</div>
+            <div className="text-xl font-extrabold font-mono text-white tabular-nums">
               {Number(activeMilestone.amount_xlm).toLocaleString()} <span className="text-xs text-purple-400 font-semibold font-sans">XLM</span>
             </div>
           </div>
@@ -252,27 +260,27 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
         {activeMilestone.subtasks && activeMilestone.subtasks.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-zinc-200 uppercase tracking-wider">
                 Sub-Tasks & Acceptance Criteria
               </h3>
-              <span className="text-[11px] font-mono text-zinc-500">
+              <span className="text-[11px] font-mono text-purple-300 font-semibold bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
                 {activeMilestone.subtasks.filter((s) => s.is_completed).length} / {activeMilestone.subtasks.length} Completed
               </span>
             </div>
 
-            <div className="space-y-2 bg-[#0d0f14] p-3 rounded-lg border border-white/[0.06]">
+            <div className="space-y-2 bg-[#0a0c14]/80 p-3.5 rounded-xl border border-white/[0.06]">
               {activeMilestone.subtasks.map((task) => (
                 <label
                   key={task.id}
-                  className="flex items-start gap-3 p-2 rounded-md hover:bg-white/[0.02] cursor-pointer transition-colors"
+                  className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-white/[0.03] cursor-pointer transition-colors group"
                 >
                   <input
                     type="checkbox"
                     checked={task.is_completed}
                     onChange={() => handleToggleSubtask(task.id, task.is_completed)}
-                    className="mt-0.5 w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-purple-600 focus:ring-purple-500/20"
+                    className="mt-0.5 w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-purple-600 focus:ring-purple-500/20 cursor-pointer accent-purple-500"
                   />
-                  <span className={`text-xs leading-relaxed ${task.is_completed ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
+                  <span className={`text-xs leading-relaxed transition-all ${task.is_completed ? 'line-through text-zinc-500' : 'text-zinc-200 group-hover:text-white'}`}>
                     {task.title}
                   </span>
                 </label>
@@ -284,21 +292,21 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
         {/* Deliverable Review / Live Preview Section */}
         {activeMilestone.deliverable_url && (
           <div className="space-y-3">
-            <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-xs font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-2">
               <FileText className="w-3.5 h-3.5 text-purple-400" />
               <span>Submitted Deliverable</span>
             </h3>
 
-            <div className="p-4 rounded-lg bg-[#0d0f14] border border-white/[0.08] flex items-center justify-between gap-4">
+            <div className="p-4 rounded-xl bg-[#0a0c14]/80 border border-purple-500/20 shadow-[0_0_15px_rgba(147,51,234,0.08)] flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0 shadow-[0_0_10px_rgba(147,51,234,0.2)]">
                   <GitPullRequest className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-mono text-zinc-200 truncate">
+                  <div className="text-xs font-mono text-white truncate font-medium">
                     {activeMilestone.deliverable_url}
                   </div>
-                  <div className="text-[10px] text-zinc-500 mt-0.5">Proof of work submission</div>
+                  <div className="text-[10px] text-zinc-400 mt-0.5">Proof of work deliverable artifact</div>
                 </div>
               </div>
 
@@ -306,9 +314,9 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
                 href={activeMilestone.deliverable_url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-xs font-medium text-purple-300 hover:text-white transition-colors shrink-0"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600/30 to-indigo-600/30 hover:from-purple-600/50 hover:to-indigo-600/50 text-xs font-semibold text-purple-200 hover:text-white border border-purple-500/30 transition-all shrink-0 shadow-sm"
               >
-                <span>Open Link</span>
+                <span>Inspect Work</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
@@ -316,24 +324,24 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
         )}
 
         {/* Primary Milestone Action Buttons */}
-        <div className="pt-4 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-3">
+        <div className="pt-5 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
           {/* Freelancer: Submit Deliverable Form */}
           {isFreelancer && (activeMilestone.status === 'Pending' || activeMilestone.status === 'InProgress') && (
             <form onSubmit={handleSubmitDeliverable} className="w-full space-y-3">
-              <h4 className="text-xs font-semibold text-zinc-200">Submit Work for Client Approval</h4>
-              <div className="flex gap-2">
+              <h4 className="text-xs font-bold text-white">Submit Proof of Work for Milestone</h4>
+              <div className="flex gap-2.5">
                 <input
                   type="url"
-                  placeholder="GitHub PR, IPFS link, or Figma prototype URL..."
+                  placeholder="GitHub PR, IPFS hash, or Figma prototype URL..."
                   value={deliverableUrl}
                   onChange={(e) => setDeliverableUrl(e.target.value)}
-                  className="flex-1 bg-[#0d0f14] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500"
+                  className="flex-1 bg-[#0a0c14] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500 shadow-inner"
                   required
                 />
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(147,51,234,0.3)] disabled:opacity-50 hover:scale-[1.02]"
                 >
                   {isSubmitting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                   <span>Submit Work</span>
@@ -348,7 +356,7 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
               <button
                 onClick={handleApproveMilestone}
                 disabled={isSubmitting}
-                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-all shadow-md disabled:opacity-50"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] disabled:opacity-50 hover:scale-[1.02]"
               >
                 {isSubmitting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                 <span>Approve & Release {activeMilestone.amount_xlm} XLM</span>
@@ -356,7 +364,7 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
 
               <button
                 onClick={() => setShowDisputeModal(true)}
-                className="px-4 py-2.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold transition-all"
+                className="px-4 py-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold transition-all"
               >
                 Raise Dispute
               </button>
@@ -367,7 +375,7 @@ export default function MilestoneWorkspace({ escrow, userWallet, onRefresh }: Mi
           {isArbiter && activeMilestone.status === 'Disputed' && (
             <button
               onClick={() => setShowDisputeModal(true)}
-              className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold transition-all flex items-center gap-2"
+              className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center gap-2"
             >
               <ShieldAlert className="w-4 h-4" />
               <span>Execute Arbiter Settlement</span>

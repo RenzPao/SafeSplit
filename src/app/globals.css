@@ -33,24 +33,53 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Subtle micro-borders for card elevation */
+/* Subtle micro-borders for card elevation with rich ambient depth */
 .card-elevation {
-  background: #12141a;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+  background: #0f1118;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 8px 32px -4px rgba(0, 0, 0, 0.6);
 }
 
 .card-elevation-interactive {
-  background: #12141a;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #0f1118;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-elevation-interactive:hover {
-  background: #161820;
-  border-color: rgba(255, 255, 255, 0.14);
-  transform: translateY(-1px);
+  background: #141722;
+  border-color: rgba(168, 85, 247, 0.35);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 8px 24px -4px rgba(147, 51, 234, 0.15);
+  transform: translateY(-1.5px);
+}
+
+/* Glowing Ambient Gradients & Background Mesh */
+.ambient-glow-purple {
+  background: radial-gradient(circle at 50% 0%, rgba(147, 51, 234, 0.18) 0%, rgba(147, 51, 234, 0) 70%);
+}
+
+.ambient-glow-cyan {
+  background: radial-gradient(circle at 100% 50%, rgba(6, 182, 212, 0.12) 0%, rgba(6, 182, 212, 0) 65%);
+}
+
+.ambient-mesh {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, #ffffff 0%, #e9d5ff 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #ffffff 0%, #a5f3fc 50%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Refined Dark Scrollbar */

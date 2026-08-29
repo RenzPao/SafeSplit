@@ -232,32 +232,39 @@ export default function DashboardPage() {
   }, [address, fetchUserData, fetchEscrows]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#08090a] text-zinc-100 selection:bg-purple-500/30 selection:text-purple-200">
-      {/* ── Top Institutional Navbar ─────────────────────────────────── */}
-      <header className="border-b border-white/[0.08] bg-[#0d0f14]/80 backdrop-blur-md sticky top-0 z-40">
+    <div className="min-h-screen flex flex-col bg-[#07080d] text-zinc-100 selection:bg-purple-500/30 selection:text-purple-200 relative overflow-hidden">
+      {/* ── Ambient Background Cosmic Lighting & Tactical Mesh ───── */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[450px] bg-gradient-to-b from-purple-600/20 via-indigo-600/10 to-transparent blur-[140px] pointer-events-none -z-10" />
+      <div className="absolute top-60 right-[-10%] w-[500px] h-[500px] bg-cyan-500/10 blur-[160px] pointer-events-none -z-10" />
+      <div className="absolute bottom-10 left-[-10%] w-[500px] h-[500px] bg-purple-600/10 blur-[160px] pointer-events-none -z-10" />
+      <div className="absolute inset-0 ambient-mesh opacity-50 pointer-events-none -z-10" />
+
+      {/* ── Institutional Top Bar & Financial Header ───────────────── */}
+      <header className="border-b border-white/[0.08] bg-[#0b0d16]/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          {/* Brand Logo & Protocol Badge */}
+          {/* Brand Identity */}
           <div className="flex items-center gap-3">
             <a href="/" className="flex items-center gap-2.5 group">
-              <img src="/logo.svg" alt="SafeSplit Logo" className="w-8 h-8 group-hover:scale-105 transition-transform" />
-              <span className="font-bold text-base tracking-tight text-zinc-100">SafeSplit</span>
+              <div className="p-1 rounded-lg bg-purple-500/10 border border-purple-500/20 group-hover:border-purple-500/40 transition-colors shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                <img src="/logo.svg" alt="SafeSplit Logo" className="w-7 h-7 group-hover:scale-105 transition-transform" />
+              </div>
+              <span className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
+                SafeSplit
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">v2</span>
+              </span>
             </a>
-            <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[10px] font-semibold text-purple-300 font-mono">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Soroban Testnet</span>
-            </div>
           </div>
 
           {/* Center Navigation */}
-          <div className="hidden md:flex items-center gap-1 bg-[#12141a] p-1 rounded-lg border border-white/[0.06]">
+          <div className="hidden md:flex items-center gap-1 bg-[#0d0f18]/90 p-1 rounded-xl border border-white/[0.08] shadow-inner">
             <button
               onClick={() => {
                 setActiveEscrow(null);
                 setViewMode('overview');
               }}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 viewMode === 'overview'
-                  ? 'bg-white/[0.1] text-zinc-100 shadow-sm'
+                  ? 'bg-white/[0.12] text-white shadow-[0_0_15px_rgba(255,255,255,0.08)] border border-white/[0.1]'
                   : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
@@ -265,9 +272,9 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => setViewMode('create')}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 viewMode === 'create'
-                  ? 'bg-purple-600 text-white shadow-sm'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]'
                   : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
@@ -275,13 +282,13 @@ export default function DashboardPage() {
             </button>
             <a
               href="/history"
-              className="px-3 py-1 rounded-md text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-purple-300 transition-colors"
             >
               History
             </a>
             <a
               href="/pitchdeck"
-              className="px-3 py-1 rounded-md text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-purple-300 transition-colors"
             >
               Pitch Deck
             </a>
@@ -296,7 +303,7 @@ export default function DashboardPage() {
                   <button
                     onClick={handleFriendbotFund}
                     disabled={isFunding}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)]"
                   >
                     {isFunding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 text-amber-400" />}
                     <span>Fund 10k XLM</span>
@@ -306,14 +313,14 @@ export default function DashboardPage() {
                 {/* Account Profile Trigger */}
                 <button
                   onClick={() => setShowProfileModal(true)}
-                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-[#12141a] border border-white/[0.08] hover:border-white/[0.15] text-xs font-medium text-zinc-200 transition-all group"
+                  className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-[#0f1118] border border-white/[0.08] hover:border-purple-500/40 text-xs font-medium text-zinc-200 transition-all group shadow-sm hover:shadow-[0_0_15px_rgba(147,51,234,0.15)]"
                 >
-                  <div className="w-5 h-5 rounded-md bg-purple-600 flex items-center justify-center text-[10px] font-bold text-white">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center text-[10px] font-bold text-white shadow-[0_0_8px_rgba(147,51,234,0.5)]">
                     {walletUser?.name ? walletUser.name.charAt(0).toUpperCase() : address.charAt(0)}
                   </div>
-                  <span className="font-mono text-xs">{walletBalance} XLM</span>
+                  <span className="font-mono text-xs text-white font-semibold tabular-nums">{walletBalance} XLM</span>
                   <span className="text-zinc-600">|</span>
-                  <span className="font-mono text-[11px] text-zinc-400 group-hover:text-zinc-200">
+                  <span className="font-mono text-[11px] text-zinc-400 group-hover:text-purple-300">
                     {address.slice(0, 4)}...{address.slice(-4)}
                   </span>
                 </button>
@@ -321,7 +328,7 @@ export default function DashboardPage() {
             ) : (
               <button
                 onClick={connectFreighter}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-black hover:bg-zinc-200 text-xs font-semibold transition-all shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all shadow-[0_0_20px_rgba(147,51,234,0.35)]"
               >
                 <Wallet className="w-3.5 h-3.5" />
                 <span>Connect Wallet</span>

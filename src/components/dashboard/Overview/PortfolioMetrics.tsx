@@ -40,77 +40,98 @@ export default function PortfolioMetrics({ escrows, userWallet, walletBalance }:
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Metric 1: Total Locked in Escrow */}
-      <div className="card-elevation p-5 rounded-xl flex flex-col justify-between">
+      <div className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-purple-500/40 hover:shadow-[0_0_25px_rgba(147,51,234,0.15)] transition-all">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-500 opacity-80" />
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Total Value in Escrow</span>
-          <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-            <Lock className="w-3.5 h-3.5 text-purple-400" />
+          <span className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">Total Value in Escrow</span>
+          <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-105 transition-transform shadow-[0_0_10px_rgba(147,51,234,0.2)]">
+            <Lock className="w-4 h-4" />
           </div>
         </div>
         <div className="mt-4">
-          <div className="text-2xl font-bold font-mono text-zinc-100 tabular-nums">
+          <div className="text-2xl font-bold font-mono text-white tabular-nums tracking-tight">
             {totalLockedXlm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm font-sans font-medium text-purple-400">XLM</span>
           </div>
-          <div className="text-[11px] text-zinc-500 mt-1 font-mono">
-            ≈ ${(totalLockedXlm * XLM_USD_ESTIMATE).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className="text-[11px] text-zinc-400 font-mono">
+              ≈ ${(totalLockedXlm * XLM_USD_ESTIMATE).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+            </span>
+            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">Live TVL</span>
           </div>
         </div>
       </div>
 
       {/* Metric 2: Active Deals */}
-      <div className="card-elevation p-5 rounded-xl flex flex-col justify-between">
+      <div className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-cyan-500/40 hover:shadow-[0_0_25px_rgba(6,182,212,0.15)] transition-all">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 via-sky-400 to-cyan-500 opacity-80" />
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Active Deals</span>
-          <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-            <Layers className="w-3.5 h-3.5 text-blue-400" />
+          <span className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">Active Deals</span>
+          <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+            <Layers className="w-4 h-4" />
           </div>
         </div>
         <div className="mt-4">
-          <div className="text-2xl font-bold font-mono text-zinc-100 tabular-nums">
-            {activeEscrows.length} <span className="text-sm font-sans font-normal text-zinc-500">Agreements</span>
+          <div className="text-2xl font-bold font-mono text-white tabular-nums tracking-tight flex items-baseline gap-2">
+            <span>{activeEscrows.length}</span>
+            <span className="text-sm font-sans font-normal text-zinc-400">Agreements</span>
           </div>
-          <div className="text-[11px] text-zinc-500 mt-1">
-            Across {escrows.length} total lifetime contracts
+          <div className="flex items-center gap-2 mt-1.5 text-[11px] text-zinc-400">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+            </span>
+            <span>Across {escrows.length} lifetime contracts</span>
           </div>
         </div>
       </div>
 
       {/* Metric 3: Action Required */}
-      <div className="card-elevation p-5 rounded-xl flex flex-col justify-between">
+      <div className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-amber-500/40 hover:shadow-[0_0_25px_rgba(245,158,11,0.15)] transition-all">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 opacity-80" />
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Action Items</span>
-          <div className={`w-7 h-7 rounded-lg flex items-center justify-center border ${
+          <span className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">Action Items</span>
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center border transition-transform group-hover:scale-105 ${
             actionRequiredCount > 0 
-              ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' 
-              : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+              ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]' 
+              : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
           }`}>
-            {actionRequiredCount > 0 ? <AlertCircle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+            {actionRequiredCount > 0 ? <AlertCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
           </div>
         </div>
         <div className="mt-4">
-          <div className="text-2xl font-bold font-mono text-zinc-100 tabular-nums">
-            {actionRequiredCount} <span className="text-sm font-sans font-normal text-zinc-500">{actionRequiredCount === 1 ? 'Item' : 'Items'}</span>
+          <div className="text-2xl font-bold font-mono text-white tabular-nums tracking-tight flex items-baseline gap-2">
+            <span>{actionRequiredCount}</span>
+            <span className="text-sm font-sans font-normal text-zinc-400">{actionRequiredCount === 1 ? 'Pending' : 'Pending'}</span>
           </div>
-          <div className="text-[11px] text-zinc-500 mt-1">
-            {actionRequiredCount > 0 ? 'Requires your review or deposit' : 'All contracts up to date'}
+          <div className="mt-1.5">
+            {actionRequiredCount > 0 ? (
+              <span className="text-[10px] font-semibold text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                Requires your review or deposit
+              </span>
+            ) : (
+              <span className="text-[10px] font-semibold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                All agreements up to date
+              </span>
+            )}
           </div>
         </div>
       </div>
 
       {/* Metric 4: Total Settled Volume */}
-      <div className="card-elevation p-5 rounded-xl flex flex-col justify-between">
+      <div className="card-elevation p-5 rounded-2xl flex flex-col justify-between relative overflow-hidden group hover:border-emerald-500/40 hover:shadow-[0_0_25px_rgba(16,185,129,0.15)] transition-all">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 opacity-80" />
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Settled & Completed</span>
-          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider">Settled & Completed</span>
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+            <TrendingUp className="w-4 h-4" />
           </div>
         </div>
         <div className="mt-4">
-          <div className="text-2xl font-bold font-mono text-zinc-100 tabular-nums">
+          <div className="text-2xl font-bold font-mono text-white tabular-nums tracking-tight">
             {completedVolume.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm font-sans font-medium text-emerald-400">XLM</span>
           </div>
-          <div className="text-[11px] text-zinc-500 mt-1">
-            {completedEscrows.length} successfully settled deals
+          <div className="flex items-center gap-2 mt-1.5 text-[11px] text-zinc-400">
+            <span className="text-emerald-400 font-semibold">{completedEscrows.length}</span> settled agreements
           </div>
         </div>
       </div>

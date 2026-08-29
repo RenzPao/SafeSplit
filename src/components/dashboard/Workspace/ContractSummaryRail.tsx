@@ -33,64 +33,68 @@ export default function ContractSummaryRail({
     <div className="space-y-4">
       {/* ── Key Contract Actions ─────────────────────────────────── */}
       {needsDeposit && isClient && (
-        <div className="card-elevation p-4 rounded-xl border-purple-500/30 bg-purple-950/20">
-          <div className="flex items-center gap-2 text-purple-300 text-xs font-semibold mb-2">
-            <Lock className="w-4 h-4" />
+        <div className="card-elevation p-5 rounded-2xl border border-purple-500/40 bg-gradient-to-b from-purple-950/30 to-[#0d0f18] shadow-[0_0_30px_rgba(147,51,234,0.15)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-500" />
+          <div className="flex items-center gap-2 text-purple-300 text-xs font-bold mb-2">
+            <Lock className="w-4 h-4 text-purple-400" />
             <span>Deposit Required to Activate</span>
           </div>
-          <p className="text-[11px] text-zinc-400 leading-relaxed mb-3">
-            To start this agreement, deposit the total escrow balance ({escrow.total_xlm} XLM) into the Soroban smart contract.
+          <p className="text-xs text-zinc-300 leading-relaxed mb-4">
+            Deposit the total escrow balance ({escrow.total_xlm} XLM) into the Soroban smart contract to lock funds and authorize the freelancer to begin.
           </p>
           <button
             onClick={onDepositFunds}
             disabled={isActionLoading}
-            className="w-full py-2.5 px-4 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold transition-all shadow-[0_0_20px_rgba(147,51,234,0.4)] flex items-center justify-center gap-2 disabled:opacity-50 hover:scale-[1.02]"
           >
-            {isActionLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
+            {isActionLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
             <span>Deposit {escrow.total_xlm} XLM on-chain</span>
           </button>
         </div>
       )}
 
       {allMilestonesApproved && escrow.status !== 'Completed' && (
-        <div className="card-elevation p-4 rounded-xl border-emerald-500/30 bg-emerald-950/20">
-          <div className="flex items-center gap-2 text-emerald-300 text-xs font-semibold mb-2">
-            <CheckCircle2 className="w-4 h-4" />
+        <div className="card-elevation p-5 rounded-2xl border border-emerald-500/40 bg-gradient-to-b from-emerald-950/30 to-[#0d0f18] shadow-[0_0_30px_rgba(16,185,129,0.15)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500" />
+          <div className="flex items-center gap-2 text-emerald-300 text-xs font-bold mb-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
             <span>All Milestones Approved</span>
           </div>
-          <p className="text-[11px] text-zinc-400 leading-relaxed mb-3">
-            All project stages have been approved and funds released. Finalize this agreement to settle the escrow.
+          <p className="text-xs text-zinc-300 leading-relaxed mb-4">
+            All project stages have been approved and funds released. Finalize this agreement to formally settle and archive the contract.
           </p>
           <button
             onClick={onFinalizeEscrow}
             disabled={isActionLoading}
-            className="w-full py-2.5 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 disabled:opacity-50 hover:scale-[1.02]"
           >
-            {isActionLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+            {isActionLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
             <span>Finalize & Close Escrow</span>
           </button>
         </div>
       )}
 
       {/* ── Agreement Parties ────────────────────────────────────── */}
-      <div className="card-elevation p-4 rounded-xl">
-        <h3 className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-3">
+      <div className="card-elevation p-5 rounded-2xl border border-white/[0.08] bg-[#0d0f18]/90 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+        <h3 className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-3.5">
           Agreement Parties
         </h3>
 
         <div className="space-y-3">
           {/* Client Card */}
-          <div className={`p-3 rounded-lg border transition-all ${
-            isClient ? 'bg-blue-500/[0.04] border-blue-500/30' : 'bg-[#0d0f14] border-white/[0.06]'
+          <div className={`p-3.5 rounded-xl border transition-all ${
+            isClient 
+              ? 'bg-blue-500/[0.08] border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.15)]' 
+              : 'bg-[#0a0c14]/80 border-white/[0.06] hover:border-white/[0.12]'
           }`}>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">
                 Client (Depositor) {isClient && '• You'}
               </span>
-              <Badge status="client" size="sm" showIcon={false} />
+              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">Client</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-zinc-200">
+              <span className="font-mono text-xs text-white font-medium">
                 {escrow.client_address ? `${escrow.client_address.slice(0, 6)}...${escrow.client_address.slice(-4)}` : '—'}
               </span>
               <CopyButton text={escrow.client_address} size="sm" />
@@ -98,17 +102,19 @@ export default function ContractSummaryRail({
           </div>
 
           {/* Freelancer Card */}
-          <div className={`p-3 rounded-lg border transition-all ${
-            isFreelancer ? 'bg-purple-500/[0.04] border-purple-500/30' : 'bg-[#0d0f14] border-white/[0.06]'
+          <div className={`p-3.5 rounded-xl border transition-all ${
+            isFreelancer 
+              ? 'bg-purple-500/[0.08] border-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.15)]' 
+              : 'bg-[#0a0c14]/80 border-white/[0.06] hover:border-white/[0.12]'
           }`}>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400">
                 Freelancer (Payee) {isFreelancer && '• You'}
               </span>
-              <Badge status="freelancer" size="sm" showIcon={false} />
+              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Freelancer</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-zinc-200">
+              <span className="font-mono text-xs text-white font-medium">
                 {escrow.freelancer_address ? `${escrow.freelancer_address.slice(0, 6)}...${escrow.freelancer_address.slice(-4)}` : '—'}
               </span>
               <CopyButton text={escrow.freelancer_address} size="sm" />
@@ -116,20 +122,22 @@ export default function ContractSummaryRail({
           </div>
 
           {/* Arbiter Card */}
-          <div className={`p-3 rounded-lg border transition-all ${
-            isArbiter ? 'bg-amber-500/[0.04] border-amber-500/30' : 'bg-[#0d0f14] border-white/[0.06]'
+          <div className={`p-3.5 rounded-xl border transition-all ${
+            isArbiter 
+              ? 'bg-amber-500/[0.08] border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]' 
+              : 'bg-[#0a0c14]/80 border-white/[0.06] hover:border-white/[0.12]'
           }`}>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
                 Mediator / Arbiter {isArbiter && '• You'}
               </span>
-              <Badge status="arbiter" size="sm" showIcon={false} />
+              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Arbiter</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-zinc-200">
+              <span className="font-mono text-xs text-zinc-300">
                 {escrow.arbiter_address && !escrow.arbiter_address.startsWith('G0000')
                   ? `${escrow.arbiter_address.slice(0, 6)}...${escrow.arbiter_address.slice(-4)}`
-                  : 'SafeSplit Protocol Auto-Resolve'}
+                  : 'Protocol Auto-Resolve'}
               </span>
               {escrow.arbiter_address && !escrow.arbiter_address.startsWith('G0000') && (
                 <CopyButton text={escrow.arbiter_address} size="sm" />
@@ -140,14 +148,14 @@ export default function ContractSummaryRail({
       </div>
 
       {/* ── Technical Specifications ─────────────────────────────── */}
-      <div className="card-elevation p-4 rounded-xl text-xs space-y-2.5">
+      <div className="card-elevation p-5 rounded-2xl border border-white/[0.08] bg-[#0d0f18]/90 text-xs space-y-3 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
         <h3 className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
           Protocol State
         </h3>
 
         <div className="flex items-center justify-between text-zinc-400">
           <span>Smart Contract Network</span>
-          <span className="text-zinc-200 font-mono">Stellar Soroban Testnet</span>
+          <span className="text-purple-300 font-mono font-medium">Stellar Soroban Testnet</span>
         </div>
 
         <div className="flex items-center justify-between text-zinc-400">
@@ -156,14 +164,14 @@ export default function ContractSummaryRail({
         </div>
 
         <div className="flex items-center justify-between text-zinc-400">
-          <span>Fee Commission</span>
-          <span className="text-emerald-400 font-medium font-mono">0.00% (Zero Fee)</span>
+          <span>Protocol Commission</span>
+          <span className="text-emerald-400 font-semibold font-mono">0.00% (Zero Fee)</span>
         </div>
 
         {escrow.webhook_url && (
-          <div className="flex items-center justify-between text-zinc-400 pt-2 border-t border-white/[0.06]">
+          <div className="flex items-center justify-between text-zinc-400 pt-2.5 border-t border-white/[0.06]">
             <span>Webhook Integrations</span>
-            <span className="text-purple-400 font-mono text-[11px]">Active (Discord/Slack)</span>
+            <span className="text-cyan-400 font-mono text-[11px] font-semibold">Active (Slack/Discord)</span>
           </div>
         )}
       </div>

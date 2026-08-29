@@ -51,12 +51,13 @@ export default function EscrowHeader({ escrow, userWallet, onBack }: EscrowHeade
   };
 
   return (
-    <div className="card-elevation p-5 rounded-xl flex flex-col gap-4">
+    <div className="card-elevation p-5 md:p-6 rounded-2xl flex flex-col gap-4 border border-white/[0.08] bg-[#0d0f18]/90 shadow-[0_0_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-60" />
       {/* Top Row: Back button & Action Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04] px-2.5 py-1.5 rounded-lg transition-colors"
+          className="flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-white/[0.06] px-3 py-1.5 rounded-xl transition-all border border-transparent hover:border-white/[0.08]"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to All Agreements</span>
@@ -66,28 +67,28 @@ export default function EscrowHeader({ escrow, userWallet, onBack }: EscrowHeade
           {/* Share / Invite */}
           <button
             onClick={handleCopyInvite}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.06] transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 hover:text-white text-xs font-semibold border border-white/[0.08] hover:border-purple-500/40 transition-all shadow-sm"
           >
-            <Share2 className="w-3.5 h-3.5" />
-            <span>Copy Deal Link</span>
+            <Share2 className="w-3.5 h-3.5 text-purple-400" />
+            <span>Copy Link</span>
           </button>
 
           {/* Download Invoice PDF */}
           <button
             onClick={handleDownloadInvoice}
             disabled={isExporting}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.06] transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 hover:text-white text-xs font-semibold border border-white/[0.08] hover:border-purple-500/40 transition-all shadow-sm disabled:opacity-50"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5 text-cyan-400" />
             <span>{isExporting ? 'Generating...' : 'PDF Invoice'}</span>
           </button>
 
           {/* Export Calendar */}
           <button
             onClick={handleExportCalendar}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/[0.06] transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 hover:text-white text-xs font-semibold border border-white/[0.08] hover:border-purple-500/40 transition-all shadow-sm"
           >
-            <Calendar className="w-3.5 h-3.5" />
+            <Calendar className="w-3.5 h-3.5 text-emerald-400" />
             <span>.ICS Calendar</span>
           </button>
         </div>
@@ -97,16 +98,16 @@ export default function EscrowHeader({ escrow, userWallet, onBack }: EscrowHeade
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-zinc-100">
+            <h1 className="text-xl font-extrabold text-white tracking-tight">
               {escrow.title || `Escrow Agreement #${escrow.id.slice(0, 8)}`}
             </h1>
             <Badge status={escrow.status} size="md" />
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-zinc-400">
+          <div className="flex flex-wrap items-center gap-3.5 mt-2.5 text-xs text-zinc-400">
             <div className="flex items-center gap-1.5 font-mono">
               <span className="text-zinc-500">Escrow ID:</span>
-              <span className="text-zinc-300 font-semibold">{escrow.id.slice(0, 10)}...</span>
+              <span className="text-zinc-200 font-semibold bg-white/[0.04] px-1.5 py-0.5 rounded">{escrow.id.slice(0, 10)}...</span>
               <CopyButton text={escrow.id} size="sm" />
             </div>
 
@@ -127,10 +128,10 @@ export default function EscrowHeader({ escrow, userWallet, onBack }: EscrowHeade
         </div>
 
         {/* Financial Overview */}
-        <div className="md:text-right bg-[#0d0f14] px-4 py-2.5 rounded-xl border border-white/[0.06]">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Total Escrow Value</div>
-          <div className="text-xl font-bold font-mono text-zinc-100 tabular-nums">
-            {formattedXlm} <span className="text-xs font-sans text-purple-400 font-semibold">XLM</span>
+        <div className="md:text-right bg-[#0a0c14]/90 px-5 py-3 rounded-2xl border border-purple-500/20 shadow-[0_0_20px_rgba(147,51,234,0.1)]">
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-purple-300">Total Escrow Value</div>
+          <div className="text-2xl font-bold font-mono text-white tabular-nums tracking-tight">
+            {formattedXlm} <span className="text-sm font-sans text-purple-400 font-semibold">XLM</span>
           </div>
         </div>
       </div>
