@@ -14,9 +14,7 @@ const slides = [
     render: () => (
       <div className="flex flex-col items-center justify-center h-full text-center gap-8 px-8">
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6 }}>
-          <div className="w-24 h-24 mx-auto rounded-3xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center shadow-[0_0_60px_rgba(139,92,246,0.3)] mb-8">
-            <ShieldCheck className="w-12 h-12 text-purple-400" />
-          </div>
+          <img src="/logo.svg" alt="SafeSplit Logo" className="w-24 h-24 mx-auto mb-8" />
           <h1 className="text-6xl md:text-8xl font-extrabold text-white tracking-tighter mb-4">SafeSplit</h1>
           <p className="text-xl md:text-2xl text-purple-400 font-semibold tracking-wide mb-6">Trustless Milestone Escrow on Stellar Soroban</p>
           <p className="text-zinc-500 max-w-lg mx-auto text-base leading-relaxed">
@@ -382,7 +380,7 @@ export default function PitchDeckPage() {
           <span className="text-zinc-700">{current + 1} / {slides.length}</span>
         </div>
         <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-purple-400" />
+          <img src="/logo.svg" alt="Logo" className="w-4 h-4" />
           <span className="font-bold text-sm text-white tracking-tight">SafeSplit</span>
         </div>
       </div>

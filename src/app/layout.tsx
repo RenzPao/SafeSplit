@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { WalletProvider } from "@/contexts/WalletContext";
+import { ToastProvider } from "@/contexts/ToastContext";
 import WalletModal from "@/components/WalletModal";
 
 const geistSans = Geist({
@@ -15,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SafeSplit | Trustless Milestone Escrow",
-  description: "SafeSplit provides a completely trustless, milestone-based decentralized escrow leveraging the Stellar Soroban smart contract platform.",
-  keywords: ["Escrow", "Stellar", "Soroban", "Smart Contracts", "Freelance", "Crypto", "Trustless"],
+  title: "SafeSplit | Trustless Milestone Escrow on Stellar Soroban",
+  description: "SafeSplit provides institutional-grade, milestone-based decentralized escrow and arbitration on the Stellar Soroban smart contract network.",
+  keywords: ["Escrow", "Stellar", "Soroban", "Smart Contracts", "Freelance", "Crypto", "Trustless", "Arbitration"],
   openGraph: {
     title: "SafeSplit | Trustless Milestone Escrow",
     description: "Secure, milestone-based decentralized escrow on Stellar Soroban.",
@@ -40,20 +41,24 @@ export const metadata: Metadata = {
     images: ["/main.png"],
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.svg",
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col"><WalletProvider>
-          {children}
-          <WalletModal />
-        </WalletProvider></body>
+      <body className="min-h-full flex flex-col bg-[#08090a] text-zinc-100 selection:bg-purple-500/30 selection:text-purple-200">
+        <ToastProvider>
+          <WalletProvider>
+            {children}
+            <WalletModal />
+          </WalletProvider>
+        </ToastProvider>
+      </body>
     </html>
   );
 }

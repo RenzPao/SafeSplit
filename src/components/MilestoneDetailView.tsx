@@ -25,7 +25,7 @@ import { buildAndSubmitSorobanTx } from '@/lib/stellar/sorobanTx';
 import { uploadDeliverableFile, updateMilestoneStatus, updateEscrowStatus } from '@/lib/stellar/supabaseBackend';
 import StellarExpertButton from '@/components/StellarExpertButton';
 
-import type { Escrow, Milestone, ActivityLog } from '@/app/dashboard/page';
+import type { Escrow, Milestone, ActivityLog } from '@/components/dashboard/types';
 
 interface SubTask {
   id: string;

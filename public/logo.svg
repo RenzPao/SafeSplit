@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- Background -->
+  <rect width="500" height="500" fill="#0F172A" rx="100" />
+  
+  <defs>
+    <!-- Gradients for a modern Web3 aesthetic -->
+    <linearGradient id="leftGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+    <linearGradient id="rightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818CF8" />
+      <stop offset="100%" stop-color="#6366F1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Left Half: Represents Security (Shield) -->
+  <path d="M 235 110 L 120 150 L 120 300 C 120 380 235 430 235 430 Z" fill="url(#leftGrad)" />
+  
+  <!-- Right Half: Represents the Split/Escrow -->
+  <path d="M 265 110 L 380 150 L 380 300 C 380 380 265 430 265 430 Z" fill="url(#rightGrad)" />
+  
+  <!-- Central Node / Connection Point -->
+  <circle cx="250" cy="270" r="16" fill="#F8FAFC" />
+  <circle cx="250" cy="270" r="8" fill="#0F172A" />
+  
+  <!-- Stylized connecting line -->
+  <path d="M 250 110 L 250 245" stroke="#F8FAFC" stroke-width="4" stroke-dasharray="8, 8" />
+</svg>
