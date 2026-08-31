@@ -8,10 +8,6 @@ import {
   Scale, 
   ShieldCheck, 
   CheckCircle2, 
-  ArrowRight, 
-  FileCheck, 
-  Lock, 
-  Zap,
   Users
 } from 'lucide-react';
 
@@ -48,10 +44,10 @@ export default function PersonaExperienceSection() {
         'Immutable Work Timestamping: Submit cryptographic proof of work (GitHub PR commit / IPFS CID).',
         'Instant Settlement: Receive payouts directly to your Stellar wallet in ~3 seconds upon client approval.',
       ],
-      mockPreviewTitle: 'Freelancer Proof-of-Work Desk',
+      mockPreviewTitle: 'Freelancer Proof Desk',
       mockHighlights: [
         { label: 'Vault Verification', value: 'Escrow Fully Funded & Verified', color: 'text-emerald-300' },
-        { label: 'Deliverable Proof', value: 'GitHub PR #42 & IPFS CID Stamped', color: 'text-cyan-300' },
+        { label: 'Deliverable Proof', value: 'GitHub PR #42 & IPFS Stamped', color: 'text-cyan-300' },
         { label: 'Payout Horizon', value: 'Instant Stellar XLM Settlement', color: 'text-purple-300' },
       ],
     },
@@ -65,11 +61,11 @@ export default function PersonaExperienceSection() {
         'Granular Settlement Dials: Allocate dispute splits (e.g. 70% client / 30% freelancer) based on evidence.',
         'Zero Custody Risk: Arbiters never touch private keys or hold escrow funds—smart contract executes the ruling.',
       ],
-      mockPreviewTitle: 'Arbiter Settlement Workbench',
+      mockPreviewTitle: 'Arbiter Settlement Desk',
       mockHighlights: [
-        { label: 'Dispute Case', value: 'Milestone #3 Evidence Under Review', color: 'text-amber-300' },
-        { label: 'Split Visualizer', value: 'Custom 50/50 Dual Allocation Dial', color: 'text-purple-300' },
-        { label: 'Enforcement', value: 'Atomic Soroban Smart Execution', color: 'text-emerald-300' },
+        { label: 'Dispute Case', value: 'Milestone #3 Under Review', color: 'text-amber-300' },
+        { label: 'Split Visualizer', value: 'Custom 50/50 Split Dial', color: 'text-purple-300' },
+        { label: 'Enforcement', value: 'Atomic Smart Execution', color: 'text-emerald-300' },
       ],
     },
   };
@@ -77,57 +73,57 @@ export default function PersonaExperienceSection() {
   const current = personaData[activePersona];
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
+    <section className="py-12 sm:py-20 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 sm:space-y-12">
       {/* Section Header */}
-      <div className="text-center space-y-3 max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold uppercase tracking-wider">
+      <div className="text-center space-y-2.5 sm:space-y-3 max-w-3xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-[11px] sm:text-xs font-semibold uppercase tracking-wider">
           <Users className="w-3.5 h-3.5" />
           <span>Role-Based Experience</span>
         </div>
-        <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+        <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
           Engineered for Every Counterparty
         </h2>
-        <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
+        <p className="text-xs sm:text-base text-zinc-400 leading-relaxed max-w-2xl mx-auto">
           Select your role to explore how SafeSplit eliminates counterparty risk and creates frictionless agreement execution.
         </p>
       </div>
 
-      {/* Role Switcher Tabs */}
-      <div className="flex items-center justify-center gap-3">
+      {/* Role Switcher Tabs (Compact Grid on Mobile, Flex on Desktop) */}
+      <div className="grid grid-cols-3 gap-1.5 sm:flex sm:justify-center sm:gap-3 max-w-lg mx-auto">
         <button
           onClick={() => setActivePersona('client')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all min-h-[44px] ${
             activePersona === 'client'
-              ? 'bg-blue-600 text-white shadow-[0_0_20px_rgba(59,130,246,0.4)] scale-105'
+              ? 'bg-blue-600 text-white shadow-md scale-105'
               : 'bg-[#0d0f18] text-zinc-400 hover:text-zinc-200 border border-white/[0.06]'
           }`}
         >
-          <Briefcase className="w-4 h-4" />
-          <span>I am a Client</span>
+          <Briefcase className="w-3.5 h-3.5" />
+          <span>Client</span>
         </button>
 
         <button
           onClick={() => setActivePersona('freelancer')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all min-h-[44px] ${
             activePersona === 'freelancer'
-              ? 'bg-purple-600 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] scale-105'
+              ? 'bg-purple-600 text-white shadow-md scale-105'
               : 'bg-[#0d0f18] text-zinc-400 hover:text-zinc-200 border border-white/[0.06]'
           }`}
         >
-          <Code2 className="w-4 h-4" />
-          <span>I am a Freelancer</span>
+          <Code2 className="w-3.5 h-3.5" />
+          <span>Freelancer</span>
         </button>
 
         <button
           onClick={() => setActivePersona('arbiter')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all min-h-[44px] ${
             activePersona === 'arbiter'
-              ? 'bg-amber-600 text-white shadow-[0_0_20px_rgba(245,158,11,0.4)] scale-105'
+              ? 'bg-amber-600 text-white shadow-md scale-105'
               : 'bg-[#0d0f18] text-zinc-400 hover:text-zinc-200 border border-white/[0.06]'
           }`}
         >
-          <Scale className="w-4 h-4" />
-          <span>I am an Arbiter</span>
+          <Scale className="w-3.5 h-3.5" />
+          <span>Arbiter</span>
         </button>
       </div>
 
@@ -135,28 +131,28 @@ export default function PersonaExperienceSection() {
       <AnimatePresence mode="wait">
         <motion.div
           key={activePersona}
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -15 }}
-          transition={{ duration: 0.25 }}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center card-elevation p-8 rounded-3xl border border-white/[0.08] bg-[#0c0e18]/90 shadow-[0_0_40px_rgba(0,0,0,0.6)]"
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.22 }}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center card-elevation p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-white/[0.08] bg-[#0c0e18]/90 shadow-md"
         >
           {/* Left Column: Role Value Points (7 cols) */}
-          <div className="lg:col-span-7 space-y-6">
-            <span className={`text-[11px] font-mono font-bold px-3 py-1 rounded-full border ${current.badgeColor}`}>
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6">
+            <span className={`text-[10px] sm:text-[11px] font-mono font-bold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full border ${current.badgeColor}`}>
               {current.badge}
             </span>
 
-            <div className="space-y-2">
-              <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            <div className="space-y-1 sm:space-y-2">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-snug">
                 {current.title}
               </h3>
-              <p className="text-xs font-mono text-zinc-400">{current.role}</p>
+              <p className="text-[11px] sm:text-xs font-mono text-zinc-400">{current.role}</p>
             </div>
 
-            <div className="space-y-3.5 pt-2">
+            <div className="space-y-2.5 sm:space-y-3.5 pt-1 sm:pt-2">
               {current.points.map((pt, idx) => (
-                <div key={idx} className="flex items-start gap-3">
+                <div key={idx} className="flex items-start gap-2.5 sm:gap-3">
                   <div className="p-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mt-0.5 shrink-0">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                   </div>
@@ -167,26 +163,26 @@ export default function PersonaExperienceSection() {
           </div>
 
           {/* Right Column: Live Desk Mockup Card (5 cols) */}
-          <div className="lg:col-span-5 p-6 rounded-2xl bg-[#07080e] border border-white/[0.08] space-y-4 shadow-inner">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
+          <div className="lg:col-span-5 p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-[#07080e] border border-white/[0.08] space-y-3 sm:space-y-4 shadow-inner">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-2.5">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-purple-400" />
                 <span>{current.mockPreviewTitle}</span>
               </span>
-              <span className="text-[10px] font-mono text-emerald-400">● Live Active State</span>
+              <span className="text-[10px] font-mono text-emerald-400">● Live Active</span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {current.mockHighlights.map((item, idx) => (
-                <div key={idx} className="p-3 rounded-xl bg-[#0d0f17] border border-white/[0.04] flex items-center justify-between text-xs">
-                  <span className="text-zinc-400">{item.label}</span>
-                  <span className={`font-mono font-semibold ${item.color}`}>{item.value}</span>
+                <div key={idx} className="p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-[#0d0f17] border border-white/[0.04] flex items-center justify-between text-xs">
+                  <span className="text-zinc-400 text-[11px] sm:text-xs">{item.label}</span>
+                  <span className={`font-mono font-semibold text-[11px] sm:text-xs ${item.color}`}>{item.value}</span>
                 </div>
               ))}
             </div>
 
             <div className="pt-2 border-t border-white/[0.06] flex justify-between items-center text-[10px] font-mono text-zinc-500">
-              <span>Stellar Soroban Contract CDA4...YZEU</span>
+              <span>Stellar Soroban CDA4...YZEU</span>
               <span>Gas: 0.00001 XLM</span>
             </div>
           </div>
