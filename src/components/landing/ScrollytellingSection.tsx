@@ -160,8 +160,8 @@ export default function ScrollytellingSection() {
                 <span className="text-purple-300 font-bold">
                   Stage 0{activeStep} / 04: {current.subtitle}
                 </span>
-                <span className="text-zinc-400 font-semibold">
-                  {scrollProgressPct >= 99 ? '✓ Scrollytelling Complete (100%)' : `Camera Locked (${scrollProgressPct}%)`}
+                <span className="text-zinc-400 font-semibold font-mono">
+                  {scrollProgressPct}%
                 </span>
               </div>
 
@@ -462,8 +462,8 @@ export default function ScrollytellingSection() {
                     <span>State: Active in Soroban VM</span>
                   </span>
 
-                  <span className="text-zinc-500 text-[11px]">
-                    {scrollProgressPct >= 99 ? 'Scroll down to continue ↓' : 'Keep scrolling to advance stages'}
+                  <span className="text-zinc-500 text-[11px] font-mono">
+                    Protocol v20 State Machine
                   </span>
                 </div>
               </div>
