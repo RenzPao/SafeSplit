@@ -11,10 +11,7 @@ import {
   ShieldCheck, 
   Zap, 
   Terminal, 
-  ArrowDown,
-  Sparkles,
-  ChevronRight,
-  Check
+  ArrowDown
 } from 'lucide-react';
 
 interface StageData {
@@ -91,7 +88,7 @@ export default function ScrollytellingSection() {
   const [activeStep, setActiveStep] = useState<number>(1);
   const [scrollProgressPct, setScrollProgressPct] = useState<number>(0);
 
-  // ── Scroll Listener Tracking ─────────────────────────────────────
+  // ── Scroll Listener Tracking Camera Lock ─────────────────────────
   useEffect(() => {
     const handleScroll = () => {
       const el = containerRef.current;
@@ -103,7 +100,6 @@ export default function ScrollytellingSection() {
 
       if (totalScrollDistance <= 0) return;
 
-      // Calculate progress 0 to 1 based on how far we've scrolled inside containerRef
       const currentScroll = -rect.top;
       const progress = Math.max(0, Math.min(1, currentScroll / totalScrollDistance));
 
@@ -143,12 +139,12 @@ export default function ScrollytellingSection() {
   };
 
   return (
-    <div ref={containerRef} className="relative h-[400vh] w-full">
-      {/* ── Sticky Viewport Container (Locks in Screen for 400vh) ─── */}
+    <div ref={containerRef} className="relative h-[280vh] w-full">
+      {/* ── Sticky Viewport Container (Locks Camera on Screen for 280vh) ── */}
       <div className="sticky top-0 h-screen w-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 z-20 overflow-hidden">
         <div className="max-w-7xl w-full mx-auto space-y-6">
           {/* Top Section Header & Sticky Progress */}
-          <div className="text-center space-y-2.5 max-w-3xl mx-auto">
+          <div className="text-center space-y-2 max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold uppercase tracking-wider shadow-[0_0_20px_rgba(147,51,234,0.15)]">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Interactive Protocol Scrollytelling</span>
@@ -165,7 +161,7 @@ export default function ScrollytellingSection() {
                   Stage 0{activeStep} / 04: {current.subtitle}
                 </span>
                 <span className="text-zinc-400 font-semibold">
-                  {scrollProgressPct >= 99 ? '✓ Scrollytelling Complete (100%)' : `Scroll Locked (${scrollProgressPct}%)`}
+                  {scrollProgressPct >= 99 ? '✓ Scrollytelling Complete (100%)' : `Camera Locked (${scrollProgressPct}%)`}
                 </span>
               </div>
 
@@ -189,7 +185,7 @@ export default function ScrollytellingSection() {
 
           {/* ── 2-Column Split Console (Single Narrative Card + Visualizer) ── */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            {/* Left Column: The Single Dynamic Box (5 cols) ─────────── */}
+            {/* Left Column: The 1 Dynamic Narrative Card (5 cols) ──────── */}
             <div className="lg:col-span-5 relative">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -197,37 +193,39 @@ export default function ScrollytellingSection() {
                   initial={{ opacity: 0, y: 15, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                  transition={{ duration: 0.28, ease: 'easeOut' }}
-                  className="p-6 sm:p-7 rounded-3xl border border-purple-500/40 bg-[#0e111d]/95 backdrop-blur-2xl shadow-[0_0_50px_rgba(147,51,234,0.2)] space-y-4"
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  className="p-6 sm:p-7 rounded-3xl border border-purple-500/40 bg-[#0e111d]/95 backdrop-blur-2xl shadow-[0_0_50px_rgba(147,51,234,0.2)] space-y-4 min-h-[380px] flex flex-col justify-between"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[10px] font-mono font-bold px-3 py-1 rounded-full border ${current.badgeColor}`}>
-                      {current.badge}
-                    </span>
-                    <span className="text-xs font-mono text-zinc-500">Step 0{current.id} / 04</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[10px] font-mono font-bold px-3 py-1 rounded-full border ${current.badgeColor}`}>
+                        {current.badge}
+                      </span>
+                      <span className="text-xs font-mono text-zinc-500">Step 0{current.id} / 04</span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-snug">
+                        {current.title}
+                      </h3>
+                      <p className="text-xs font-mono text-purple-300 font-semibold">{current.subtitle}</p>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">
+                      {current.description}
+                    </p>
+
+                    <div className="space-y-2 pt-2 border-t border-white/[0.06]">
+                      {current.points.map((pt, pIdx) => (
+                        <div key={pIdx} className="flex items-start gap-2.5 text-xs text-zinc-300">
+                          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5 shrink-0" />
+                          <span>{pt}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-snug">
-                      {current.title}
-                    </h3>
-                    <p className="text-xs font-mono text-purple-300 font-semibold">{current.subtitle}</p>
-                  </div>
-
-                  <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">
-                    {current.description}
-                  </p>
-
-                  <div className="space-y-2 pt-2 border-t border-white/[0.06]">
-                    {current.points.map((pt, pIdx) => (
-                      <div key={pIdx} className="flex items-start gap-2.5 text-xs text-zinc-300">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5 shrink-0" />
-                        <span>{pt}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="pt-2 flex items-center justify-between text-xs font-mono">
+                  <div className="pt-2 flex items-center justify-between text-xs font-mono border-t border-white/[0.04]">
                     <span className="text-emerald-400 flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                       Live in Soroban VM
@@ -247,9 +245,9 @@ export default function ScrollytellingSection() {
 
             {/* Right Column: Dynamic State Visualizer (7 cols) ───────── */}
             <div className="lg:col-span-7">
-              <div className="card-elevation rounded-3xl border border-white/[0.1] bg-[#07090e]/95 backdrop-blur-2xl shadow-[0_0_60px_rgba(0,0,0,0.9)] overflow-hidden h-[420px] sm:h-[450px] flex flex-col justify-between">
+              <div className="card-elevation rounded-3xl border border-white/[0.1] bg-[#07090e]/95 backdrop-blur-2xl shadow-[0_0_60px_rgba(0,0,0,0.9)] overflow-hidden h-[380px] sm:h-[400px] flex flex-col justify-between">
                 {/* Visualizer Header */}
-                <div className="p-3.5 bg-[#0d0f17] border-b border-white/[0.08] flex items-center justify-between">
+                <div className="p-3 bg-[#0d0f17] border-b border-white/[0.08] flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-rose-500/80" />
                     <div className="w-3 h-3 rounded-full bg-amber-500/80" />
@@ -266,7 +264,7 @@ export default function ScrollytellingSection() {
                 </div>
 
                 {/* Dynamic Stage Body */}
-                <div className="flex-1 p-6 flex items-center justify-center relative overflow-hidden">
+                <div className="flex-1 p-5 flex items-center justify-center relative overflow-hidden">
                   <AnimatePresence mode="wait">
                     {/* STAGE 1: INCEPTION & SHA-256 */}
                     {activeStep === 1 && (
@@ -276,9 +274,9 @@ export default function ScrollytellingSection() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: -15 }}
                         transition={{ duration: 0.25 }}
-                        className="w-full max-w-md space-y-3.5"
+                        className="w-full max-w-md space-y-3"
                       >
-                        <div className="p-4 rounded-2xl bg-[#0e111a] border border-purple-500/30 space-y-3 shadow-inner">
+                        <div className="p-3.5 rounded-2xl bg-[#0e111a] border border-purple-500/30 space-y-2.5 shadow-inner">
                           <div className="flex items-center justify-between text-xs font-mono text-purple-300 font-bold">
                             <span className="flex items-center gap-1.5">
                               <Fingerprint className="w-4 h-4 text-purple-400" />
@@ -287,24 +285,24 @@ export default function ScrollytellingSection() {
                             <span className="text-[10px] text-emerald-400">SHA-256 Verified</span>
                           </div>
 
-                          <div className="p-3 rounded-xl bg-[#06070b] border border-white/[0.06] text-xs font-mono space-y-2">
-                            <div className="text-zinc-400 text-[11px]">Raw SOW Input:</div>
-                            <div className="text-white text-xs bg-white/[0.02] p-2 rounded border border-white/[0.04]">
+                          <div className="p-2.5 rounded-xl bg-[#06070b] border border-white/[0.06] text-xs font-mono space-y-1.5">
+                            <div className="text-zinc-400 text-[10px]">Raw SOW Input:</div>
+                            <div className="text-white text-xs bg-white/[0.02] p-1.5 rounded border border-white/[0.04]">
                               &quot;Milestone 1: Smart Contract Audit : 5,000 XLM&quot;
                             </div>
 
-                            <div className="pt-1 flex items-center justify-center text-purple-400">
-                              <ArrowDown className="w-4 h-4 animate-bounce" />
+                            <div className="pt-0.5 flex items-center justify-center text-purple-400">
+                              <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
                             </div>
 
-                            <div className="text-zinc-400 text-[11px]">On-Chain Hash Fingerprint:</div>
-                            <div className="text-purple-300 font-mono text-[10px] break-all bg-purple-950/30 p-2.5 rounded-lg border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                            <div className="text-zinc-400 text-[10px]">On-Chain Hash Fingerprint:</div>
+                            <div className="text-purple-300 font-mono text-[10px] break-all bg-purple-950/30 p-2 rounded-lg border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
                               7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069
                             </div>
                           </div>
                         </div>
 
-                        <div className="p-3 rounded-xl bg-[#0a0c14] border border-white/[0.06] flex items-center justify-between text-xs font-mono text-zinc-400">
+                        <div className="p-2.5 rounded-xl bg-[#0a0c14] border border-white/[0.06] flex items-center justify-between text-xs font-mono text-zinc-400">
                           <span>Contract Instance:</span>
                           <span className="text-white font-semibold">CDA4...YZEU (Testnet)</span>
                         </div>
@@ -319,9 +317,9 @@ export default function ScrollytellingSection() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: -15 }}
                         transition={{ duration: 0.25 }}
-                        className="w-full max-w-md space-y-4"
+                        className="w-full max-w-md space-y-3"
                       >
-                        <div className="p-5 rounded-2xl bg-[#0e111a] border border-cyan-500/30 space-y-4 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
+                        <div className="p-4 rounded-2xl bg-[#0e111a] border border-cyan-500/30 space-y-3 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <Lock className="w-4 h-4 text-cyan-400" />
@@ -334,15 +332,15 @@ export default function ScrollytellingSection() {
                             </span>
                           </div>
 
-                          <div className="p-4 rounded-xl bg-[#06070b] border border-white/[0.06] space-y-3">
+                          <div className="p-3 rounded-xl bg-[#06070b] border border-white/[0.06] space-y-2">
                             <div className="flex justify-between items-baseline">
                               <span className="text-xs text-zinc-400">Escrow Vault Balance:</span>
-                              <span className="text-2xl font-bold font-mono text-white">
+                              <span className="text-xl font-bold font-mono text-white">
                                 10,000.00 <span className="text-xs font-sans text-cyan-400">XLM</span>
                               </span>
                             </div>
 
-                            <div className="w-full h-2.5 rounded-full bg-zinc-800 overflow-hidden">
+                            <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
                               <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: '100%' }}
@@ -358,7 +356,7 @@ export default function ScrollytellingSection() {
                           </div>
                         </div>
 
-                        <div className="p-3 rounded-xl bg-[#0a0c14] border border-white/[0.06] text-xs font-mono text-zinc-400 flex items-center justify-between">
+                        <div className="p-2.5 rounded-xl bg-[#0a0c14] border border-white/[0.06] text-xs font-mono text-zinc-400 flex items-center justify-between">
                           <span className="flex items-center gap-1.5 text-emerald-400">
                             <ShieldCheck className="w-3.5 h-3.5" />
                             Multi-Sig Verification
@@ -376,9 +374,9 @@ export default function ScrollytellingSection() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: -15 }}
                         transition={{ duration: 0.25 }}
-                        className="w-full max-w-md space-y-4"
+                        className="w-full max-w-md space-y-3"
                       >
-                        <div className="p-5 rounded-2xl bg-[#0e111a] border border-amber-500/30 space-y-4 shadow-[0_0_30px_rgba(245,158,11,0.15)]">
+                        <div className="p-4 rounded-2xl bg-[#0e111a] border border-amber-500/30 space-y-3 shadow-[0_0_30px_rgba(245,158,11,0.15)]">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <GitPullRequest className="w-4 h-4 text-amber-400" />
@@ -391,14 +389,14 @@ export default function ScrollytellingSection() {
                             </span>
                           </div>
 
-                          <div className="p-3.5 rounded-xl bg-[#06070b] border border-white/[0.06] space-y-2.5 font-mono text-xs">
+                          <div className="p-3 rounded-xl bg-[#06070b] border border-white/[0.06] space-y-2 font-mono text-xs">
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-zinc-400">GitHub PR Commit:</span>
                               <span className="text-purple-300 font-semibold">PR #42 (commit 9f41b2a)</span>
                             </div>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-zinc-400">IPFS Deliverable CID:</span>
-                              <span className="text-cyan-300 font-semibold truncate max-w-[180px]">QmZtmD2qtW3wTq9Y...</span>
+                              <span className="text-cyan-300 font-semibold truncate max-w-[160px]">QmZtmD2qtW3wTq9Y...</span>
                             </div>
                             <div className="flex justify-between items-center text-[11px]">
                               <span className="text-zinc-400">Timestamp Stamped:</span>
@@ -407,7 +405,7 @@ export default function ScrollytellingSection() {
                           </div>
                         </div>
 
-                        <div className="p-3 rounded-xl bg-[#0a0c14] border border-white/[0.06] text-xs font-mono text-zinc-400 flex items-center justify-between">
+                        <div className="p-2.5 rounded-xl bg-[#0a0c14] border border-white/[0.06] text-xs font-mono text-zinc-400 flex items-center justify-between">
                           <span>Inspection Window:</span>
                           <span className="text-amber-400 font-bold">Awaiting Client Sign-off</span>
                         </div>
@@ -422,9 +420,9 @@ export default function ScrollytellingSection() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: -15 }}
                         transition={{ duration: 0.25 }}
-                        className="w-full max-w-md space-y-4"
+                        className="w-full max-w-md space-y-3"
                       >
-                        <div className="p-5 rounded-2xl bg-[#0e111a] border border-emerald-500/40 space-y-4 shadow-[0_0_40px_rgba(16,185,129,0.2)]">
+                        <div className="p-4 rounded-2xl bg-[#0e111a] border border-emerald-500/40 space-y-3 shadow-[0_0_40px_rgba(16,185,129,0.2)]">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -437,9 +435,9 @@ export default function ScrollytellingSection() {
                             </span>
                           </div>
 
-                          <div className="p-4 rounded-xl bg-[#06070b] border border-white/[0.06] text-center space-y-2">
-                            <div className="text-[11px] font-mono text-zinc-400">Tranche Payout Executed:</div>
-                            <div className="text-3xl font-extrabold font-mono text-emerald-400 tabular-nums shadow-sm">
+                          <div className="p-3 rounded-xl bg-[#06070b] border border-white/[0.06] text-center space-y-1.5">
+                            <div className="text-[10px] font-mono text-zinc-400">Tranche Payout Executed:</div>
+                            <div className="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-400 tabular-nums shadow-sm">
                               +5,000.00 <span className="text-xs text-white">XLM</span>
                             </div>
                             <div className="text-[10px] font-mono text-zinc-500">
@@ -448,9 +446,9 @@ export default function ScrollytellingSection() {
                           </div>
                         </div>
 
-                        <div className="p-3.5 rounded-xl bg-[#0a0c14] border border-emerald-500/20 flex items-center justify-between text-xs font-mono">
+                        <div className="p-2.5 rounded-xl bg-[#0a0c14] border border-emerald-500/20 flex items-center justify-between text-xs font-mono">
                           <span className="text-zinc-400">Stellar Finality Time:</span>
-                          <span className="text-emerald-300 font-bold font-sans">⚡ 3.2 Seconds (Gas: ~0.00001 XLM)</span>
+                          <span className="text-emerald-300 font-bold font-sans">⚡ 3.2 Seconds</span>
                         </div>
                       </motion.div>
                     )}
@@ -458,7 +456,7 @@ export default function ScrollytellingSection() {
                 </div>
 
                 {/* Bottom State Bar */}
-                <div className="p-3 bg-[#090b12] border-t border-white/[0.08] flex items-center justify-between text-xs font-mono text-zinc-400">
+                <div className="p-2.5 bg-[#090b12] border-t border-white/[0.08] flex items-center justify-between text-xs font-mono text-zinc-400">
                   <span className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
                     <span>State: Active in Soroban VM</span>

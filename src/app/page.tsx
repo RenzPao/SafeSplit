@@ -4,17 +4,10 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   ArrowRight, 
-  ShieldCheck, 
-  Zap, 
-  CheckCircle2, 
-  Lock, 
-  Layers,
-  Scale,
   ExternalLink,
-  ChevronRight,
-  Sparkles,
-  RotateCw,
-  Terminal
+  ShieldCheck,
+  Zap,
+  Lock
 } from 'lucide-react';
 import ThreeVaultCanvas, { VaultMode } from '@/components/landing/ThreeVaultCanvas';
 import LiveProtocolPulse from '@/components/landing/LiveProtocolPulse';
@@ -28,7 +21,7 @@ export default function LandingPage() {
   const [vaultMode, setVaultMode] = useState<VaultMode>('locked');
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07080d] text-zinc-100 selection:bg-purple-500/30 selection:text-purple-200 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-[#07080d] text-zinc-100 selection:bg-purple-500/30 selection:text-purple-200 relative">
       {/* ── Rich Ambient Background Lighting & Nebula Glows ──────── */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[550px] bg-gradient-to-b from-purple-600/25 via-indigo-600/15 to-transparent blur-[140px] pointer-events-none -z-10" />
       <div className="absolute top-60 right-[-10%] w-[650px] h-[650px] bg-cyan-500/15 blur-[160px] pointer-events-none -z-10" />
@@ -155,7 +148,7 @@ export default function LandingPage() {
       {/* ── Live Stellar Protocol Telemetry Ticker ────────────────── */}
       <LiveProtocolPulse />
 
-      {/* ── Interactive Scrollytelling Protocol Walkthrough ───────── */}
+      {/* ── Interactive Scrollytelling (Camera-Locked 4-Stage Protocol) ── */}
       <ScrollytellingSection />
 
       {/* ── Interactive Deal Playground & Fee Savings Calculator ──── */}
