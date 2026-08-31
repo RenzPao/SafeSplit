@@ -18,16 +18,18 @@ export default function LandingPage() {
   const [vaultMode, setVaultMode] = useState<VaultMode>('locked');
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07080d] text-zinc-100 selection:bg-purple-500/30 selection:text-purple-200 relative">
-      {/* ── Ambient Background Lighting (Scaled Responsively) ────── */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] sm:w-[650px] lg:w-[1100px] h-[550px] bg-gradient-to-b from-purple-600/25 via-indigo-600/15 to-transparent blur-[140px] pointer-events-none -z-10" />
-      <div className="absolute top-60 right-[-10%] w-[300px] sm:w-[500px] lg:w-[650px] h-[650px] bg-cyan-500/15 blur-[160px] pointer-events-none -z-10" />
-      <div className="absolute top-[800px] left-[-10%] w-[300px] sm:w-[500px] lg:w-[650px] h-[650px] bg-purple-600/15 blur-[160px] pointer-events-none -z-10" />
-      <div className="absolute inset-0 ambient-mesh opacity-60 pointer-events-none -z-10" />
+    <div className="min-h-screen flex flex-col bg-[#07080d] text-zinc-100 selection:bg-purple-500/30 selection:text-purple-200 relative w-full overflow-x-clip">
+      {/* ── Isolated Ambient Background Layer (Eliminates Horizontal Mobile Wobble) ── */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[340px] sm:w-[650px] lg:w-[1100px] h-[550px] bg-gradient-to-b from-purple-600/25 via-indigo-600/15 to-transparent blur-[120px] sm:blur-[140px]" />
+        <div className="absolute top-60 right-[-15%] sm:right-[-10%] w-[280px] sm:w-[450px] lg:w-[650px] h-[650px] bg-cyan-500/15 blur-[130px] sm:blur-[160px]" />
+        <div className="absolute top-[800px] left-[-15%] sm:left-[-10%] w-[280px] sm:w-[450px] lg:w-[650px] h-[650px] bg-purple-600/15 blur-[130px] sm:blur-[160px]" />
+        <div className="absolute inset-0 ambient-mesh opacity-60" />
+      </div>
 
       {/* ── Top Navigation ────────────────────────────────────────── */}
       <header className="border-b border-white/[0.08] bg-[#0b0d14]/85 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
           <Link href="/" className="flex items-center gap-2 group shrink-0">
             <div className="p-1 rounded-lg bg-purple-500/10 border border-purple-500/20 group-hover:border-purple-500/40 transition-colors shadow-[0_0_15px_rgba(168,85,247,0.2)]">
               <img src="/logo.svg" alt="SafeSplit Logo" className="w-6 h-6 sm:w-7 sm:h-7 group-hover:scale-105 transition-transform" />
@@ -58,7 +60,7 @@ export default function LandingPage() {
               <motion.button 
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all shadow-[0_0_20px_rgba(147,51,234,0.35)] min-h-[38px]"
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all shadow-[0_0_20px_rgba(147,51,234,0.35)] min-h-[38px]"
               >
                 <span>Launch App</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -69,8 +71,8 @@ export default function LandingPage() {
       </header>
 
       {/* ── 3D Interactive Hero Section ───────────────────────────── */}
-      <section className="relative pt-10 sm:pt-16 pb-8 sm:pb-12 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <section className="relative pt-8 sm:pt-16 pb-8 sm:pb-12 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
           {/* Left Hero Column: Value Prop & CTAs (7 cols) */}
           <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-left">
             {/* Mainnet Protocol Badge */}
@@ -93,7 +95,7 @@ export default function LandingPage() {
             </p>
 
             {/* Hero CTAs (Full width on Mobile) */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 pt-1 sm:pt-2">
               <Link href="/dashboard" className="w-full sm:w-auto">
                 <motion.button 
                   whileHover={{ scale: 1.02 }}
@@ -119,23 +121,23 @@ export default function LandingPage() {
             {/* Mini Trust Highlights Strip */}
             <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-4 sm:pt-6 border-t border-white/[0.06] text-xs font-mono">
               <div>
-                <div className="font-bold text-white text-base sm:text-lg">0.00%</div>
+                <div className="font-bold text-white text-sm sm:text-lg">0.00%</div>
                 <div className="text-zinc-400 text-[10px] sm:text-[11px]">Platform Fees</div>
               </div>
               <div>
-                <div className="font-bold text-emerald-400 text-base sm:text-lg">~3.2s</div>
+                <div className="font-bold text-emerald-400 text-sm sm:text-lg">~3.2s</div>
                 <div className="text-zinc-400 text-[10px] sm:text-[11px]">Stellar Finality</div>
               </div>
               <div>
-                <div className="font-bold text-cyan-400 text-base sm:text-lg">100%</div>
+                <div className="font-bold text-cyan-400 text-sm sm:text-lg">100%</div>
                 <div className="text-zinc-400 text-[10px] sm:text-[11px]">Autonomous Rust</div>
               </div>
             </div>
           </div>
 
           {/* Right Hero Column: Interactive Three.js 3D Soroban Vault (5 cols) */}
-          <div className="lg:col-span-5 relative">
-            <div className="relative rounded-2xl sm:rounded-3xl border border-white/[0.08] bg-gradient-to-b from-[#0e101a]/80 to-[#07080e]/90 shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-xl overflow-hidden">
+          <div className="lg:col-span-5 relative w-full">
+            <div className="relative rounded-2xl sm:rounded-3xl border border-white/[0.08] bg-gradient-to-b from-[#0e101a]/80 to-[#07080e]/90 shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-xl overflow-hidden w-full">
               <ThreeVaultCanvas onModeChange={(mode) => setVaultMode(mode)} />
             </div>
           </div>
@@ -158,7 +160,7 @@ export default function LandingPage() {
       <DeveloperWorkbench />
 
       {/* ── Footer ────────────────────────────────────────────────── */}
-      <footer className="border-t border-white/[0.08] py-10 sm:py-12 bg-[#06070b]">
+      <footer className="border-t border-white/[0.08] py-8 sm:py-12 bg-[#06070b] w-full">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 text-center sm:text-left">
           <div className="flex items-center flex-wrap justify-center sm:justify-start gap-2 text-zinc-400 text-xs">
             <img src="/logo.svg" alt="SafeSplit" className="w-5 h-5 sm:w-6 sm:h-6" />
